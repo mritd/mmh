@@ -16,11 +16,13 @@ import (
 )
 
 type Server struct {
-	User      string
-	Password  string
-	PublicKey string
-	Address   string
-	Port      int
+	Name      string `yml:"Name"`
+	Group     string `yml:"Group"`
+	User      string `yml:"User"`
+	Password  string `yml:"Password"`
+	PublicKey string `yml:"PublicKey"`
+	Address   string `yml:"Address"`
+	Port      int    `yml:"Port"`
 }
 
 func publicKeyFile(file string) ssh.AuthMethod {
