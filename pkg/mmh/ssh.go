@@ -39,6 +39,7 @@ func password(password string) ssh.AuthMethod {
 }
 
 func (s Server) authMethod() ssh.AuthMethod {
+	// Priority use of public key
 	if strings.TrimSpace(s.PublicKey) != "" {
 		return publicKeyFile(s.PublicKey)
 	} else {
@@ -83,6 +84,7 @@ func (s Server) Connect() {
 	termWidth, termHeight, err := terminal.GetSize(fd)
 	utils.CheckAndExit(err)
 
+	// only xterm-256color support
 	err = session.RequestPty("xterm-256color", termHeight, termWidth, modes)
 	utils.CheckAndExit(err)
 
