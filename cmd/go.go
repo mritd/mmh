@@ -26,8 +26,9 @@ import (
 )
 
 var goCmd = &cobra.Command{
-	Use:   "go SERVER_NAME",
-	Short: "Login single server",
+	Use:     "go SERVER_NAME",
+	Aliases: []string{"mgo"},
+	Short:   "Login single server",
 	Long: `
 Login single server.`,
 	Run: func(cmd *cobra.Command, args []string) {
