@@ -95,6 +95,7 @@ func exec(ctx context.Context, s Server, cmd string) {
 	err = session.RequestPty("xterm-256color", termHeight, termWidth, modes)
 	utils.CheckAndExit(err)
 
+	// write to pw
 	pr, pw := io.Pipe()
 	session.Stdout = pw
 	session.Stderr = pw
