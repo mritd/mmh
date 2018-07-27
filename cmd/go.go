@@ -26,12 +26,16 @@ import (
 )
 
 var goCmd = &cobra.Command{
-	Use:   "go",
-	Short: "Login server",
+	Use:   "go SERVER_NAME",
+	Short: "Login single server",
 	Long: `
-Login server.`,
+Login single server.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		mmh.Run(args)
+		if len(args) == 1 {
+			mmh.SingleLogin(args[0])
+		} else {
+			cmd.Help()
+		}
 	},
 }
 
