@@ -107,7 +107,7 @@ func AddServer() {
 		ActiveTpl:    "»  {{ . | cyan }}",
 		InactiveTpl:  "  {{ . | white }}",
 		SelectPrompt: "Auth Method",
-		SelectedTpl:  "{{ \"» \" | cyan }}{{\"Method:\" | cyan }} {{ . | cyan }}",
+		SelectedTpl:  "{{ \"» \" | green }}{{\"Method:\" | cyan }} {{ . | faint }}",
 		DisPlaySize:  9,
 		DetailsTpl: `
 --------- SSH Auth Method ----------
