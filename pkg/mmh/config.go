@@ -42,6 +42,17 @@ func ConfigExample() []Server {
 	}
 }
 
+func findServerByName(name string) *Server {
+	var servers []Server
+	utils.CheckAndExit(viper.UnmarshalKey(SERVERS, &servers))
+	for _, s := range servers {
+		if strings.ToLower(s.Name) == strings.ToLower(name) {
+			return &s
+		}
+	}
+	return nil
+}
+
 func AddServer() {
 
 	// Name
@@ -50,6 +61,10 @@ func AddServer() {
 			return errors.New("Input is empty!")
 		} else if len(line) > 25 {
 			return errors.New("Input length must < 25!")
+		}
+
+		if s := findServerByName(string(line)); s != nil {
+			return errors.New("Server name exist!")
 		}
 		return nil
 
