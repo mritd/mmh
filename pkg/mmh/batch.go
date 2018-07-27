@@ -1,53 +1,46 @@
 package mmh
 
 import (
-	"io/ioutil"
 	"net"
 
-	"os"
+	"io"
 
-	"strings"
-
+	"bufio"
 	"fmt"
+
+	"sync"
+
+	"os"
 
 	"github.com/mritd/mmh/pkg/utils"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/terminal"
 )
 
-type Server struct {
-	Name      string   `yml:"Name"`
-	Tags      []string `yml:"Tags"`
-	User      string   `yml:"User"`
-	Password  string   `yml:"Password"`
-	PublicKey string   `yml:"PublicKey"`
-	Address   string   `yml:"Address"`
-	Port      int      `yml:"Port"`
-}
+func Batch(tag, cmd string) {
 
-func publicKeyFile(file string) ssh.AuthMethod {
-	buffer, err := ioutil.ReadFile(file)
-	utils.CheckAndExit(err)
+	initTagsGroup()
 
-	key, err := ssh.ParsePrivateKey(buffer)
-	utils.CheckAndExit(err)
-	return ssh.PublicKeys(key)
-}
+	var serverWg sync.WaitGroup
 
-func password(password string) ssh.AuthMethod {
-	return ssh.Password(password)
-}
-
-func (s Server) authMethod() ssh.AuthMethod {
-	// Priority use of public key
-	if strings.TrimSpace(s.PublicKey) != "" {
-		return publicKeyFile(s.PublicKey)
-	} else {
-		return password(s.Password)
+	servers := tagsMap[tag]
+	if len(servers) == 0 {
+		utils.Exit("Tagged server not found!", 1)
 	}
+
+	serverWg.Add(len(servers))
+
+	for _, server := range servers {
+		s := server
+		go func() {
+			defer serverWg.Done()
+			exec(s, cmd)
+		}()
+	}
+	serverWg.Wait()
 }
 
-func (s Server) Connect() {
+func exec(s Server, cmd string) {
 	sshConfig := &ssh.ClientConfig{
 		User: s.User,
 		Auth: []ssh.AuthMethod{
@@ -77,10 +70,6 @@ func (s Server) Connect() {
 	utils.CheckAndExit(err)
 	defer terminal.Restore(fd, state)
 
-	session.Stdout = os.Stdout
-	session.Stderr = os.Stderr
-	session.Stdin = os.Stdin
-
 	termWidth, termHeight, err := terminal.GetSize(fd)
 	utils.CheckAndExit(err)
 
@@ -88,8 +77,41 @@ func (s Server) Connect() {
 	err = session.RequestPty("xterm-256color", termHeight, termWidth, modes)
 	utils.CheckAndExit(err)
 
-	err = session.Shell()
-	utils.CheckAndExit(err)
+	pr, pw := io.Pipe()
+	session.Stdout = pw
+	session.Stderr = pw
 
-	session.Wait()
+	var execWg sync.WaitGroup
+	execWg.Add(2)
+
+	go func() {
+
+		defer func() {
+			pr.Close()
+			execWg.Done()
+		}()
+
+		buf := bufio.NewReader(pr)
+		for {
+			line, err := buf.ReadString('\n')
+			if err != nil {
+				if err == io.EOF {
+					break
+				} else {
+					panic(err)
+				}
+			}
+			fmt.Printf("%s:  %s", s.Name, string(line))
+		}
+	}()
+
+	go func() {
+		defer func() {
+			pw.Close()
+			execWg.Done()
+		}()
+		session.Run(cmd)
+	}()
+
+	execWg.Wait()
 }

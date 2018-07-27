@@ -20,13 +20,16 @@ import (
 )
 
 const SERVERS = "servers"
+const TAGS = "tags"
 
-func ConfigExample() []Server {
+var tagsMap = make(map[string][]Server)
+
+func ServersExample() []Server {
 	return []Server{
 		{
 			Name:     "prod11",
 			User:     "root",
-			Group:    "prod",
+			Tags:     []string{"prod"},
 			Address:  "10.10.4.11",
 			Port:     22,
 			Password: "password",
@@ -34,11 +37,18 @@ func ConfigExample() []Server {
 		{
 			Name:      "prod12",
 			User:      "root",
-			Group:     "prod",
+			Tags:      []string{"prod"},
 			Address:   "10.10.4.12",
 			Port:      22,
 			PublicKey: "/Users/mritd/.ssh/id_rsa",
 		},
+	}
+}
+
+func TagsExample() []string {
+	return []string{
+		"prod",
+		"test",
 	}
 }
 
@@ -72,13 +82,13 @@ func AddServer() {
 
 	name := p.Run()
 
-	// Group
+	// Tags
 	p = promptx.NewDefaultPrompt(func(line []rune) error {
 		// Allow empty
 		return nil
-	}, "Group:")
+	}, "Tags:")
 
-	group := p.Run()
+	tags := strings.Fields(p.Run())
 
 	// SSH user
 	p = promptx.NewDefaultPrompt(func(line []rune) error {
@@ -171,7 +181,7 @@ func AddServer() {
 
 	server := Server{
 		Name:      name,
-		Group:     group,
+		Tags:      tags,
 		User:      user,
 		Address:   address,
 		Port:      port,
@@ -232,5 +242,27 @@ func listLayout(name string) string {
 		return fmt.Sprintf("%-12s", name)
 	} else {
 		return fmt.Sprintf("%-12s", utils.ShortenString(name, 12))
+	}
+}
+
+func initTagsGroup() {
+
+	var tags []string
+	utils.CheckAndExit(viper.UnmarshalKey(TAGS, &tags))
+
+	var servers []Server
+	utils.CheckAndExit(viper.UnmarshalKey(SERVERS, &servers))
+
+	for _, tag := range tags {
+		var tmpServers []Server
+		for _, server := range servers {
+			for _, stag := range server.Tags {
+				if tag == stag {
+					tmpServers = append(tmpServers, server)
+					break
+				}
+			}
+		}
+		tagsMap[tag] = tmpServers
 	}
 }

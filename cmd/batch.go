@@ -21,56 +21,27 @@
 package cmd
 
 import (
-	"os"
+	"strings"
 
-	"path/filepath"
-
-	"github.com/mitchellh/go-homedir"
 	"github.com/mritd/mmh/pkg/mmh"
-	"github.com/mritd/mmh/pkg/utils"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
-var cfgFile string
-
-var rootCmd = &cobra.Command{
-	Use:   "mmh",
-	Short: "A simple Multi-user ssh tool",
+var batchCmd = &cobra.Command{
+	Use:   "batch",
+	Short: "Batch exec command",
 	Long: `
-A simple Multi-user ssh tool.`,
+Batch exec command.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		mmh.InteractiveLogin()
+		if len(args) < 2 {
+			cmd.Help()
+		} else {
+			cmd := strings.Join(args[1:], " ")
+			mmh.Batch(args[0], cmd)
+		}
 	},
 }
 
-func Execute() {
-	utils.CheckAndExit(rootCmd.Execute())
-}
-
 func init() {
-	cobra.OnInitialize(initConfig)
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.mmh.yaml)")
-}
-
-func initConfig() {
-
-	if cfgFile != "" {
-		viper.SetConfigFile(cfgFile)
-	} else {
-		home, err := homedir.Dir()
-		utils.CheckAndExit(err)
-		cfgFile = home + string(filepath.Separator) + ".mmh.yaml"
-		viper.SetConfigFile(cfgFile)
-
-		if _, err := os.Stat(cfgFile); err != nil {
-			os.Create(cfgFile)
-			viper.Set(mmh.SERVERS, mmh.ServersExample())
-			viper.Set(mmh.TAGS, mmh.TagsExample())
-			viper.WriteConfig()
-		}
-
-	}
-	viper.AutomaticEnv()
-	viper.ReadInConfig()
+	rootCmd.AddCommand(batchCmd)
 }
