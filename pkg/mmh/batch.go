@@ -12,6 +12,13 @@ import (
 
 	"os"
 
+	"context"
+
+	"os/signal"
+	"syscall"
+
+	"time"
+
 	"github.com/mritd/mmh/pkg/utils"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/terminal"
@@ -19,28 +26,42 @@ import (
 
 func Batch(tag, cmd string) {
 
+	// init group data
 	initTagsGroup()
-
-	var serverWg sync.WaitGroup
-
 	servers := tagsMap[tag]
 	if len(servers) == 0 {
 		utils.Exit("Tagged server not found!", 1)
 	}
 
-	serverWg.Add(len(servers))
+	// use context to manage goroutine
+	ctx, cancel := context.WithCancel(context.Background())
+	c := make(chan os.Signal)
+	signal.Notify(c, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+	// monitor os signal
+	go func() {
+		switch <-c {
+		case syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT:
+			// exit all goroutine
+			cancel()
+		}
+	}()
 
+	// create goroutine
+	var serverWg sync.WaitGroup
+	serverWg.Add(len(servers))
 	for _, server := range servers {
 		s := server
+		// async exec
+		// because it takes time for ssh to establish a connection
 		go func() {
 			defer serverWg.Done()
-			exec(s, cmd)
+			exec(ctx, s, cmd)
 		}()
 	}
 	serverWg.Wait()
 }
 
-func exec(s Server, cmd string) {
+func exec(ctx context.Context, s Server, cmd string) {
 	sshConfig := &ssh.ClientConfig{
 		User: s.User,
 		Auth: []ssh.AuthMethod{
@@ -50,6 +71,7 @@ func exec(s Server, cmd string) {
 			// ignore host key
 			return nil
 		},
+		Timeout: time.Second * 5,
 	}
 
 	connection, err := ssh.Dial("tcp", fmt.Sprint(s.Address, ":", s.Port), sshConfig)
@@ -66,10 +88,6 @@ func exec(s Server, cmd string) {
 	}
 
 	fd := int(os.Stdin.Fd())
-	state, err := terminal.MakeRaw(fd)
-	utils.CheckAndExit(err)
-	defer terminal.Restore(fd, state)
-
 	termWidth, termHeight, err := terminal.GetSize(fd)
 	utils.CheckAndExit(err)
 
@@ -84,6 +102,17 @@ func exec(s Server, cmd string) {
 	var execWg sync.WaitGroup
 	execWg.Add(2)
 
+	var execDone = make(chan int)
+	defer close(execDone)
+
+	go func() {
+		select {
+		case <-ctx.Done():
+			session.Close()
+		}
+	}()
+
+	// read from pr and print to stdout
 	go func() {
 
 		defer func() {
@@ -105,6 +134,7 @@ func exec(s Server, cmd string) {
 		}
 	}()
 
+	// exec and write to pw
 	go func() {
 		defer func() {
 			pw.Close()
