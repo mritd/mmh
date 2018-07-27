@@ -8,6 +8,11 @@ import (
 
 	"path/filepath"
 
+	"fmt"
+
+	"bytes"
+	"text/template"
+
 	"github.com/mitchellh/go-homedir"
 	"github.com/mritd/mmh/pkg/utils"
 	"github.com/mritd/promptx"
@@ -181,4 +186,31 @@ func DeleteServer(name string) {
 	servers = append(servers[:delIdx], servers[delIdx+1:]...)
 	viper.Set(SERVERS, servers)
 	utils.CheckAndExit(viper.WriteConfig())
+}
+
+func ListServers() {
+	var servers []Server
+	utils.CheckAndExit(viper.UnmarshalKey(SERVERS, &servers))
+
+	tpl := `Name      User      Address
+-------------------------------------
+{{range . }}{{ .Name | ListLayout }}  {{ .User | ListLayout }}  {{ .Address }}:{{ .Port }}
+{{end}}`
+	t := template.New("")
+	t.Funcs(map[string]interface{}{
+		"ListLayout": listLayout,
+	})
+
+	t.Parse(tpl)
+	var buf bytes.Buffer
+	utils.CheckAndExit(t.Execute(&buf, servers))
+	fmt.Println(buf.String())
+}
+
+func listLayout(name string) string {
+	if len(name) < 8 {
+		return fmt.Sprintf("%-8s", name)
+	} else {
+		return fmt.Sprintf("%-8s", utils.ShortenString(name, 8))
+	}
 }

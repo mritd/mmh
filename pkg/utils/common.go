@@ -5,3 +5,11 @@ func CheckAndExit(err error) {
 		panic(err)
 	}
 }
+
+func ShortenString(str string, n int) string {
+	if len(str) <= n {
+		return str
+	} else {
+		return str[:n]
+	}
+}
