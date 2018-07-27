@@ -191,16 +191,21 @@ func DeleteServer(name string) {
 	var servers []Server
 	utils.CheckAndExit(viper.UnmarshalKey(SERVERS, &servers))
 
-	var delIdx int
+	delIdx := -1
 	for i, s := range servers {
 		if strings.ToLower(s.Name) == strings.ToLower(name) {
 			delIdx = i
 		}
 	}
 
-	servers = append(servers[:delIdx], servers[delIdx+1:]...)
-	viper.Set(SERVERS, servers)
-	utils.CheckAndExit(viper.WriteConfig())
+	if delIdx == -1 {
+		utils.Exit("Server not found!", 1)
+	} else {
+		servers = append(servers[:delIdx], servers[delIdx+1:]...)
+		viper.Set(SERVERS, servers)
+		utils.CheckAndExit(viper.WriteConfig())
+	}
+
 }
 
 func ListServers() {
