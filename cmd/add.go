@@ -27,7 +27,7 @@ import (
 
 var addCmd = &cobra.Command{
 	Use:   "add",
-	Short: "Add server",
+	Short: "Add ssh server",
 	Long: `
 Add ssh server.`,
 	Run: func(cmd *cobra.Command, args []string) {
