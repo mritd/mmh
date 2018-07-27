@@ -40,7 +40,7 @@ var rootCmd = &cobra.Command{
 	Long: `
 A simple Multi-user ssh tool.`,
 	Run: func(cmd *cobra.Command, args []string) {
-
+		mmh.InteractiveLogin()
 	},
 }
 
