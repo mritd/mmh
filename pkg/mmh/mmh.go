@@ -13,7 +13,7 @@ import (
 func SingleLogin(name string) {
 	serverExist := false
 	var servers []Server
-	utils.CheckAndExit(viper.UnmarshalKey("servers", &servers))
+	utils.CheckAndExit(viper.UnmarshalKey(SERVERS, &servers))
 	for _, s := range servers {
 		// Ignore case
 		if strings.ToLower(name) == strings.ToLower(s.Name) {

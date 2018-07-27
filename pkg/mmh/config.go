@@ -14,6 +14,8 @@ import (
 	"github.com/spf13/viper"
 )
 
+const SERVERS = "servers"
+
 func ConfigExample() []Server {
 	return []Server{
 		{
@@ -159,15 +161,15 @@ func AddServer() {
 
 	// Save
 	var servers []Server
-	utils.CheckAndExit(viper.UnmarshalKey("servers", &servers))
+	utils.CheckAndExit(viper.UnmarshalKey(SERVERS, &servers))
 	servers = append(servers, server)
-	viper.Set("Servers", servers)
+	viper.Set(SERVERS, servers)
 	utils.CheckAndExit(viper.WriteConfig())
 }
 
 func DeleteServer(name string) {
 	var servers []Server
-	utils.CheckAndExit(viper.UnmarshalKey("servers", &servers))
+	utils.CheckAndExit(viper.UnmarshalKey(SERVERS, &servers))
 
 	var delIdx int
 	for i, s := range servers {
@@ -177,6 +179,6 @@ func DeleteServer(name string) {
 	}
 
 	servers = append(servers[:delIdx], servers[delIdx+1:]...)
-	viper.Set("Servers", servers)
+	viper.Set(SERVERS, servers)
 	utils.CheckAndExit(viper.WriteConfig())
 }
