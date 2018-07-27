@@ -59,8 +59,8 @@ func AddServer() {
 	p := promptx.NewDefaultPrompt(func(line []rune) error {
 		if strings.TrimSpace(string(line)) == "" {
 			return errors.New("Input is empty!")
-		} else if len(line) > 25 {
-			return errors.New("Input length must < 25!")
+		} else if len(line) > 12 {
+			return errors.New("Input length must <= 12!")
 		}
 
 		if s := findServerByName(string(line)); s != nil {
@@ -212,8 +212,8 @@ func ListServers() {
 	var servers []Server
 	utils.CheckAndExit(viper.UnmarshalKey(SERVERS, &servers))
 
-	tpl := `Name      User      Address
--------------------------------------
+	tpl := `Name          User          Address
+----------------------------------------------
 {{range . }}{{ .Name | ListLayout }}  {{ .User | ListLayout }}  {{ .Address }}:{{ .Port }}
 {{end}}`
 	t := template.New("")
@@ -228,9 +228,9 @@ func ListServers() {
 }
 
 func listLayout(name string) string {
-	if len(name) < 8 {
-		return fmt.Sprintf("%-8s", name)
+	if len(name) < 12 {
+		return fmt.Sprintf("%-12s", name)
 	} else {
-		return fmt.Sprintf("%-8s", utils.ShortenString(name, 8))
+		return fmt.Sprintf("%-12s", utils.ShortenString(name, 12))
 	}
 }
