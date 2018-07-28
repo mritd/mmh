@@ -2,8 +2,6 @@ package mmh
 
 import (
 	"io/ioutil"
-	"net"
-
 	"os"
 
 	"strings"
@@ -53,10 +51,7 @@ func (s Server) Connect() {
 		Auth: []ssh.AuthMethod{
 			s.authMethod(),
 		},
-		HostKeyCallback: func(hostname string, remote net.Addr, key ssh.PublicKey) error {
-			// ignore host key
-			return nil
-		},
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
 
 	connection, err := ssh.Dial("tcp", fmt.Sprint(s.Address, ":", s.Port), sshConfig)

@@ -1,8 +1,6 @@
 package mmh
 
 import (
-	"net"
-
 	"io"
 
 	"bufio"
@@ -69,11 +67,8 @@ func exec(ctx context.Context, s Server, cmd string) {
 		Auth: []ssh.AuthMethod{
 			s.authMethod(),
 		},
-		HostKeyCallback: func(hostname string, remote net.Addr, key ssh.PublicKey) error {
-			// ignore host key
-			return nil
-		},
-		Timeout: time.Second * 5,
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+		Timeout:         time.Second * 5,
 	}
 
 	connection, err := ssh.Dial("tcp", fmt.Sprint(s.Address, ":", s.Port), sshConfig)
