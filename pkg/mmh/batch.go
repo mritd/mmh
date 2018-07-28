@@ -19,6 +19,8 @@ import (
 
 	"time"
 
+	"text/template"
+
 	"github.com/mritd/mmh/pkg/utils"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/terminal"
@@ -121,6 +123,10 @@ func exec(ctx context.Context, s Server, cmd string) {
 			execWg.Done()
 		}()
 
+		f := utils.MapRandomKeyGet(ColorsFuncMap)
+		t, err := template.New("").Funcs(ColorsFuncMap).Parse(fmt.Sprintf(`{{ .Name | %s}}{{ ":" | %s}}  {{ .Value }}`, f, f))
+		utils.CheckAndExit(err)
+
 		buf := bufio.NewReader(pr)
 		for {
 			line, err := buf.ReadString('\n')
@@ -131,7 +137,14 @@ func exec(ctx context.Context, s Server, cmd string) {
 					panic(err)
 				}
 			}
-			fmt.Printf("%s:  %s", s.Name, string(line))
+
+			fmt.Print(string(utils.Render(t, struct {
+				Name  string
+				Value string
+			}{
+				Name:  s.Name,
+				Value: string(line),
+			})))
 		}
 	}()
 
