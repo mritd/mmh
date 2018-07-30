@@ -56,6 +56,7 @@ func (s Server) Connect() {
 
 	connection, err := ssh.Dial("tcp", fmt.Sprint(s.Address, ":", s.Port), sshConfig)
 	utils.CheckAndExit(err)
+	defer connection.Close()
 
 	session, err := connection.NewSession()
 	utils.CheckAndExit(err)
