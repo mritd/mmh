@@ -24,14 +24,7 @@ import (
 	"golang.org/x/crypto/ssh/terminal"
 )
 
-func Batch(tag, cmd string) {
-
-	// init group data
-	initTagsGroup()
-	servers := tagsMap[tag]
-	if len(servers) == 0 {
-		utils.Exit("Tagged server not found!", 1)
-	}
+func Exec(tagOrName, cmd string, singleServer bool) {
 
 	// use context to manage goroutine
 	ctx, cancel := context.WithCancel(context.Background())
@@ -46,19 +39,36 @@ func Batch(tag, cmd string) {
 		}
 	}()
 
-	// create goroutine
-	var serverWg sync.WaitGroup
-	serverWg.Add(len(servers))
-	for _, server := range servers {
-		s := server
-		// async exec
-		// because it takes time for ssh to establish a connection
-		go func() {
-			defer serverWg.Done()
-			exec(ctx, s, cmd)
-		}()
+	if singleServer {
+		s := findServerByName(tagOrName)
+		if s == nil {
+			utils.Exit("Server not found", 1)
+		} else {
+			exec(ctx, *s, cmd)
+		}
+	} else {
+
+		// init group data
+		initTagsGroup()
+		servers := tagsMap[tagOrName]
+		if len(servers) == 0 {
+			utils.Exit("Tagged server not found", 1)
+		}
+
+		// create goroutine
+		var serverWg sync.WaitGroup
+		serverWg.Add(len(servers))
+		for _, server := range servers {
+			s := server
+			// async exec
+			// because it takes time for ssh to establish a connection
+			go func() {
+				defer serverWg.Done()
+				exec(ctx, s, cmd)
+			}()
+		}
+		serverWg.Wait()
 	}
-	serverWg.Wait()
 }
 
 func exec(ctx context.Context, s Server, cmd string) {

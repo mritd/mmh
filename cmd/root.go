@@ -45,7 +45,9 @@ A simple Multi-user ssh tool.`,
 }
 
 func Execute() {
-	utils.CheckAndExit(rootCmd.Execute())
+	if err := rootCmd.Execute(); err != nil {
+		utils.Exit(err.Error(), -1)
+	}
 }
 
 func init() {

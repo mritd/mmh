@@ -1,8 +1,6 @@
 package mmh
 
 import (
-	"strings"
-
 	"fmt"
 
 	"github.com/mritd/mmh/pkg/utils"
@@ -11,19 +9,11 @@ import (
 )
 
 func SingleLogin(name string) {
-	serverExist := false
-	var servers []Server
-	utils.CheckAndExit(viper.UnmarshalKey(SERVERS, &servers))
-	for _, s := range servers {
-		// Ignore case
-		if strings.ToLower(name) == strings.ToLower(s.Name) {
-			serverExist = true
-			s.Connect()
-		}
-	}
-
-	if !serverExist {
+	s := findServerByName(name)
+	if s == nil {
 		fmt.Println("Server not found!")
+	} else {
+		s.Connect()
 	}
 }
 
