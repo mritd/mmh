@@ -21,27 +21,24 @@
 package cmd
 
 import (
-	"strings"
-
 	"github.com/mritd/mmh/pkg/mmh"
 	"github.com/spf13/cobra"
 )
 
-var execCmd = &cobra.Command{
-	Use:   "exec",
-	Short: "Batch exec command",
+var cpCmd = &cobra.Command{
+	Use:   "cp FILE/DIR|SERVER_TAG:PATH SERVER_TAG:PATH|FILE/DIR",
+	Short: "Copies files between hosts on a network",
 	Long: `
-Batch exec command.`,
+Copies files between hosts on a network.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) < 2 {
 			cmd.Help()
 		} else {
-			cmd := strings.Join(args[1:], " ")
-			mmh.Exec(args[0], cmd, singleServer)
+			mmh.Copy(args[0], args[1], singleServer)
 		}
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(execCmd)
+	rootCmd.AddCommand(cpCmd)
 }

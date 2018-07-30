@@ -45,7 +45,7 @@ func (s Server) authMethod() ssh.AuthMethod {
 	}
 }
 
-func (s Server) Connect() {
+func (s Server) sshClient() *ssh.Client {
 	sshConfig := &ssh.ClientConfig{
 		User: s.User,
 		Auth: []ssh.AuthMethod{
@@ -54,11 +54,16 @@ func (s Server) Connect() {
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
 
-	connection, err := ssh.Dial("tcp", fmt.Sprint(s.Address, ":", s.Port), sshConfig)
+	client, err := ssh.Dial("tcp", fmt.Sprint(s.Address, ":", s.Port), sshConfig)
 	utils.CheckAndExit(err)
-	defer connection.Close()
+	return client
+}
 
-	session, err := connection.NewSession()
+func (s Server) Connect() {
+	sshClient := s.sshClient()
+	defer sshClient.Close()
+
+	session, err := sshClient.NewSession()
 	utils.CheckAndExit(err)
 	defer session.Close()
 
