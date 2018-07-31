@@ -11,6 +11,8 @@ import (
 
 	"path/filepath"
 
+	"sync"
+
 	"github.com/mritd/mmh/pkg/utils"
 	"github.com/pkg/sftp"
 )
@@ -95,6 +97,10 @@ func (s Server) directoryWrite(localPath, remotePath string) {
 	} else if err == nil {
 		if remoteFileInfo.IsDir() {
 			remotePath = path.Join(remotePath, path.Base(localPath))
+			_, err = sftpClient.Stat(remotePath)
+			if err == nil {
+				utils.Exit(remotePath+" already exist", 1)
+			}
 			utils.CheckAndExit(sftpClient.Mkdir(remotePath))
 		} else {
 			utils.Exit("Remote path is not directory", 1)
@@ -151,7 +157,8 @@ func (s Server) directoryWrite(localPath, remotePath string) {
 	utils.CheckAndExit(err)
 }
 
-func (s Server) sftpWrite(localPath, remotePath string) {
+func (s Server) sftpWrite(wg *sync.WaitGroup, localPath, remotePath string) {
+	defer wg.Done()
 	localFile, err := os.Open(localPath)
 	utils.CheckAndExit(err)
 	defer localFile.Close()
@@ -193,22 +200,27 @@ func Copy(path1, path2 string, singleServer bool) {
 		_, err := os.Stat(path1)
 		utils.CheckAndExit(err)
 
+		var wg sync.WaitGroup
 		if singleServer {
 			s := findServerByName(tmpSp2[0])
 			if s == nil {
 				utils.Exit("Server not found", 1)
 			} else {
-				s.sftpWrite(path1, tmpSp2[1])
+				wg.Add(1)
+				go s.sftpWrite(&wg, path1, tmpSp2[1])
 			}
+			wg.Wait()
 		} else {
 			initTagsGroup()
-			servers := tagsMap[tmpSp1[0]]
+			servers := tagsMap[tmpSp2[0]]
 			if len(servers) == 0 {
 				utils.Exit("Tagged server not found", 1)
 			}
+			wg.Add(len(servers))
 			for _, s := range servers {
-				s.sftpWrite(path1, tmpSp2[1])
+				go s.sftpWrite(&wg, path1, tmpSp2[1])
 			}
+			wg.Wait()
 		}
 
 	}
