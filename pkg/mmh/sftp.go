@@ -17,15 +17,15 @@ import (
 	"github.com/pkg/sftp"
 )
 
-func (s Server) fileWrite(localFilePath, remotePath string) {
+func (s Server) fileWrite(localPath, remotePath string) {
 
-	localFile, err := os.Open(localFilePath)
+	localFile, err := os.Open(localPath)
 	utils.CheckAndExit(err)
 	defer localFile.Close()
 	_, err = localFile.Stat()
 	utils.CheckAndExit(err)
 
-	filename := path.Base(localFilePath)
+	filename := path.Base(localPath)
 
 	sshClient := s.sshClient()
 	defer sshClient.Close()
@@ -69,6 +69,10 @@ func (s Server) fileWrite(localFilePath, remotePath string) {
 			io.Copy(remoteFile, localFile)
 		}
 	}
+}
+
+func (s Server) fileRead(localPath, remotePath string) {
+
 }
 
 func (s Server) directoryWrite(localPath, remotePath string) {
@@ -159,10 +163,7 @@ func (s Server) directoryWrite(localPath, remotePath string) {
 
 func (s Server) sftpWrite(wg *sync.WaitGroup, localPath, remotePath string) {
 	defer wg.Done()
-	localFile, err := os.Open(localPath)
-	utils.CheckAndExit(err)
-	defer localFile.Close()
-	localFileInfo, err := localFile.Stat()
+	localFileInfo, err := os.Stat(localPath)
 	utils.CheckAndExit(err)
 
 	if localFileInfo.IsDir() {
@@ -170,6 +171,19 @@ func (s Server) sftpWrite(wg *sync.WaitGroup, localPath, remotePath string) {
 	} else {
 		s.fileWrite(localPath, remotePath)
 	}
+}
+
+func (s Server) sftpRead(localPath, remotePath string) {
+	localFileInfo, err := os.Stat(localPath)
+	if err != nil {
+
+	}
+
+	if localFileInfo.IsDir() {
+		localPath = path.Join(localPath, path.Base(remotePath))
+	}
+
+	s.fileRead(localPath, remotePath)
 
 }
 
@@ -178,21 +192,14 @@ func Copy(path1, path2 string, singleServer bool) {
 	tmpSp2 := strings.Split(path2, ":")
 
 	// download file or dir
+	// only support single server download
 	if len(tmpSp1) == 2 && len(tmpSp2) == 1 {
-		if singleServer {
-			s := findServerByName(tmpSp1[0])
-			if s == nil {
-				utils.Exit("Server not found", 1)
-			} else {
-				//remotePath := tmpSp1[1]
 
-			}
+		s := findServerByName(tmpSp1[0])
+		if s == nil {
+			utils.Exit("Server not found", 1)
 		} else {
-			initTagsGroup()
-			servers := tagsMap[tmpSp1[0]]
-			if len(servers) == 0 {
-				utils.Exit("Tagged server not found", 1)
-			}
+			s.sftpRead(path2, tmpSp1[1])
 		}
 		// upload file or dir
 	} else if len(tmpSp1) == 1 && len(tmpSp2) == 2 {
