@@ -35,9 +35,9 @@ import (
 var cfgFile string
 var RootCmd = &cobra.Command{
 	Use:   "mmh",
-	Short: "A simple Multi-user ssh tool",
+	Short: "A simple Multi-server ssh tool",
 	Long: `
-A simple Multi-user ssh tool.`,
+A simple Multi-server ssh tool.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		mmh.InteractiveLogin()
 	},
