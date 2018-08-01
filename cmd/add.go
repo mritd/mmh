@@ -36,5 +36,5 @@ Add ssh server.`,
 }
 
 func init() {
-	rootCmd.AddCommand(addCmd)
+	RootCmd.AddCommand(addCmd)
 }

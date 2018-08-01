@@ -18,28 +18,23 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package main
+package cmd
 
 import (
-	"os"
-	"path/filepath"
-
-	"github.com/mritd/mmh/cmd"
 	"github.com/mritd/mmh/pkg/utils"
 	"github.com/spf13/cobra"
 )
 
-func commandFor(basename string, rootCommand *cobra.Command) *cobra.Command {
-
-	c, _, _ := rootCommand.Find([]string{basename})
-	if c != nil {
-		rootCommand.RemoveCommand(c)
-		return c
-	}
-	return rootCommand
+var installCmd = &cobra.Command{
+	Use:   "install",
+	Short: "Install mmh",
+	Long: `
+Install mmh.`,
+	Run: func(cmd *cobra.Command, args []string) {
+		utils.Install()
+	},
 }
 
-func main() {
-	basename := filepath.Base(os.Args[0])
-	utils.CheckAndExit(commandFor(basename, cmd.RootCmd).Execute())
+func init() {
+	RootCmd.AddCommand(installCmd)
 }

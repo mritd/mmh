@@ -34,7 +34,7 @@ import (
 
 var cfgFile string
 var singleServer bool
-var rootCmd = &cobra.Command{
+var RootCmd = &cobra.Command{
 	Use:   "mmh",
 	Short: "A simple Multi-user ssh tool",
 	Long: `
@@ -45,15 +45,15 @@ A simple Multi-user ssh tool.`,
 }
 
 func Execute() {
-	if err := rootCmd.Execute(); err != nil {
+	if err := RootCmd.Execute(); err != nil {
 		utils.Exit(err.Error(), -1)
 	}
 }
 
 func init() {
 	cobra.OnInitialize(initConfig)
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.mmh.yaml)")
-	rootCmd.PersistentFlags().BoolVarP(&singleServer, "single", "s", false, "Single server")
+	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.mmh.yaml)")
+	RootCmd.PersistentFlags().BoolVarP(&singleServer, "single", "s", false, "Single server")
 }
 
 func initConfig() {

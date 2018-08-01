@@ -26,8 +26,9 @@ import (
 )
 
 var cpCmd = &cobra.Command{
-	Use:   "cp FILE/DIR|SERVER_TAG:PATH SERVER_TAG:PATH|FILE/DIR",
-	Short: "Copies files between hosts on a network",
+	Use:     "cp FILE/DIR|SERVER_TAG:PATH SERVER_NAME:PATH|FILE/DIR",
+	Aliases: []string{"mcp"},
+	Short:   "Copies files between hosts on a network",
 	Long: `
 Copies files between hosts on a network.`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -40,5 +41,5 @@ Copies files between hosts on a network.`,
 }
 
 func init() {
-	rootCmd.AddCommand(cpCmd)
+	RootCmd.AddCommand(cpCmd)
 }

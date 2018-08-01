@@ -28,8 +28,9 @@ import (
 )
 
 var execCmd = &cobra.Command{
-	Use:   "exec",
-	Short: "Batch exec command",
+	Use:     "exec",
+	Aliases: []string{"mec"},
+	Short:   "Batch exec command",
 	Long: `
 Batch exec command.`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -43,5 +44,5 @@ Batch exec command.`,
 }
 
 func init() {
-	rootCmd.AddCommand(execCmd)
+	RootCmd.AddCommand(execCmd)
 }

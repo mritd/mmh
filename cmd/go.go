@@ -41,5 +41,5 @@ Login single server.`,
 }
 
 func init() {
-	rootCmd.AddCommand(goCmd)
+	RootCmd.AddCommand(goCmd)
 }
