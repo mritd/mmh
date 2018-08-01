@@ -25,6 +25,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var singleCPServer bool
 var cpCmd = &cobra.Command{
 	Use:     "cp FILE/DIR|SERVER_TAG:PATH SERVER_NAME:PATH|FILE/DIR",
 	Aliases: []string{"mcp"},
@@ -35,11 +36,12 @@ Copies files between hosts on a network.`,
 		if len(args) != 2 {
 			cmd.Help()
 		} else {
-			mmh.Copy(args[0], args[1], singleServer)
+			mmh.Copy(args[0], args[1], singleCPServer)
 		}
 	},
 }
 
 func init() {
 	RootCmd.AddCommand(cpCmd)
+	cpCmd.PersistentFlags().BoolVarP(&singleCPServer, "single", "s", false, "Single server")
 }

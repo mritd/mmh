@@ -33,7 +33,6 @@ import (
 )
 
 var cfgFile string
-var singleServer bool
 var RootCmd = &cobra.Command{
 	Use:   "mmh",
 	Short: "A simple Multi-user ssh tool",
@@ -53,7 +52,6 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.mmh.yaml)")
-	RootCmd.PersistentFlags().BoolVarP(&singleServer, "single", "s", false, "Single server")
 }
 
 func initConfig() {
