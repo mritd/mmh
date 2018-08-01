@@ -29,7 +29,7 @@ import (
 
 var singleExecServer bool
 var execCmd = &cobra.Command{
-	Use:     "exec",
+	Use:     "exec SERVER_TAG CMD",
 	Aliases: []string{"mec"},
 	Short:   "Batch exec command",
 	Long: `
