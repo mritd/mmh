@@ -183,6 +183,12 @@ func (s Server) sftpRead(localPath, remotePath string) {
 	utils.CheckAndExit(err)
 	defer sftpClient.Close()
 
+	if strings.HasPrefix(remotePath, "~") {
+		pwd, err := sftpClient.Getwd()
+		utils.CheckAndExit(err)
+		remotePath = strings.Replace(remotePath, "~", pwd, 1)
+	}
+
 	remoteFile, err := sftpClient.Open(remotePath)
 	utils.CheckAndExit(err)
 	defer remoteFile.Close()
@@ -190,10 +196,47 @@ func (s Server) sftpRead(localPath, remotePath string) {
 	remoteFileInfo, err := remoteFile.Stat()
 	utils.CheckAndExit(err)
 
+	// remote path is a dir
 	if remoteFileInfo.IsDir() {
+
+		localFileInfo, err := os.Stat(localPath)
+		if err != nil {
+			if err == os.ErrNotExist {
+				err = os.Mkdir(path.Join(localPath), remoteFileInfo.Mode())
+			}
+			utils.CheckAndExit(err)
+		} else {
+			if localFileInfo.IsDir() {
+				localPath = path.Join(localPath, path.Base(remotePath))
+				err = os.Mkdir(localPath, remoteFileInfo.Mode())
+				utils.CheckAndExit(err)
+			} else {
+				utils.Exit(localPath+" already exist", 1)
+			}
+		}
+
 		w := sftpClient.Walk(remotePath)
 		for w.Step() {
-			fmt.Println(w.Path())
+
+			fmt.Printf("Copy: %s\n", w.Path())
+
+			if w.Path() == remotePath {
+				// skip
+				continue
+			}
+
+			if w.Stat().IsDir() {
+				err = os.Mkdir(strings.Replace(w.Path(), remotePath, localPath, -1), remoteFileInfo.Mode())
+				utils.CheckAndExit(err)
+			} else {
+				localFile, err := os.OpenFile(strings.Replace(w.Path(), remotePath, localPath, -1), os.O_CREATE|os.O_WRONLY|os.O_TRUNC, w.Stat().Mode())
+				utils.CheckAndExit(err)
+				remoteTmpFile, err := sftpClient.Open(w.Path())
+				utils.CheckAndExit(err)
+				io.Copy(localFile, remoteTmpFile)
+				localFile.Close()
+				remoteTmpFile.Close()
+			}
 		}
 		// remote path is a file
 	} else {
@@ -228,7 +271,6 @@ func Copy(path1, path2 string, singleServer bool) {
 	// download file or dir
 	// only support single server download
 	if len(tmpSp1) == 2 && len(tmpSp2) == 1 {
-
 		s := findServerByName(tmpSp1[0])
 		if s == nil {
 			utils.Exit("Server not found", 1)
@@ -263,6 +305,7 @@ func Copy(path1, path2 string, singleServer bool) {
 			}
 			wg.Wait()
 		}
-
+	} else {
+		utils.Exit("Command format error", 1)
 	}
 }
