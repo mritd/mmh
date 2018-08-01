@@ -21,6 +21,8 @@ import (
 
 func (s Server) fileWrite(localPath, remotePath string) {
 
+	fmt.Printf("Copy: %s\n", localPath)
+
 	localFile, err := os.Open(localPath)
 	utils.CheckAndExit(err)
 	defer localFile.Close()
@@ -73,10 +75,6 @@ func (s Server) fileWrite(localPath, remotePath string) {
 	}
 }
 
-func (s Server) fileRead(localPath, remotePath string) {
-
-}
-
 func (s Server) directoryWrite(localPath, remotePath string) {
 	sshClient := s.sshClient()
 	defer sshClient.Close()
@@ -100,7 +98,7 @@ func (s Server) directoryWrite(localPath, remotePath string) {
 			// other err
 			utils.CheckAndExit(err)
 		}
-	} else if err == nil {
+	} else {
 		if remoteFileInfo.IsDir() {
 			remotePath = path.Join(remotePath, path.Base(localPath))
 			_, err = sftpClient.Stat(remotePath)
@@ -114,6 +112,8 @@ func (s Server) directoryWrite(localPath, remotePath string) {
 	}
 
 	err = filepath.Walk(localPath, func(path string, info os.FileInfo, err error) error {
+
+		fmt.Printf("Copy: %s\n", path)
 
 		if info == nil {
 			return err
@@ -142,7 +142,6 @@ func (s Server) directoryWrite(localPath, remotePath string) {
 					if err != nil {
 						return err
 					}
-					defer remoteFile.Close()
 
 					// get local file
 					localFile, err := os.Open(path)
@@ -152,6 +151,9 @@ func (s Server) directoryWrite(localPath, remotePath string) {
 
 					// copy
 					io.Copy(remoteFile, localFile)
+
+					remoteFile.Close()
+					localFile.Close()
 				}
 			} else {
 				return err
