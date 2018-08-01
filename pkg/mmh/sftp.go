@@ -13,6 +13,8 @@ import (
 
 	"sync"
 
+	"fmt"
+
 	"github.com/mritd/mmh/pkg/utils"
 	"github.com/pkg/sftp"
 )
@@ -174,17 +176,49 @@ func (s Server) sftpWrite(wg *sync.WaitGroup, localPath, remotePath string) {
 }
 
 func (s Server) sftpRead(localPath, remotePath string) {
-	localFileInfo, err := os.Stat(localPath)
-	if err != nil {
+	sshClient := s.sshClient()
+	defer sshClient.Close()
+
+	sftpClient, err := sftp.NewClient(sshClient)
+	utils.CheckAndExit(err)
+	defer sftpClient.Close()
+
+	remoteFile, err := sftpClient.Open(remotePath)
+	utils.CheckAndExit(err)
+	defer remoteFile.Close()
+
+	remoteFileInfo, err := remoteFile.Stat()
+	utils.CheckAndExit(err)
+
+	if remoteFileInfo.IsDir() {
+		w := sftpClient.Walk(remotePath)
+		for w.Step() {
+			fmt.Println(w.Path())
+		}
+		// remote path is a file
+	} else {
+		localFileInfo, err := os.Stat(localPath)
+		if err != nil {
+			if err == os.ErrNotExist {
+				localFile, err := os.OpenFile(localPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, remoteFileInfo.Mode())
+				utils.CheckAndExit(err)
+				defer localFile.Close()
+				io.Copy(localFile, remoteFile)
+			} else {
+				utils.CheckAndExit(err)
+			}
+		} else {
+			if localFileInfo.IsDir() {
+				localFile, err := os.OpenFile(path.Join(localPath, path.Base(remotePath)), os.O_CREATE|os.O_WRONLY|os.O_TRUNC, remoteFileInfo.Mode())
+				utils.CheckAndExit(err)
+				defer localFile.Close()
+				io.Copy(localFile, remoteFile)
+			} else {
+				utils.Exit(localPath+" already exist", 1)
+			}
+		}
 
 	}
-
-	if localFileInfo.IsDir() {
-		localPath = path.Join(localPath, path.Base(remotePath))
-	}
-
-	s.fileRead(localPath, remotePath)
-
 }
 
 func Copy(path1, path2 string, singleServer bool) {
