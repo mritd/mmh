@@ -23,7 +23,7 @@ package cmd
 import (
 	"os"
 
-	"path/filepath"
+	"path"
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/mritd/mmh/pkg/mmh"
@@ -61,7 +61,7 @@ func initConfig() {
 	} else {
 		home, err := homedir.Dir()
 		utils.CheckAndExit(err)
-		cfgFile = home + string(filepath.Separator) + ".mmh.yaml"
+		cfgFile = path.Join(home, ".mmh.yaml")
 		viper.SetConfigFile(cfgFile)
 
 		if _, err := os.Stat(cfgFile); err != nil {
