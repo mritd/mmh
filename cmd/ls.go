@@ -36,5 +36,5 @@ List ssh server.`,
 }
 
 func init() {
-	rootCmd.AddCommand(lsCmd)
+	RootCmd.AddCommand(lsCmd)
 }

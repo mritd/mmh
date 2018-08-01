@@ -15,8 +15,6 @@ import (
 	"os/signal"
 	"syscall"
 
-	"time"
-
 	"text/template"
 
 	"github.com/mritd/mmh/pkg/utils"
@@ -72,19 +70,11 @@ func Exec(tagOrName, cmd string, singleServer bool) {
 }
 
 func exec(ctx context.Context, s Server, cmd string) {
-	sshConfig := &ssh.ClientConfig{
-		User: s.User,
-		Auth: []ssh.AuthMethod{
-			s.authMethod(),
-		},
-		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
-		Timeout:         time.Second * 5,
-	}
 
-	connection, err := ssh.Dial("tcp", fmt.Sprint(s.Address, ":", s.Port), sshConfig)
-	utils.CheckAndExit(err)
+	sshClient := s.sshClient()
+	defer sshClient.Close()
 
-	session, err := connection.NewSession()
+	session, err := sshClient.NewSession()
 	utils.CheckAndExit(err)
 	defer session.Close()
 

@@ -27,10 +27,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var singleServer bool
+var singleExecServer bool
 var execCmd = &cobra.Command{
-	Use:   "exec",
-	Short: "Batch exec command",
+	Use:     "exec SERVER_TAG CMD",
+	Aliases: []string{"mec"},
+	Short:   "Batch exec command",
 	Long: `
 Batch exec command.`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -38,12 +39,12 @@ Batch exec command.`,
 			cmd.Help()
 		} else {
 			cmd := strings.Join(args[1:], " ")
-			mmh.Exec(args[0], cmd, singleServer)
+			mmh.Exec(args[0], cmd, singleExecServer)
 		}
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(execCmd)
-	execCmd.PersistentFlags().BoolVarP(&singleServer, "single", "s", false, "Single server exec")
+	RootCmd.AddCommand(execCmd)
+	execCmd.PersistentFlags().BoolVarP(&singleExecServer, "single", "s", false, "Single server")
 }

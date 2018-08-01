@@ -40,5 +40,5 @@ Delete ssh server.`,
 }
 
 func init() {
-	rootCmd.AddCommand(delCmd)
+	RootCmd.AddCommand(delCmd)
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"os/user"
 	"reflect"
 	"strings"
 	"text/template"
@@ -12,6 +13,13 @@ import (
 )
 
 func CheckAndExit(err error) {
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+}
+
+func CheckAndExitPrintStack(err error) {
 	if err != nil {
 		panic(err)
 	}
@@ -51,4 +59,13 @@ func Render(tpl *template.Template, data interface{}) []byte {
 		return []byte(fmt.Sprintf("%v", data))
 	}
 	return buf.Bytes()
+}
+
+func CheckRoot() {
+	u, err := user.Current()
+	CheckAndExit(err)
+
+	if u.Uid != "0" || u.Gid != "0" {
+		Exit("This command must be run as root! (sudo)", 1)
+	}
 }

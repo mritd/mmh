@@ -18,28 +18,30 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package main
+package cmd
 
 import (
-	"os"
-	"path/filepath"
-
-	"github.com/mritd/mmh/cmd"
-	"github.com/mritd/mmh/pkg/utils"
+	"github.com/mritd/mmh/pkg/mmh"
 	"github.com/spf13/cobra"
 )
 
-func commandFor(basename string, rootCommand *cobra.Command) *cobra.Command {
-
-	c, _, _ := rootCommand.Find([]string{basename})
-	if c != nil {
-		rootCommand.RemoveCommand(c)
-		return c
-	}
-	return rootCommand
+var singleCPServer bool
+var cpCmd = &cobra.Command{
+	Use:     "cp FILE/DIR|SERVER_TAG:PATH SERVER_NAME:PATH|FILE/DIR",
+	Aliases: []string{"mcp"},
+	Short:   "Copies files between hosts on a network",
+	Long: `
+Copies files between hosts on a network.`,
+	Run: func(cmd *cobra.Command, args []string) {
+		if len(args) != 2 {
+			cmd.Help()
+		} else {
+			mmh.Copy(args[0], args[1], singleCPServer)
+		}
+	},
 }
 
-func main() {
-	basename := filepath.Base(os.Args[0])
-	utils.CheckAndExit(commandFor(basename, cmd.RootCmd).Execute())
+func init() {
+	RootCmd.AddCommand(cpCmd)
+	cpCmd.PersistentFlags().BoolVarP(&singleCPServer, "single", "s", false, "Single server")
 }

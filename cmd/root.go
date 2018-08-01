@@ -23,7 +23,7 @@ package cmd
 import (
 	"os"
 
-	"path/filepath"
+	"path"
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/mritd/mmh/pkg/mmh"
@@ -33,26 +33,25 @@ import (
 )
 
 var cfgFile string
-
-var rootCmd = &cobra.Command{
+var RootCmd = &cobra.Command{
 	Use:   "mmh",
-	Short: "A simple Multi-user ssh tool",
+	Short: "A simple Multi-server ssh tool",
 	Long: `
-A simple Multi-user ssh tool.`,
+A simple Multi-server ssh tool.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		mmh.InteractiveLogin()
 	},
 }
 
 func Execute() {
-	if err := rootCmd.Execute(); err != nil {
+	if err := RootCmd.Execute(); err != nil {
 		utils.Exit(err.Error(), -1)
 	}
 }
 
 func init() {
 	cobra.OnInitialize(initConfig)
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.mmh.yaml)")
+	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.mmh.yaml)")
 }
 
 func initConfig() {
@@ -62,7 +61,7 @@ func initConfig() {
 	} else {
 		home, err := homedir.Dir()
 		utils.CheckAndExit(err)
-		cfgFile = home + string(filepath.Separator) + ".mmh.yaml"
+		cfgFile = path.Join(home, ".mmh.yaml")
 		viper.SetConfigFile(cfgFile)
 
 		if _, err := os.Stat(cfgFile); err != nil {
