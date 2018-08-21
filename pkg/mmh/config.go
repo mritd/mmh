@@ -35,6 +35,7 @@ func ServersExample() []Server {
 			Address:  "10.10.4.11",
 			Port:     22,
 			Password: "password",
+			Proxy:    "prod12",
 		},
 		{
 			Name:      "prod12",
