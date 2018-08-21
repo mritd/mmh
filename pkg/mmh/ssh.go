@@ -13,6 +13,8 @@ import (
 	"golang.org/x/crypto/ssh/terminal"
 )
 
+var proxyMap map[string]string
+
 type Server struct {
 	Name      string   `yml:"Name"`
 	Tags      []string `yml:"Tags"`
@@ -72,6 +74,17 @@ func (s Server) sshClient() *ssh.Client {
 	}
 
 	if s.Proxy != "" {
+
+		if proxyMap == nil {
+			proxyMap = make(map[string]string)
+		}
+
+		if proxyMap[s.Proxy] != "" {
+			utils.Exit("Proxy cycle not allowed!", 1)
+		} else {
+			proxyMap[s.Proxy] = s.Proxy
+		}
+
 		proxy := findServerByName(s.Proxy)
 		fmt.Printf("Using proxy [%s], connect to %s:%d\n", s.Proxy, proxy.Address, proxy.Port)
 		proxyClient := proxy.sshClient()
