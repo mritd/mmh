@@ -13,6 +13,8 @@ import (
 	"bytes"
 	"text/template"
 
+	"sort"
+
 	"github.com/mitchellh/go-homedir"
 	"github.com/mritd/mmh/pkg/utils"
 	"github.com/mritd/promptx"
@@ -33,6 +35,7 @@ func ServersExample() []Server {
 			Address:  "10.10.4.11",
 			Port:     22,
 			Password: "password",
+			Proxy:    "prod12",
 		},
 		{
 			Name:      "prod12",
@@ -53,8 +56,9 @@ func TagsExample() []string {
 }
 
 func findServerByName(name string) *Server {
-	var servers []Server
+	var servers Servers
 	utils.CheckAndExit(viper.UnmarshalKey(SERVERS, &servers))
+	sort.Sort(servers)
 	for _, s := range servers {
 		if strings.ToLower(s.Name) == strings.ToLower(name) {
 			return &s
@@ -179,6 +183,18 @@ func AddServer() {
 		password = p.Run()
 	}
 
+	p = promptx.NewDefaultPrompt(func(line []rune) error {
+		if strings.TrimSpace(string(line)) != "" {
+			if findServerByName(string(line)) == nil {
+				return errors.New("Proxy server not found!")
+			}
+		}
+		return nil
+
+	}, "Proxy:")
+
+	proxy := p.Run()
+
 	server := Server{
 		Name:      name,
 		Tags:      tags,
@@ -187,18 +203,20 @@ func AddServer() {
 		Port:      port,
 		PublicKey: publicKey,
 		Password:  password,
+		Proxy:     proxy,
 	}
 
 	// Save
-	var servers []Server
+	var servers Servers
 	utils.CheckAndExit(viper.UnmarshalKey(SERVERS, &servers))
 	servers = append(servers, server)
+	sort.Sort(servers)
 	viper.Set(SERVERS, servers)
 	utils.CheckAndExit(viper.WriteConfig())
 }
 
 func DeleteServer(name string) {
-	var servers []Server
+	var servers Servers
 	utils.CheckAndExit(viper.UnmarshalKey(SERVERS, &servers))
 
 	delIdx := -1
@@ -212,6 +230,7 @@ func DeleteServer(name string) {
 		utils.Exit("Server not found!", 1)
 	} else {
 		servers = append(servers[:delIdx], servers[delIdx+1:]...)
+		sort.Sort(servers)
 		viper.Set(SERVERS, servers)
 		utils.CheckAndExit(viper.WriteConfig())
 	}
@@ -219,8 +238,9 @@ func DeleteServer(name string) {
 }
 
 func ListServers() {
-	var servers []Server
+	var servers Servers
 	utils.CheckAndExit(viper.UnmarshalKey(SERVERS, &servers))
+	sort.Sort(servers)
 
 	tpl := `Name          User          Address
 ----------------------------------------------
@@ -250,7 +270,7 @@ func initTagsGroup() {
 	var tags []string
 	utils.CheckAndExit(viper.UnmarshalKey(TAGS, &tags))
 
-	var servers []Server
+	var servers Servers
 	utils.CheckAndExit(viper.UnmarshalKey(SERVERS, &servers))
 
 	for _, tag := range tags {

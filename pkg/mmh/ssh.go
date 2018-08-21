@@ -13,6 +13,8 @@ import (
 	"golang.org/x/crypto/ssh/terminal"
 )
 
+var proxyMap map[string]string
+
 type Server struct {
 	Name      string   `yml:"Name"`
 	Tags      []string `yml:"Tags"`
@@ -21,6 +23,19 @@ type Server struct {
 	PublicKey string   `yml:"PublicKey"`
 	Address   string   `yml:"Address"`
 	Port      int      `yml:"Port"`
+	Proxy     string   `yml:"proxy"`
+}
+
+type Servers []Server
+
+func (servers Servers) Len() int {
+	return len(servers)
+}
+func (servers Servers) Less(i, j int) bool {
+	return servers[i].Name < servers[j].Name
+}
+func (servers Servers) Swap(i, j int) {
+	servers[i], servers[j] = servers[j], servers[i]
 }
 
 func publicKeyFile(file string) ssh.AuthMethod {
@@ -46,6 +61,10 @@ func (s Server) authMethod() ssh.AuthMethod {
 }
 
 func (s Server) sshClient() *ssh.Client {
+
+	var client *ssh.Client
+	var err error
+
 	sshConfig := &ssh.ClientConfig{
 		User: s.User,
 		Auth: []ssh.AuthMethod{
@@ -54,8 +73,31 @@ func (s Server) sshClient() *ssh.Client {
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
 
-	client, err := ssh.Dial("tcp", fmt.Sprint(s.Address, ":", s.Port), sshConfig)
-	utils.CheckAndExit(err)
+	if s.Proxy != "" {
+
+		if proxyMap == nil {
+			proxyMap = make(map[string]string)
+		}
+
+		if proxyMap[s.Proxy] != "" {
+			utils.Exit("Proxy cycle not allowed!", 1)
+		} else {
+			proxyMap[s.Proxy] = s.Proxy
+		}
+
+		proxy := findServerByName(s.Proxy)
+		fmt.Printf("Using proxy [%s], connect to %s:%d\n", s.Proxy, proxy.Address, proxy.Port)
+		proxyClient := proxy.sshClient()
+		conn, err := proxyClient.Dial("tcp", fmt.Sprint(s.Address, ":", s.Port))
+		utils.CheckAndExit(err)
+		ncc, channel, request, err := ssh.NewClientConn(conn, fmt.Sprint(s.Address, ":", s.Port), sshConfig)
+		utils.CheckAndExit(err)
+		client = ssh.NewClient(ncc, channel, request)
+	} else {
+		client, err = ssh.Dial("tcp", fmt.Sprint(s.Address, ":", s.Port), sshConfig)
+		utils.CheckAndExit(err)
+	}
+
 	return client
 }
 

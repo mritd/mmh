@@ -26,7 +26,7 @@ func (s Server) fileWrite(localPath, remotePath string) {
 	localFile, err := os.Open(localPath)
 	utils.CheckAndExit(err)
 	defer localFile.Close()
-	_, err = localFile.Stat()
+	localFileInfo, err := localFile.Stat()
 	utils.CheckAndExit(err)
 
 	filename := path.Base(localPath)
@@ -52,9 +52,10 @@ func (s Server) fileWrite(localPath, remotePath string) {
 			utils.CheckAndExit(err)
 			defer remoteFile.Close()
 			io.Copy(remoteFile, localFile)
+			utils.CheckAndExit(sftpClient.Chmod(remotePath, localFileInfo.Mode()))
 		} else {
 			// other err
-			utils.Exit(err.Error(), 1)
+			utils.CheckAndExit(err)
 		}
 	} else {
 		// remotePath is dir
@@ -64,6 +65,7 @@ func (s Server) fileWrite(localPath, remotePath string) {
 			utils.CheckAndExit(err)
 			defer remoteFile.Close()
 			io.Copy(remoteFile, localFile)
+			utils.CheckAndExit(sftpClient.Chmod(remoteFilePath, localFileInfo.Mode()))
 		} else {
 			// remove remote file
 			utils.CheckAndExit(sftpClient.Remove(remotePath))
@@ -71,6 +73,7 @@ func (s Server) fileWrite(localPath, remotePath string) {
 			utils.CheckAndExit(err)
 			defer remoteFile.Close()
 			io.Copy(remoteFile, localFile)
+			utils.CheckAndExit(sftpClient.Chmod(remotePath, localFileInfo.Mode()))
 		}
 	}
 }
@@ -89,11 +92,18 @@ func (s Server) directoryWrite(localPath, remotePath string) {
 		remotePath = strings.Replace(remotePath, "~", pwd, 1)
 	}
 
+	localFile, err := os.Open(localPath)
+	utils.CheckAndExit(err)
+	defer localFile.Close()
+	localFileInfo, err := localFile.Stat()
+	utils.CheckAndExit(err)
+
 	// check remote path is directory
 	remoteFileInfo, err := sftpClient.Stat(remotePath)
 	if err != nil {
 		if err == os.ErrNotExist {
 			utils.CheckAndExit(sftpClient.Mkdir(remotePath))
+			utils.CheckAndExit(sftpClient.Chmod(remotePath, localFileInfo.Mode()))
 		} else {
 			// other err
 			utils.CheckAndExit(err)
@@ -106,6 +116,7 @@ func (s Server) directoryWrite(localPath, remotePath string) {
 				utils.Exit(remotePath+" already exist", 1)
 			}
 			utils.CheckAndExit(sftpClient.Mkdir(remotePath))
+			utils.CheckAndExit(sftpClient.Chmod(remotePath, localFileInfo.Mode()))
 		} else {
 			utils.Exit("Remote path is not directory", 1)
 		}
@@ -123,12 +134,16 @@ func (s Server) directoryWrite(localPath, remotePath string) {
 			return nil
 		}
 
-		remoteCurrentPath := filepath.Join(remotePath, strings.Replace(path, localPath, "", -1))
+		remoteCurrentPath := filepath.Join(remotePath, strings.Replace(path, localPath, "", 1))
 		if info.IsDir() {
 			_, err := sftpClient.Stat(remoteCurrentPath)
 			if err != nil {
 				if err == os.ErrNotExist {
-					return sftpClient.Mkdir(remoteCurrentPath)
+					err = sftpClient.Mkdir(remoteCurrentPath)
+					if err != nil {
+						return err
+					}
+					return sftpClient.Chmod(remoteCurrentPath, info.Mode())
 				}
 			} else {
 				return err
@@ -142,7 +157,11 @@ func (s Server) directoryWrite(localPath, remotePath string) {
 					if err != nil {
 						return err
 					}
-
+					// chmod
+					err = sftpClient.Chmod(remoteCurrentPath, info.Mode())
+					if err != nil {
+						return err
+					}
 					// get local file
 					localFile, err := os.Open(path)
 					if err != nil {

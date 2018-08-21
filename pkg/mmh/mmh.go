@@ -3,6 +3,8 @@ package mmh
 import (
 	"fmt"
 
+	"sort"
+
 	"github.com/mritd/mmh/pkg/utils"
 	"github.com/mritd/promptx"
 	"github.com/spf13/viper"
@@ -18,8 +20,9 @@ func SingleLogin(name string) {
 }
 
 func InteractiveLogin() {
-	var servers []Server
+	var servers Servers
 	utils.CheckAndExit(viper.UnmarshalKey("servers", &servers))
+	sort.Sort(servers)
 
 	cfg := &promptx.SelectConfig{
 		ActiveTpl:    `»  {{ .Name | cyan }}: {{ .User | cyan }}{{ "@" | cyan }}{{ .Address | cyan }}`,
