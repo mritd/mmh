@@ -183,6 +183,18 @@ func AddServer() {
 		password = p.Run()
 	}
 
+	p = promptx.NewDefaultPrompt(func(line []rune) error {
+		if strings.TrimSpace(string(line)) != "" {
+			if findServerByName(string(line)) == nil {
+				return errors.New("Proxy server not found!")
+			}
+		}
+		return nil
+
+	}, "Proxy:")
+
+	proxy := p.Run()
+
 	server := Server{
 		Name:      name,
 		Tags:      tags,
@@ -191,6 +203,7 @@ func AddServer() {
 		Port:      port,
 		PublicKey: publicKey,
 		Password:  password,
+		Proxy:     proxy,
 	}
 
 	// Save
