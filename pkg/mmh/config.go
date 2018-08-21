@@ -13,6 +13,8 @@ import (
 	"bytes"
 	"text/template"
 
+	"sort"
+
 	"github.com/mitchellh/go-homedir"
 	"github.com/mritd/mmh/pkg/utils"
 	"github.com/mritd/promptx"
@@ -55,6 +57,7 @@ func TagsExample() []string {
 func findServerByName(name string) *Server {
 	var servers Servers
 	utils.CheckAndExit(viper.UnmarshalKey(SERVERS, &servers))
+	sort.Sort(servers)
 	for _, s := range servers {
 		if strings.ToLower(s.Name) == strings.ToLower(name) {
 			return &s
@@ -193,6 +196,7 @@ func AddServer() {
 	var servers Servers
 	utils.CheckAndExit(viper.UnmarshalKey(SERVERS, &servers))
 	servers = append(servers, server)
+	sort.Sort(servers)
 	viper.Set(SERVERS, servers)
 	utils.CheckAndExit(viper.WriteConfig())
 }
@@ -212,6 +216,7 @@ func DeleteServer(name string) {
 		utils.Exit("Server not found!", 1)
 	} else {
 		servers = append(servers[:delIdx], servers[delIdx+1:]...)
+		sort.Sort(servers)
 		viper.Set(SERVERS, servers)
 		utils.CheckAndExit(viper.WriteConfig())
 	}
@@ -221,6 +226,7 @@ func DeleteServer(name string) {
 func ListServers() {
 	var servers Servers
 	utils.CheckAndExit(viper.UnmarshalKey(SERVERS, &servers))
+	sort.Sort(servers)
 
 	tpl := `Name          User          Address
 ----------------------------------------------

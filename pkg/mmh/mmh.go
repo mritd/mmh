@@ -22,7 +22,6 @@ func SingleLogin(name string) {
 func InteractiveLogin() {
 	var servers Servers
 	utils.CheckAndExit(viper.UnmarshalKey("servers", &servers))
-
 	sort.Sort(servers)
 
 	cfg := &promptx.SelectConfig{
