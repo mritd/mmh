@@ -53,7 +53,7 @@ func TagsExample() []string {
 }
 
 func findServerByName(name string) *Server {
-	var servers []Server
+	var servers Servers
 	utils.CheckAndExit(viper.UnmarshalKey(SERVERS, &servers))
 	for _, s := range servers {
 		if strings.ToLower(s.Name) == strings.ToLower(name) {
@@ -190,7 +190,7 @@ func AddServer() {
 	}
 
 	// Save
-	var servers []Server
+	var servers Servers
 	utils.CheckAndExit(viper.UnmarshalKey(SERVERS, &servers))
 	servers = append(servers, server)
 	viper.Set(SERVERS, servers)
@@ -198,7 +198,7 @@ func AddServer() {
 }
 
 func DeleteServer(name string) {
-	var servers []Server
+	var servers Servers
 	utils.CheckAndExit(viper.UnmarshalKey(SERVERS, &servers))
 
 	delIdx := -1
@@ -219,7 +219,7 @@ func DeleteServer(name string) {
 }
 
 func ListServers() {
-	var servers []Server
+	var servers Servers
 	utils.CheckAndExit(viper.UnmarshalKey(SERVERS, &servers))
 
 	tpl := `Name          User          Address
@@ -250,7 +250,7 @@ func initTagsGroup() {
 	var tags []string
 	utils.CheckAndExit(viper.UnmarshalKey(TAGS, &tags))
 
-	var servers []Server
+	var servers Servers
 	utils.CheckAndExit(viper.UnmarshalKey(SERVERS, &servers))
 
 	for _, tag := range tags {

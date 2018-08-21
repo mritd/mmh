@@ -23,6 +23,18 @@ type Server struct {
 	Port      int      `yml:"Port"`
 }
 
+type Servers []Server
+
+func (servers Servers) Len() int {
+	return len(servers)
+}
+func (servers Servers) Less(i, j int) bool {
+	return servers[i].Name < servers[j].Name
+}
+func (servers Servers) Swap(i, j int) {
+	servers[i], servers[j] = servers[j], servers[i]
+}
+
 func publicKeyFile(file string) ssh.AuthMethod {
 	buffer, err := ioutil.ReadFile(file)
 	utils.CheckAndExit(err)
