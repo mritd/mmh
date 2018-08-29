@@ -68,6 +68,7 @@ func initConfig() {
 			os.Create(cfgFile)
 			viper.Set(mmh.SERVERS, mmh.ServersExample())
 			viper.Set(mmh.TAGS, mmh.TagsExample())
+			viper.Set("MaxProxy", 5)
 			viper.WriteConfig()
 		}
 

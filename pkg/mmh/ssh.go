@@ -4,6 +4,8 @@ import (
 	"io/ioutil"
 	"os"
 
+	"github.com/spf13/viper"
+
 	"strings"
 
 	"fmt"
@@ -13,7 +15,7 @@ import (
 	"golang.org/x/crypto/ssh/terminal"
 )
 
-var proxyMap map[string]string
+var proxyCount = 0
 
 type Server struct {
 	Name      string   `yml:"Name"`
@@ -64,6 +66,10 @@ func (s Server) sshClient() *ssh.Client {
 
 	var client *ssh.Client
 	var err error
+	var maxProxy = viper.GetInt("maxProxy")
+	if maxProxy == 0 {
+		maxProxy = 5
+	}
 
 	sshConfig := &ssh.ClientConfig{
 		User: s.User,
@@ -75,18 +81,14 @@ func (s Server) sshClient() *ssh.Client {
 
 	if s.Proxy != "" {
 
-		if proxyMap == nil {
-			proxyMap = make(map[string]string)
-		}
-
-		if proxyMap[s.Proxy] != "" {
-			utils.Exit("Proxy cycle not allowed!", 1)
+		if proxyCount > maxProxy {
+			utils.Exit("Too many proxy node!", 1)
 		} else {
-			proxyMap[s.Proxy] = s.Proxy
+			proxyCount++
 		}
 
 		proxy := findServerByName(s.Proxy)
-		fmt.Printf("Using proxy [%s], connect to %s:%d\n", s.Proxy, proxy.Address, proxy.Port)
+		fmt.Printf("Using proxy [%s], connect to %s\n", s.Proxy, s.Name)
 		proxyClient := proxy.sshClient()
 		conn, err := proxyClient.Dial("tcp", fmt.Sprint(s.Address, ":", s.Port))
 		utils.CheckAndExit(err)
