@@ -31,8 +31,6 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-var proxyCount = 0
-
 type Server struct {
 	Name      string   `yml:"Name"`
 	Tags      []string `yml:"Tags"`
@@ -82,6 +80,7 @@ func (s Server) sshClient() *ssh.Client {
 
 	var client *ssh.Client
 	var err error
+	var proxyCount int
 	var maxProxy = viper.GetInt("maxProxy")
 	if maxProxy == 0 {
 		maxProxy = 5
