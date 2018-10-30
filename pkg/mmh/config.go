@@ -242,13 +242,14 @@ func ListServers() {
 	utils.CheckAndExit(viper.UnmarshalKey(SERVERS, &servers))
 	sort.Sort(servers)
 
-	tpl := `Name          User          Address
-----------------------------------------------
-{{range . }}{{ .Name | ListLayout }}  {{ .User | ListLayout }}  {{ .Address }}:{{ .Port }}
+	tpl := `Name          User          Tags          Address
+-------------------------------------------------------------
+{{range . }}{{ .Name | ListLayout }}  {{ .User | ListLayout }}  {{ .Tags | MergeTag | ListLayout }}  {{ .Address }}:{{ .Port }}
 {{end}}`
 	t := template.New("")
 	t.Funcs(map[string]interface{}{
 		"ListLayout": listLayout,
+		"MergeTag":   mergeTag,
 	})
 
 	t.Parse(tpl)
@@ -263,6 +264,10 @@ func listLayout(name string) string {
 	} else {
 		return fmt.Sprintf("%-12s", utils.ShortenString(name, 12))
 	}
+}
+
+func mergeTag(tags []string) string {
+	return strings.Join(tags, ",")
 }
 
 func initTagsGroup() {
