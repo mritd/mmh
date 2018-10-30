@@ -18,7 +18,8 @@ package mmh
 
 import (
 	"io/ioutil"
-	"os"
+
+	"github.com/mritd/sshterminal"
 
 	"github.com/spf13/viper"
 
@@ -28,7 +29,6 @@ import (
 
 	"github.com/mritd/mmh/pkg/utils"
 	"golang.org/x/crypto/ssh"
-	"golang.org/x/crypto/ssh/terminal"
 )
 
 var proxyCount = 0
@@ -127,30 +127,5 @@ func (s Server) Connect() {
 	utils.CheckAndExit(err)
 	defer session.Close()
 
-	modes := ssh.TerminalModes{
-		ssh.ECHO:          0,     // disable echoing
-		ssh.TTY_OP_ISPEED: 14400, // input speed = 14.4kbaud
-		ssh.TTY_OP_OSPEED: 14400, // output speed = 14.4kbaud
-	}
-
-	fd := int(os.Stdin.Fd())
-	state, err := terminal.MakeRaw(fd)
-	utils.CheckAndExit(err)
-	defer terminal.Restore(fd, state)
-
-	session.Stdout = os.Stdout
-	session.Stderr = os.Stderr
-	session.Stdin = os.Stdin
-
-	termWidth, termHeight, err := terminal.GetSize(fd)
-	utils.CheckAndExit(err)
-
-	// only xterm-256color support
-	err = session.RequestPty("xterm-256color", termHeight, termWidth, modes)
-	utils.CheckAndExit(err)
-
-	err = session.Shell()
-	utils.CheckAndExit(err)
-
-	session.Wait()
+	utils.CheckAndExit(sshterminal.New(sshClient))
 }
