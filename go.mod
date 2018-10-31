@@ -13,7 +13,7 @@ require (
 	github.com/mitchellh/go-homedir v1.0.0
 	github.com/mritd/promptx v0.0.0-20180727042559-599061ab5daa
 	github.com/mritd/readline v0.0.0-20180425151209-ae245b60ddeb // indirect
-	github.com/mritd/sshterminal v0.0.0-20181030150951-a3d5b89b343b
+	github.com/mritd/sshterminal v0.0.0-20181031102542-5624aba72ba0
 	github.com/pkg/errors v0.8.0 // indirect
 	github.com/pkg/sftp v1.8.3
 	github.com/spf13/cobra v0.0.3
