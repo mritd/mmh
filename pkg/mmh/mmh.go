@@ -17,8 +17,6 @@
 package mmh
 
 import (
-	"fmt"
-
 	"sort"
 
 	"github.com/mritd/mmh/pkg/utils"
@@ -29,9 +27,9 @@ import (
 func SingleLogin(name string) {
 	s := findServerByName(name)
 	if s == nil {
-		fmt.Println("Server not found!")
+		utils.Exit("Server not found!", 1)
 	} else {
-		s.Connect()
+		utils.CheckAndExit(s.Connect())
 	}
 }
 

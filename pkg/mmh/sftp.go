@@ -47,7 +47,8 @@ func (s Server) fileWrite(localPath, remotePath string) {
 
 	filename := path.Base(localPath)
 
-	sshClient := s.sshClient()
+	sshClient, err := s.sshClient()
+	utils.CheckAndExit(err)
 	defer sshClient.Close()
 
 	sftpClient, err := sftp.NewClient(sshClient)
@@ -95,7 +96,8 @@ func (s Server) fileWrite(localPath, remotePath string) {
 }
 
 func (s Server) directoryWrite(localPath, remotePath string) {
-	sshClient := s.sshClient()
+	sshClient, err := s.sshClient()
+	utils.CheckAndExit(err)
 	defer sshClient.Close()
 
 	sftpClient, err := sftp.NewClient(sshClient)
@@ -213,7 +215,8 @@ func (s Server) sftpWrite(wg *sync.WaitGroup, localPath, remotePath string) {
 }
 
 func (s Server) sftpRead(localPath, remotePath string) {
-	sshClient := s.sshClient()
+	sshClient, err := s.sshClient()
+	utils.CheckAndExit(err)
 	defer sshClient.Close()
 
 	sftpClient, err := sftp.NewClient(sshClient)

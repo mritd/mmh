@@ -293,7 +293,7 @@ func mergeTag(tags []string) string {
 
 func findServerByName(name string) *Server {
 	var servers Servers
-	utils.CheckAndExit(viper.UnmarshalKey(SERVERS, &servers))
+	viper.UnmarshalKey(SERVERS, &servers)
 	sort.Sort(servers)
 	for _, s := range servers {
 		if strings.ToLower(s.Name) == strings.ToLower(name) {

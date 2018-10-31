@@ -17,7 +17,9 @@
 package mmh
 
 import (
+	"errors"
 	"io/ioutil"
+	"time"
 
 	"github.com/mritd/sshterminal"
 
@@ -27,7 +29,6 @@ import (
 
 	"fmt"
 
-	"github.com/mritd/mmh/pkg/utils"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -54,77 +55,106 @@ func (servers Servers) Swap(i, j int) {
 	servers[i], servers[j] = servers[j], servers[i]
 }
 
-func publicKeyFile(file string) ssh.AuthMethod {
+func publicKeyFile(file string) (ssh.AuthMethod, error) {
 	buffer, err := ioutil.ReadFile(file)
-	utils.CheckAndExit(err)
-
+	if err != nil {
+		return nil, err
+	}
 	key, err := ssh.ParsePrivateKey(buffer)
-	utils.CheckAndExit(err)
-	return ssh.PublicKeys(key)
+	if err != nil {
+		return nil, err
+	}
+	return ssh.PublicKeys(key), nil
 }
 
 func password(password string) ssh.AuthMethod {
 	return ssh.Password(password)
 }
 
-func (s Server) authMethod() ssh.AuthMethod {
+func (s *Server) authMethod() (ssh.AuthMethod, error) {
 	// Priority use of public key
 	if strings.TrimSpace(s.PublicKey) != "" {
 		return publicKeyFile(s.PublicKey)
 	} else {
-		return password(s.Password)
+		return password(s.Password), nil
 	}
 }
 
-func (s Server) sshClient() *ssh.Client {
+func (s *Server) sshClient() (*ssh.Client, error) {
 
 	var client *ssh.Client
-	var err error
 	var proxyCount int
 	var maxProxy = viper.GetInt("maxProxy")
 	if maxProxy == 0 {
 		maxProxy = 5
 	}
 
+	auth, err := s.authMethod()
+	if err != nil {
+		return nil, err
+	}
+
 	sshConfig := &ssh.ClientConfig{
 		User: s.User,
 		Auth: []ssh.AuthMethod{
-			s.authMethod(),
+			auth,
 		},
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+		Timeout:         5 * time.Second,
 	}
 
 	if s.Proxy != "" {
 
 		if proxyCount > maxProxy {
-			utils.Exit("Too many proxy node!", 1)
+			return nil, errors.New("too many proxy node")
 		} else {
 			proxyCount++
 		}
 
+		// find proxy server
 		proxy := findServerByName(s.Proxy)
-		fmt.Printf("Using proxy [%s], connect to %s\n", s.Proxy, s.Name)
-		proxyClient := proxy.sshClient()
+		if proxy == nil {
+			return nil, errors.New(fmt.Sprintf("cloud not found proxy server: %s", s.Proxy))
+		} else {
+			fmt.Printf("Using proxy [%s], connect to %s\n", s.Proxy, s.Name)
+		}
+
+		// recursive connect
+		proxyClient, err := proxy.sshClient()
+		if err != nil {
+			return nil, err
+		}
 		conn, err := proxyClient.Dial("tcp", fmt.Sprint(s.Address, ":", s.Port))
-		utils.CheckAndExit(err)
+		if err != nil {
+			return nil, err
+		}
 		ncc, channel, request, err := ssh.NewClientConn(conn, fmt.Sprint(s.Address, ":", s.Port), sshConfig)
-		utils.CheckAndExit(err)
+		if err != nil {
+			return nil, err
+		}
 		client = ssh.NewClient(ncc, channel, request)
 	} else {
 		client, err = ssh.Dial("tcp", fmt.Sprint(s.Address, ":", s.Port), sshConfig)
-		utils.CheckAndExit(err)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	return client
+	return client, nil
 }
 
-func (s Server) Connect() {
-	sshClient := s.sshClient()
+func (s *Server) Connect() error {
+	sshClient, err := s.sshClient()
+	if err != nil {
+		return err
+	}
 	defer sshClient.Close()
 
 	session, err := sshClient.NewSession()
-	utils.CheckAndExit(err)
+	if err != nil {
+		return err
+	}
 	defer session.Close()
 
-	utils.CheckAndExit(sshterminal.New(sshClient))
+	return sshterminal.New(sshClient)
 }

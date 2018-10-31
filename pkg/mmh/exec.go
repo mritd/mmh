@@ -55,12 +55,31 @@ func Exec(tagOrName, cmd string, singleServer bool) {
 		}
 	}()
 
+	// 😂 10 errors should be enough
+	var errCh = make(chan error, 10)
+	var errWg sync.WaitGroup
+	errWg.Add(1)
+	go func() {
+		defer errWg.Done()
+		for {
+			select {
+			case err, ok := <-errCh:
+				if ok {
+					fmt.Println(err)
+				} else {
+					return
+				}
+			}
+		}
+	}()
+
 	if singleServer {
 		s := findServerByName(tagOrName)
 		if s == nil {
 			utils.Exit("Server not found", 1)
 		} else {
-			exec(ctx, s, cmd)
+			exec(ctx, s, cmd, errCh)
+			close(errCh)
 		}
 	} else {
 		servers := tagsMap[tagOrName]
@@ -77,21 +96,27 @@ func Exec(tagOrName, cmd string, singleServer bool) {
 			// because it takes time for ssh to establish a connection
 			go func() {
 				defer serverWg.Done()
-				exec(ctx, s, cmd)
+				exec(ctx, s, cmd, errCh)
 			}()
 		}
 		serverWg.Wait()
+		close(errCh)
 	}
+	errWg.Wait()
 }
 
-func exec(ctx context.Context, s *Server, cmd string) {
+func exec(ctx context.Context, s *Server, cmd string, errCh chan error) {
 
-	sshClient := s.sshClient()
+	sshClient, err := s.sshClient()
+	if err != nil {
+		errCh <- err
+		return
+	}
 	defer sshClient.Close()
 
 	session, err := sshClient.NewSession()
 	if err != nil {
-		fmt.Println(err)
+		errCh <- err
 		return
 	}
 	defer session.Close()
@@ -105,7 +130,7 @@ func exec(ctx context.Context, s *Server, cmd string) {
 	fd := int(os.Stdin.Fd())
 	termWidth, termHeight, err := terminal.GetSize(fd)
 	if err != nil {
-		fmt.Println(err)
+		errCh <- err
 		return
 	}
 
@@ -115,7 +140,7 @@ func exec(ctx context.Context, s *Server, cmd string) {
 	}
 	err = session.RequestPty(termType, termHeight, termWidth, modes)
 	if err != nil {
-		fmt.Println(err)
+		errCh <- err
 		return
 	}
 
@@ -124,19 +149,8 @@ func exec(ctx context.Context, s *Server, cmd string) {
 	session.Stdout = pw
 	session.Stderr = pw
 
-	var errCh = make(chan error, 2)
 	var execWg sync.WaitGroup
 	execWg.Add(2)
-
-	// print err
-	go func() {
-		for {
-			select {
-			case err := <-errCh:
-				fmt.Println(err)
-			}
-		}
-	}()
 
 	// if cancel, close all
 	go func() {
