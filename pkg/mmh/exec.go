@@ -66,7 +66,7 @@ func Exec(tagOrName, cmd string, singleServer bool) {
 			exec(ctx, s, cmd, errCh)
 			select {
 			case err := <-errCh:
-				color.New(color.BgRed).Println(err)
+				color.New(color.BgRed, color.FgHiWhite).Println(err)
 			default:
 			}
 		}
