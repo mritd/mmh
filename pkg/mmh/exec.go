@@ -17,6 +17,7 @@
 package mmh
 
 import (
+	"bytes"
 	"io"
 
 	"bufio"
@@ -42,11 +43,12 @@ func Exec(tagOrName, cmd string, singleServer bool) {
 
 	// use context to manage goroutine
 	ctx, cancel := context.WithCancel(context.Background())
-	c := make(chan os.Signal)
-	signal.Notify(c, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+
 	// monitor os signal
+	cancelChannel := make(chan os.Signal)
+	signal.Notify(cancelChannel, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	go func() {
-		switch <-c {
+		switch <-cancelChannel {
 		case syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT:
 			// exit all goroutine
 			cancel()
@@ -105,8 +107,7 @@ func exec(ctx context.Context, s *Server, cmd string) {
 	if termType == "" {
 		termType = "xterm-256color"
 	}
-	err = session.RequestPty(termType, termHeight, termWidth, modes)
-	utils.CheckAndExit(err)
+	utils.CheckAndExit(session.RequestPty(termType, termHeight, termWidth, modes))
 
 	// write to pw
 	pr, pw := io.Pipe()
@@ -116,13 +117,13 @@ func exec(ctx context.Context, s *Server, cmd string) {
 	var execWg sync.WaitGroup
 	execWg.Add(2)
 
-	var execDone = make(chan int)
-	defer close(execDone)
-
+	// if cancel, close all
 	go func() {
 		select {
 		case <-ctx.Done():
 			session.Close()
+			pw.Close()
+			pr.Close()
 		}
 	}()
 
@@ -145,17 +146,20 @@ func exec(ctx context.Context, s *Server, cmd string) {
 				if err == io.EOF {
 					break
 				} else {
-					panic(err)
+					utils.CheckAndExit(err)
 				}
 			}
 
-			fmt.Print(string(utils.Render(t, struct {
+			var output bytes.Buffer
+			err = t.Execute(&output, struct {
 				Name  string
 				Value string
 			}{
 				Name:  s.Name,
 				Value: string(line),
-			})))
+			})
+			utils.CheckAndExit(err)
+			fmt.Print(output.String())
 		}
 	}()
 
@@ -165,7 +169,7 @@ func exec(ctx context.Context, s *Server, cmd string) {
 			pw.Close()
 			execWg.Done()
 		}()
-		session.Run(cmd)
+		utils.CheckAndExit(session.Run(cmd))
 	}()
 
 	execWg.Wait()
