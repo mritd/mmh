@@ -20,6 +20,8 @@ import (
 	"bytes"
 	"io"
 
+	"github.com/fatih/color"
+
 	"bufio"
 	"fmt"
 
@@ -55,31 +57,18 @@ func Exec(tagOrName, cmd string, singleServer bool) {
 		}
 	}()
 
-	// 😂 10 errors should be enough
-	var errCh = make(chan error, 10)
-	var errWg sync.WaitGroup
-	errWg.Add(1)
-	go func() {
-		defer errWg.Done()
-		for {
-			select {
-			case err, ok := <-errCh:
-				if ok {
-					fmt.Println(err)
-				} else {
-					return
-				}
-			}
-		}
-	}()
-
 	if singleServer {
 		s := findServerByName(tagOrName)
 		if s == nil {
 			utils.Exit("Server not found", 1)
 		} else {
+			var errCh = make(chan error, 1)
 			exec(ctx, s, cmd, errCh)
-			close(errCh)
+			select {
+			case err := <-errCh:
+				color.New(color.BgRed).Println(err)
+			default:
+			}
 		}
 	} else {
 		servers := tagsMap[tagOrName]
@@ -96,13 +85,17 @@ func Exec(tagOrName, cmd string, singleServer bool) {
 			// because it takes time for ssh to establish a connection
 			go func() {
 				defer serverWg.Done()
+				var errCh = make(chan error, 1)
 				exec(ctx, s, cmd, errCh)
+				select {
+				case err := <-errCh:
+					color.New(color.BgRed, color.FgHiWhite).Printf("%s:  %s\n", s.Name, err)
+				default:
+				}
 			}()
 		}
 		serverWg.Wait()
-		close(errCh)
 	}
-	errWg.Wait()
 }
 
 func exec(ctx context.Context, s *Server, cmd string, errCh chan error) {
