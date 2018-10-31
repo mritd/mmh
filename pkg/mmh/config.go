@@ -40,7 +40,7 @@ import (
 const SERVERS = "servers"
 const TAGS = "tags"
 
-var tagsMap = make(map[string][]Server)
+var tagsMap = make(map[string][]*Server)
 
 func ServersExample() []Server {
 	return []Server{
@@ -69,18 +69,6 @@ func TagsExample() []string {
 		"prod",
 		"test",
 	}
-}
-
-func findServerByName(name string) *Server {
-	var servers Servers
-	utils.CheckAndExit(viper.UnmarshalKey(SERVERS, &servers))
-	sort.Sort(servers)
-	for _, s := range servers {
-		if strings.ToLower(s.Name) == strings.ToLower(name) {
-			return &s
-		}
-	}
-	return nil
 }
 
 func AddServer() {
@@ -225,7 +213,7 @@ func AddServer() {
 	// Save
 	var servers Servers
 	utils.CheckAndExit(viper.UnmarshalKey(SERVERS, &servers))
-	servers = append(servers, server)
+	servers = append(servers, &server)
 	sort.Sort(servers)
 	viper.Set(SERVERS, servers)
 	utils.CheckAndExit(viper.WriteConfig())
@@ -286,7 +274,19 @@ func mergeTag(tags []string) string {
 	return strings.Join(tags, ",")
 }
 
-func initTagsGroup() {
+func findServerByName(name string) *Server {
+	var servers Servers
+	utils.CheckAndExit(viper.UnmarshalKey(SERVERS, &servers))
+	sort.Sort(servers)
+	for _, s := range servers {
+		if strings.ToLower(s.Name) == strings.ToLower(name) {
+			return s
+		}
+	}
+	return nil
+}
+
+func InitTagsGroup() {
 
 	var tags []string
 	utils.CheckAndExit(viper.UnmarshalKey(TAGS, &tags))
@@ -295,7 +295,7 @@ func initTagsGroup() {
 	utils.CheckAndExit(viper.UnmarshalKey(SERVERS, &servers))
 
 	for _, tag := range tags {
-		var tmpServers []Server
+		var tmpServers []*Server
 		for _, server := range servers {
 			for _, stag := range server.Tags {
 				if tag == stag {

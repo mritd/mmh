@@ -58,12 +58,9 @@ func Exec(tagOrName, cmd string, singleServer bool) {
 		if s == nil {
 			utils.Exit("Server not found", 1)
 		} else {
-			exec(ctx, *s, cmd)
+			exec(ctx, s, cmd)
 		}
 	} else {
-
-		// init group data
-		initTagsGroup()
 		servers := tagsMap[tagOrName]
 		if len(servers) == 0 {
 			utils.Exit("Tagged server not found", 1)
@@ -85,7 +82,7 @@ func Exec(tagOrName, cmd string, singleServer bool) {
 	}
 }
 
-func exec(ctx context.Context, s Server, cmd string) {
+func exec(ctx context.Context, s *Server, cmd string) {
 
 	sshClient := s.sshClient()
 	defer sshClient.Close()
@@ -104,8 +101,11 @@ func exec(ctx context.Context, s Server, cmd string) {
 	termWidth, termHeight, err := terminal.GetSize(fd)
 	utils.CheckAndExit(err)
 
-	// only xterm-256color support
-	err = session.RequestPty("xterm-256color", termHeight, termWidth, modes)
+	termType := os.Getenv("TERM")
+	if termType == "" {
+		termType = "xterm-256color"
+	}
+	err = session.RequestPty(termType, termHeight, termWidth, modes)
 	utils.CheckAndExit(err)
 
 	// write to pw
@@ -134,7 +134,7 @@ func exec(ctx context.Context, s Server, cmd string) {
 			execWg.Done()
 		}()
 
-		f := utils.MapRandomKeyGet(ColorsFuncMap)
+		f := getColorFuncName()
 		t, err := template.New("").Funcs(ColorsFuncMap).Parse(fmt.Sprintf(`{{ .Name | %s}}{{ ":" | %s}}  {{ .Value }}`, f, f))
 		utils.CheckAndExit(err)
 

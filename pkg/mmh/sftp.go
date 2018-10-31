@@ -331,7 +331,6 @@ func Copy(path1, path2 string, singleServer bool) {
 			}
 			wg.Wait()
 		} else {
-			initTagsGroup()
 			servers := tagsMap[tmpSp2[0]]
 			if len(servers) == 0 {
 				utils.Exit("Tagged server not found", 1)

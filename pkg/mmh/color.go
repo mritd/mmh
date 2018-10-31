@@ -1,62 +1,66 @@
 package mmh
 
 import (
-	"fmt"
-	"strconv"
-	"strings"
-
+	"sort"
+	"sync"
 	"text/template"
+
+	"github.com/fatih/color"
 )
 
-const esc = "\033["
-
-type attribute int
-
-// Foreground weight/decoration attributes.
 const (
-	reset attribute = iota
+	ColorRed     = "red"
+	ColorGreen   = "green"
+	ColorYellow  = "yellow"
+	ColorBlue    = "blue"
+	ColorMagenta = "magenta"
+	ColorCyan    = "cyan"
+	ColorWhite   = "white"
 )
 
-// Foreground color attributes
-const (
-	FGRed attribute = iota + 31
-	FGGreen
-	FGYellow
-	FGBlue
-	FGMagenta
-	FGCyan
-)
-
-// ResetCode is the character code used to reset the terminal formatting
-var ResetCode = fmt.Sprintf("%s%dm", esc, reset)
-
-// ColorsFuncMap defines template helpers for the output. It can be extended as a
-// regular map.
-var ColorsFuncMap = template.FuncMap{
-	"red":     Styler(FGRed),
-	"green":   Styler(FGGreen),
-	"yellow":  Styler(FGYellow),
-	"blue":    Styler(FGBlue),
-	"magenta": Styler(FGMagenta),
-	"cyan":    Styler(FGCyan),
+type colorCount struct {
+	name  string
+	count int
 }
 
-// Styler returns a func that applies the attributes given in the Styler call
-// to the provided string.
-func Styler(attrs ...attribute) func(interface{}) string {
-	attrstrs := make([]string, len(attrs))
-	for i, v := range attrs {
-		attrstrs[i] = strconv.Itoa(int(v))
-	}
+type colorCounts []colorCount
 
-	seq := strings.Join(attrstrs, ";")
+func (cs colorCounts) Len() int {
+	return len(cs)
+}
+func (cs colorCounts) Less(i, j int) bool {
+	return cs[i].count < cs[j].count
+}
+func (cs colorCounts) Swap(i, j int) {
+	cs[i], cs[j] = cs[j], cs[i]
+}
 
-	return func(v interface{}) string {
-		end := ""
-		s, ok := v.(string)
-		if !ok || !strings.HasSuffix(s, ResetCode) {
-			end = ResetCode
-		}
-		return fmt.Sprintf("%s%sm%v%s", esc, seq, v, end)
-	}
+var colorMux sync.Mutex
+
+var cs = colorCounts{
+	colorCount{ColorRed, 0},
+	colorCount{ColorGreen, 0},
+	colorCount{ColorYellow, 0},
+	colorCount{ColorBlue, 0},
+	colorCount{ColorMagenta, 0},
+	colorCount{ColorCyan, 0},
+	colorCount{ColorWhite, 0},
+}
+
+var ColorsFuncMap = template.FuncMap{
+	ColorRed:     color.New(color.FgRed).SprintfFunc(),
+	ColorGreen:   color.New(color.FgGreen).SprintfFunc(),
+	ColorYellow:  color.New(color.FgYellow).SprintfFunc(),
+	ColorBlue:    color.New(color.FgBlue).SprintfFunc(),
+	ColorMagenta: color.New(color.FgMagenta).SprintfFunc(),
+	ColorCyan:    color.New(color.FgCyan).SprintfFunc(),
+	ColorWhite:   color.New(color.FgWhite).SprintfFunc(),
+}
+
+func getColorFuncName() string {
+	colorMux.Lock()
+	defer colorMux.Unlock()
+	sort.Sort(cs)
+	cs[0].count++
+	return cs[0].name
 }

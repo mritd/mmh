@@ -42,7 +42,7 @@ type Server struct {
 	Proxy     string   `yml:"proxy"`
 }
 
-type Servers []Server
+type Servers []*Server
 
 func (servers Servers) Len() int {
 	return len(servers)
