@@ -262,6 +262,23 @@ func ListServers() {
 	fmt.Println(buf.String())
 }
 
+func ListServer(serverName string) {
+	s := findServerByName(serverName)
+	if s == nil {
+		fmt.Println("Server not found!")
+	}
+	tpl := `Name: {{ .Name }}
+User: {{ .User }}
+Address: {{ .Address }}:{{ .Port }}
+Tags: {{ .Tags | MergeTag }}
+Proxy: {{ .Proxy }}`
+	t := template.New("").Funcs(map[string]interface{}{"MergeTag": mergeTag})
+	t.Parse(tpl)
+	var buf bytes.Buffer
+	utils.CheckAndExit(t.Execute(&buf, s))
+	fmt.Println(buf.String())
+}
+
 func listLayout(name string) string {
 	if len(name) < 12 {
 		return fmt.Sprintf("%-12s", name)

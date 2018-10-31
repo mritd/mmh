@@ -22,12 +22,16 @@ import (
 )
 
 var lsCmd = &cobra.Command{
-	Use:   "ls",
+	Use:   "ls [SERVER_NAME]",
 	Short: "List ssh server",
 	Long: `
 List ssh server.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		mmh.ListServers()
+		if len(args) == 1 {
+			mmh.ListServer(args[0])
+		} else {
+			mmh.ListServers()
+		}
 	},
 }
 
