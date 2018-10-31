@@ -114,8 +114,19 @@ func exec(ctx context.Context, s *Server, cmd string) {
 	session.Stdout = pw
 	session.Stderr = pw
 
+	var errCh = make(chan error, 2)
 	var execWg sync.WaitGroup
 	execWg.Add(2)
+
+	// print err
+	go func() {
+		for {
+			select {
+			case err := <-errCh:
+				fmt.Println(err)
+			}
+		}
+	}()
 
 	// if cancel, close all
 	go func() {
@@ -137,7 +148,10 @@ func exec(ctx context.Context, s *Server, cmd string) {
 
 		f := getColorFuncName()
 		t, err := template.New("").Funcs(ColorsFuncMap).Parse(fmt.Sprintf(`{{ .Name | %s}}{{ ":" | %s}}  {{ .Value }}`, f, f))
-		utils.CheckAndExit(err)
+		if err != nil {
+			errCh <- err
+			return
+		}
 
 		buf := bufio.NewReader(pr)
 		for {
@@ -146,7 +160,8 @@ func exec(ctx context.Context, s *Server, cmd string) {
 				if err == io.EOF {
 					break
 				} else {
-					utils.CheckAndExit(err)
+					errCh <- err
+					break
 				}
 			}
 
@@ -158,7 +173,10 @@ func exec(ctx context.Context, s *Server, cmd string) {
 				Name:  s.Name,
 				Value: string(line),
 			})
-			utils.CheckAndExit(err)
+			if err != nil {
+				errCh <- err
+				return
+			}
 			fmt.Print(output.String())
 		}
 	}()
@@ -169,7 +187,11 @@ func exec(ctx context.Context, s *Server, cmd string) {
 			pw.Close()
 			execWg.Done()
 		}()
-		utils.CheckAndExit(session.Run(cmd))
+		err := session.Run(cmd)
+		if err != nil {
+			errCh <- err
+			return
+		}
 	}()
 
 	execWg.Wait()
