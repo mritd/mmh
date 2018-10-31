@@ -90,7 +90,10 @@ func exec(ctx context.Context, s *Server, cmd string) {
 	defer sshClient.Close()
 
 	session, err := sshClient.NewSession()
-	utils.CheckAndExit(err)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 	defer session.Close()
 
 	modes := ssh.TerminalModes{
@@ -101,13 +104,20 @@ func exec(ctx context.Context, s *Server, cmd string) {
 
 	fd := int(os.Stdin.Fd())
 	termWidth, termHeight, err := terminal.GetSize(fd)
-	utils.CheckAndExit(err)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
 	termType := os.Getenv("TERM")
 	if termType == "" {
 		termType = "xterm-256color"
 	}
-	utils.CheckAndExit(session.RequestPty(termType, termHeight, termWidth, modes))
+	err = session.RequestPty(termType, termHeight, termWidth, modes)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
 	// write to pw
 	pr, pw := io.Pipe()
