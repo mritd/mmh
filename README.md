@@ -2,6 +2,11 @@
 
 > 一个使用 Go 编写的简单多服务器登录管理小工具.
 
+### 安装
+
+可直接从 [release](https://github.com/mritd/mmh/releases) 页下载预编译的二进制文件，然后执行 `sudo mmh install` 即可；
+卸载直接执行 `sudo mmh uninstall`，卸载命令不会删除 `~/.mmh.yaml` 配置文件。
+
 ### 基本命令
 
 ```sh
@@ -23,6 +28,7 @@ Available Commands:
   install     Install mmh
   ls          List ssh server
   uninstall   Uninstall mmh
+  version     Print version
 
 Flags:
       --config string   config file (default is $HOME/.mmh.yaml)
@@ -63,13 +69,14 @@ tags:
 
 ![mmh](img/mmh.gif)
 
-### 跳板登录
+### 无限跳板
 
 在每个服务器配置中可以设置一个 `proxy` 字段，当登录带有 `proxy` 字段的服务器时，工具会首先链接代理节点进行跳转；
 这种能力方便于在使用跳板机的情况下无感的直连跳板机之后的主机；并且其支持无限的跳板登录，如 A、B、C 三台机器，
 如果 C 的 `proxy` 设置为 B，同时 B 的 `proxy` 设置为 A，那么实际在登录 C 时，工具实际连接顺序为: `local->A->B->C`
 
-**不要去尝试循环登录，比如 `A->B->C->A` 这种配置，工具内部已经做了检测防止产生这种循环依赖的情况**
+**不要去尝试循环登录，比如 `A->B->C->A` 这种配置，工具内部已经做了检测防止产生这种 "真·无限跳板" 的情况，
+默认最大跳板机数量被限制为 5 台，可通过在配置文件根节点中增加 `maxProxy` 字段进行调整**
 
 ### 批量执行
 
