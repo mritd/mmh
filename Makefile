@@ -16,7 +16,9 @@ clean:
 	rm -rf dist
 
 install:
-	go install
+	go install -ldflags "-X 'github.com/mritd/mmh/cmd.Version=${BUILD_VERSION}' \
+                         -X 'github.com/mritd/mmh/cmd.BuildTime=${BUILD_TIME}' \
+                         -X 'github.com/mritd/mmh/cmd.CommitID=${COMMIT_SHA1}'"
 
 .PHONY : all release clean install
 
