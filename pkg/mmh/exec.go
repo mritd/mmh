@@ -150,8 +150,6 @@ func exec(ctx context.Context, s *Server, cmd string, errCh chan error) {
 		select {
 		case <-ctx.Done():
 			session.Close()
-			pw.Close()
-			pr.Close()
 		}
 	}()
 
@@ -192,7 +190,7 @@ func exec(ctx context.Context, s *Server, cmd string, errCh chan error) {
 			})
 			if err != nil {
 				errCh <- err
-				return
+				break
 			}
 			fmt.Print(output.String())
 		}
