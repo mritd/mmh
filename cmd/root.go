@@ -46,7 +46,7 @@ func Execute() {
 }
 
 func init() {
-	cobra.OnInitialize(initConfig, mmh.InitTagsGroup)
+	cobra.OnInitialize(initConfig, mmh.InitServersMap, mmh.InitTagsGroup)
 	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.mmh.yaml)")
 }
 

@@ -41,6 +41,7 @@ const SERVERS = "servers"
 const TAGS = "tags"
 
 var tagsMap = make(map[string][]*Server)
+var serversMap = make(map[string]*Server)
 
 func ServersExample() []Server {
 	return []Server{
@@ -292,15 +293,15 @@ func mergeTag(tags []string) string {
 }
 
 func findServerByName(name string) *Server {
+	return serversMap[strings.ToLower(name)]
+}
+
+func InitServersMap() {
 	var servers Servers
-	viper.UnmarshalKey(SERVERS, &servers)
-	sort.Sort(servers)
+	utils.CheckAndExit(viper.UnmarshalKey(SERVERS, &servers))
 	for _, s := range servers {
-		if strings.ToLower(s.Name) == strings.ToLower(name) {
-			return s
-		}
+		serversMap[strings.ToLower(s.Name)] = s
 	}
-	return nil
 }
 
 func InitTagsGroup() {
