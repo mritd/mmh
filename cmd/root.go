@@ -46,7 +46,7 @@ func Execute() {
 }
 
 func init() {
-	cobra.OnInitialize(initConfig, mmh.InitServersMap, mmh.InitTagsGroup)
+	cobra.OnInitialize(initConfig, mmh.InitServers)
 	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.mmh.yaml)")
 }
 
@@ -62,10 +62,7 @@ func initConfig() {
 
 		if _, err := os.Stat(cfgFile); err != nil {
 			os.Create(cfgFile)
-			viper.Set(mmh.SERVERS, mmh.ServersExample())
-			viper.Set(mmh.TAGS, mmh.TagsExample())
-			viper.Set("MaxProxy", 5)
-			viper.WriteConfig()
+			mmh.WriteExampleConfig()
 		}
 
 	}

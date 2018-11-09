@@ -37,14 +37,17 @@ import (
 	"github.com/spf13/viper"
 )
 
-const SERVERS = "servers"
-const TAGS = "tags"
+const keyServers = "servers"
+const keyTags = "tags"
 
-var tagsMap = make(map[string][]*Server)
-var serversMap = make(map[string]*Server)
+var (
+	servers    = Servers{}
+	serversMap = make(map[string]*Server)
+	tagsMap    = make(map[string][]*Server)
+)
 
-func ServersExample() []Server {
-	return []Server{
+func WriteExampleConfig() {
+	viper.Set(keyServers, []Server{
 		{
 			Name:     "prod11",
 			User:     "root",
@@ -62,13 +65,38 @@ func ServersExample() []Server {
 			Port:      22,
 			PublicKey: "/Users/mritd/.ssh/id_rsa",
 		},
-	}
-}
-
-func TagsExample() []string {
-	return []string{
+	})
+	viper.Set(keyTags, []string{
 		"prod",
 		"test",
+	})
+	viper.Set("MaxProxy", 5)
+	viper.WriteConfig()
+}
+
+func InitServers() {
+	// init servers
+	utils.CheckAndExit(viper.UnmarshalKey(keyServers, &servers))
+
+	// init servers map
+	for _, s := range servers {
+		serversMap[strings.ToLower(s.Name)] = s
+	}
+
+	// init tags group
+	var tags []string
+	utils.CheckAndExit(viper.UnmarshalKey(keyTags, &tags))
+	for _, tag := range tags {
+		var tmpServers []*Server
+		for _, server := range servers {
+			for _, stag := range server.Tags {
+				if tag == stag {
+					tmpServers = append(tmpServers, server)
+					break
+				}
+			}
+		}
+		tagsMap[tag] = tmpServers
 	}
 }
 
@@ -212,17 +240,13 @@ func AddServer() {
 	}
 
 	// Save
-	var servers Servers
-	utils.CheckAndExit(viper.UnmarshalKey(SERVERS, &servers))
 	servers = append(servers, &server)
 	sort.Sort(servers)
-	viper.Set(SERVERS, servers)
+	viper.Set(keyServers, servers)
 	utils.CheckAndExit(viper.WriteConfig())
 }
 
 func DeleteServer(name string) {
-	var servers Servers
-	utils.CheckAndExit(viper.UnmarshalKey(SERVERS, &servers))
 
 	delIdx := -1
 	for i, s := range servers {
@@ -236,23 +260,20 @@ func DeleteServer(name string) {
 	} else {
 		servers = append(servers[:delIdx], servers[delIdx+1:]...)
 		sort.Sort(servers)
-		viper.Set(SERVERS, servers)
+		viper.Set(keyServers, servers)
 		utils.CheckAndExit(viper.WriteConfig())
 	}
 
 }
 
 func ListServers() {
-	var servers Servers
-	utils.CheckAndExit(viper.UnmarshalKey(SERVERS, &servers))
 	sort.Sort(servers)
 
 	tpl := `Name          User          Tags          Address
 -------------------------------------------------------------
 {{range . }}{{ .Name | ListLayout }}  {{ .User | ListLayout }}  {{ .Tags | MergeTag | ListLayout }}  {{ .Address }}:{{ .Port }}
 {{end}}`
-	t := template.New("")
-	t.Funcs(map[string]interface{}{
+	t := template.New("").Funcs(map[string]interface{}{
 		"ListLayout": listLayout,
 		"MergeTag":   mergeTag,
 	})
@@ -294,34 +315,4 @@ func mergeTag(tags []string) string {
 
 func findServerByName(name string) *Server {
 	return serversMap[strings.ToLower(name)]
-}
-
-func InitServersMap() {
-	var servers Servers
-	utils.CheckAndExit(viper.UnmarshalKey(SERVERS, &servers))
-	for _, s := range servers {
-		serversMap[strings.ToLower(s.Name)] = s
-	}
-}
-
-func InitTagsGroup() {
-
-	var tags []string
-	utils.CheckAndExit(viper.UnmarshalKey(TAGS, &tags))
-
-	var servers Servers
-	utils.CheckAndExit(viper.UnmarshalKey(SERVERS, &servers))
-
-	for _, tag := range tags {
-		var tmpServers []*Server
-		for _, server := range servers {
-			for _, stag := range server.Tags {
-				if tag == stag {
-					tmpServers = append(tmpServers, server)
-					break
-				}
-			}
-		}
-		tagsMap[tag] = tmpServers
-	}
 }
