@@ -23,8 +23,6 @@ import (
 
 	"github.com/mritd/sshterminal"
 
-	"github.com/spf13/viper"
-
 	"strings"
 
 	"fmt"
@@ -84,7 +82,6 @@ func (s *Server) sshClient() (*ssh.Client, error) {
 
 	var client *ssh.Client
 	var proxyCount int
-	var maxProxy = viper.GetInt("maxProxy")
 	if maxProxy == 0 {
 		maxProxy = 5
 	}

@@ -44,6 +44,7 @@ var (
 	servers    = Servers{}
 	serversMap = make(map[string]*Server)
 	tagsMap    = make(map[string][]*Server)
+	maxProxy   = viper.GetInt("maxProxy")
 )
 
 func WriteExampleConfig() {
@@ -77,6 +78,7 @@ func WriteExampleConfig() {
 func InitServers() {
 	// init servers
 	utils.CheckAndExit(viper.UnmarshalKey(keyServers, &servers))
+	sort.Sort(servers)
 
 	// init servers map
 	for _, s := range servers {
@@ -267,7 +269,6 @@ func DeleteServer(name string) {
 }
 
 func ListServers() {
-	sort.Sort(servers)
 
 	tpl := `Name          User          Tags          Address
 -------------------------------------------------------------
