@@ -14,9 +14,10 @@ require (
 	github.com/mritd/promptx v0.0.0-20180727042559-599061ab5daa
 	github.com/mritd/readline v0.0.0-20180425151209-ae245b60ddeb // indirect
 	github.com/mritd/sshterminal v0.0.0-20181031102542-5624aba72ba0
+	github.com/mritd/sshutils v0.0.0-20181115142407-18090e5b0160
 	github.com/pkg/errors v0.8.0 // indirect
 	github.com/pkg/sftp v1.8.3
 	github.com/spf13/cobra v0.0.3
 	github.com/spf13/viper v1.2.1
-	golang.org/x/crypto v0.0.0-20181030102418-4d3f4d9ffa16
+	golang.org/x/crypto v0.0.0-20181112202954-3d3f9f413869
 )

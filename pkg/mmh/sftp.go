@@ -18,9 +18,8 @@ package mmh
 
 import (
 	"errors"
-	"strings"
-
 	"os"
+	"strings"
 
 	"path"
 
@@ -386,6 +385,7 @@ func (s Server) sftpRead(localPath, remotePath string) error {
 }
 
 func Copy(path1, path2 string, singleServer bool) error {
+
 	tmpSp1 := strings.Split(path1, ":")
 	tmpSp2 := strings.Split(path2, ":")
 

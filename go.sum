@@ -35,6 +35,10 @@ github.com/mritd/readline v0.0.0-20180425151209-ae245b60ddeb h1:fB2rncglOnfNm4xZ
 github.com/mritd/readline v0.0.0-20180425151209-ae245b60ddeb/go.mod h1:wvYAHAQUSCpYdQJIF/KWesOEv2JORGDkhM2hZzg+IOU=
 github.com/mritd/sshterminal v0.0.0-20181031102542-5624aba72ba0 h1:ka0yD9NO/itL8LYSfQ4up/uWoDSTcO4KUdhRLU5zSXM=
 github.com/mritd/sshterminal v0.0.0-20181031102542-5624aba72ba0/go.mod h1:+z/Q5WKviawJVubm6dcUHBP6djTKY5fBsP+PX+GoRNE=
+github.com/mritd/sshutils v0.0.0-20181115134845-84edf03a9e80 h1:ijvbqaRZzV9kwfXozci7EDCfDCShlYhHIBGrd9srf8E=
+github.com/mritd/sshutils v0.0.0-20181115134845-84edf03a9e80/go.mod h1:FkoaMgPYYjkfgSUc57VB3r9nVZxdkwUl1wk/Y0m0ojg=
+github.com/mritd/sshutils v0.0.0-20181115142407-18090e5b0160 h1:ZqjbMpOU8UXtllL53W+xX4yolDOBNEMi1VDSuMsapE8=
+github.com/mritd/sshutils v0.0.0-20181115142407-18090e5b0160/go.mod h1:FkoaMgPYYjkfgSUc57VB3r9nVZxdkwUl1wk/Y0m0ojg=
 github.com/pelletier/go-toml v1.2.0 h1:T5zMGML61Wp+FlcbWjRDT7yAxhJNAiPPLOFECq181zc=
 github.com/pelletier/go-toml v1.2.0/go.mod h1:5z9KED0ma1S8pY6P1sdut58dfprrGBbd/94hg7ilaic=
 github.com/pkg/errors v0.8.0 h1:WdK/asTD0HN+q6hsWO3/vpuAkAr+tw6aNJNDFFf0+qw=
@@ -61,9 +65,13 @@ github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXf
 golang.org/x/crypto v0.0.0-20180904163835-0709b304e793/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
 golang.org/x/crypto v0.0.0-20181030102418-4d3f4d9ffa16 h1:y6ce7gCWtnH+m3dCjzQ1PCuwl28DDIc3VNnvY29DlIA=
 golang.org/x/crypto v0.0.0-20181030102418-4d3f4d9ffa16/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
+golang.org/x/crypto v0.0.0-20181112202954-3d3f9f413869 h1:kkXA53yGe04D0adEYJwEVQjeBppL01Exg+fnMjfUraU=
+golang.org/x/crypto v0.0.0-20181112202954-3d3f9f413869/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
 golang.org/x/sys v0.0.0-20180905080454-ebe1bf3edb33/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
 golang.org/x/sys v0.0.0-20180906133057-8cf3aee42992 h1:BH3eQWeGbwRU2+wxxuuPOdFBmaiBH81O8BugSjHeTFg=
 golang.org/x/sys v0.0.0-20180906133057-8cf3aee42992/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
+golang.org/x/sys v0.0.0-20181107165924-66b7b1311ac8 h1:YoY1wS6JYVRpIfFngRf2HHo9R9dAne3xbkGOQ5rJXjU=
+golang.org/x/sys v0.0.0-20181107165924-66b7b1311ac8/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
 golang.org/x/text v0.3.0 h1:g61tztE5qeGQ89tm6NTjjM9VPIm088od1l6aSorWRWg=
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405 h1:yhCVgyC4o1eVCa2tZl7eS0r+SDo693bJlVdllGtEeKM=

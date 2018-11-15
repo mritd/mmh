@@ -17,12 +17,13 @@
 package mmh
 
 import (
+	"bufio"
 	"bytes"
 	"io"
+	"text/template"
 
 	"github.com/fatih/color"
 
-	"bufio"
 	"fmt"
 
 	"sync"
@@ -34,11 +35,8 @@ import (
 	"os/signal"
 	"syscall"
 
-	"text/template"
-
 	"github.com/mritd/mmh/pkg/utils"
-	"golang.org/x/crypto/ssh"
-	"golang.org/x/crypto/ssh/terminal"
+	"github.com/mritd/sshutils"
 )
 
 func Exec(tagOrName, cmd string, singleServer bool) {
@@ -114,102 +112,58 @@ func exec(ctx context.Context, s *Server, cmd string, errCh chan error) {
 		errCh <- err
 		return
 	}
-	defer session.Close()
 
-	modes := ssh.TerminalModes{
-		ssh.ECHO:          0,     // disable echoing
-		ssh.TTY_OP_ISPEED: 14400, // input speed = 14.4kbaud
-		ssh.TTY_OP_OSPEED: 14400, // output speed = 14.4kbaud
-	}
+	sshSession := sshutils.New(session)
+	defer sshSession.Close()
+	go sshSession.PipeExec(cmd)
+	<-sshSession.ReadDone
 
-	fd := int(os.Stdin.Fd())
-	termWidth, termHeight, err := terminal.GetSize(fd)
-	if err != nil {
-		errCh <- err
-		return
-	}
-
-	termType := os.Getenv("TERM")
-	if termType == "" {
-		termType = "xterm-256color"
-	}
-	err = session.RequestPty(termType, termHeight, termWidth, modes)
-	if err != nil {
-		errCh <- err
-		return
-	}
-
-	// write to pw
-	pr, pw := io.Pipe()
-	session.Stdout = pw
-	session.Stderr = pw
-
-	var execWg sync.WaitGroup
-	execWg.Add(2)
-
-	// if cancel, close all
+	// copy error
 	go func() {
 		select {
+		case err := <-sshSession.ErrCh:
+			errCh <- err
 		case <-ctx.Done():
-			session.Close()
+			err := sshSession.Close()
+			if err != nil {
+				errCh <- err
+			}
 		}
 	}()
 
-	// read from pr and print to stdout
-	go func() {
+	// read from sshSession.Stdout and print to os.stdout
+	f := getColorFuncName()
+	t, err := template.New("").Funcs(ColorsFuncMap).Parse(fmt.Sprintf(`{{ .Name | %s}}{{ ":" | %s}}  {{ .Value }}`, f, f))
+	if err != nil {
+		errCh <- err
+		return
+	}
 
-		defer func() {
-			pr.Close()
-			execWg.Done()
-		}()
-
-		f := getColorFuncName()
-		t, err := template.New("").Funcs(ColorsFuncMap).Parse(fmt.Sprintf(`{{ .Name | %s}}{{ ":" | %s}}  {{ .Value }}`, f, f))
+	buf := bufio.NewReader(sshSession.Stdout)
+	for {
+		line, err := buf.ReadString('\n')
 		if err != nil {
-			errCh <- err
-			return
-		}
-
-		buf := bufio.NewReader(pr)
-		for {
-			line, err := buf.ReadString('\n')
-			if err != nil {
-				if err == io.EOF {
-					break
-				} else {
-					errCh <- err
-					break
-				}
-			}
-
-			var output bytes.Buffer
-			err = t.Execute(&output, struct {
-				Name  string
-				Value string
-			}{
-				Name:  s.Name,
-				Value: string(line),
-			})
-			if err != nil {
+			if err == io.EOF {
+				break
+			} else {
 				errCh <- err
 				break
 			}
-			fmt.Print(output.String())
 		}
-	}()
 
-	// exec and write to pw
-	go func() {
-		defer func() {
-			pw.Close()
-			execWg.Done()
-		}()
-		err := session.Run(cmd)
+		var output bytes.Buffer
+		err = t.Execute(&output, struct {
+			Name  string
+			Value string
+		}{
+			Name:  s.Name,
+			Value: string(line),
+		})
 		if err != nil {
 			errCh <- err
-			return
+			break
 		}
-	}()
+		fmt.Print(output.String())
+	}
 
-	execWg.Wait()
 }

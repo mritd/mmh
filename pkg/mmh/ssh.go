@@ -147,11 +147,5 @@ func (s *Server) Connect() error {
 	}
 	defer sshClient.Close()
 
-	session, err := sshClient.NewSession()
-	if err != nil {
-		return err
-	}
-	defer session.Close()
-
 	return sshterminal.New(sshClient)
 }
