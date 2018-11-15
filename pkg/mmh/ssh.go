@@ -21,7 +21,7 @@ import (
 	"io/ioutil"
 	"time"
 
-	"github.com/mritd/sshterminal"
+	"github.com/mritd/sshutils"
 
 	"strings"
 
@@ -147,5 +147,13 @@ func (s *Server) Connect() error {
 	}
 	defer sshClient.Close()
 
-	return sshterminal.New(sshClient)
+	session, err := sshClient.NewSession()
+	if err != nil {
+		return err
+	}
+
+	sshSession := sshutils.New(session)
+	defer sshSession.Close()
+
+	return sshSession.Terminal()
 }
