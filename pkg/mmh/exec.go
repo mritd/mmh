@@ -56,12 +56,12 @@ func Exec(tagOrName, cmd string, singleServer bool) {
 	}()
 
 	if singleServer {
-		s := findServerByName(tagOrName)
-		if s == nil {
+		server := findServerByName(tagOrName)
+		if server == nil {
 			utils.Exit("Server not found", 1)
 		} else {
 			var errCh = make(chan error, 1)
-			exec(ctx, s, cmd, errCh)
+			exec(ctx, server, singleServer, cmd, errCh)
 			select {
 			case err := <-errCh:
 				color.New(color.BgRed, color.FgHiWhite).Print(err)
@@ -78,17 +78,17 @@ func Exec(tagOrName, cmd string, singleServer bool) {
 		// create goroutine
 		var serverWg sync.WaitGroup
 		serverWg.Add(len(servers))
-		for _, server := range servers {
-			s := server
+		for _, tmpServer := range servers {
+			server := tmpServer
 			// async exec
 			// because it takes time for ssh to establish a connection
 			go func() {
 				defer serverWg.Done()
 				var errCh = make(chan error, 1)
-				exec(ctx, s, cmd, errCh)
+				exec(ctx, server, singleServer, cmd, errCh)
 				select {
 				case err := <-errCh:
-					color.New(color.BgRed, color.FgHiWhite).Printf("%s:  %s", s.Name, err)
+					color.New(color.BgRed, color.FgHiWhite).Printf("%server:  %server", server.Name, err)
 					fmt.Println()
 				default:
 				}
@@ -98,7 +98,7 @@ func Exec(tagOrName, cmd string, singleServer bool) {
 	}
 }
 
-func exec(ctx context.Context, s *Server, cmd string, errCh chan error) {
+func exec(ctx context.Context, s *Server, singleServer bool, cmd string, errCh chan error) {
 
 	sshClient, err := s.sshClient()
 	if err != nil {
@@ -124,46 +124,47 @@ func exec(ctx context.Context, s *Server, cmd string, errCh chan error) {
 		case err := <-sshSession.ErrCh:
 			errCh <- err
 		case <-ctx.Done():
-			err := sshSession.Close()
-			if err != nil {
-				errCh <- err
-			}
+			sshSession.Close()
 		}
 	}()
 
 	// read from sshSession.Stdout and print to os.stdout
-	f := getColorFuncName()
-	t, err := template.New("").Funcs(ColorsFuncMap).Parse(fmt.Sprintf(`{{ .Name | %s}}{{ ":" | %s}}  {{ .Value }}`, f, f))
-	if err != nil {
-		errCh <- err
-		return
-	}
-
-	buf := bufio.NewReader(sshSession.Stdout)
-	for {
-		line, err := buf.ReadString('\n')
+	if singleServer {
+		io.Copy(os.Stdout, sshSession.Stdout)
+	} else {
+		f := getColorFuncName()
+		t, err := template.New("").Funcs(ColorsFuncMap).Parse(fmt.Sprintf(`{{ .Name | %s}}{{ ":" | %s}}  {{ .Value }}`, f, f))
 		if err != nil {
-			if err == io.EOF {
-				break
-			} else {
+			errCh <- err
+			return
+		}
+
+		buf := bufio.NewReader(sshSession.Stdout)
+		for {
+			line, err := buf.ReadString('\n')
+			if err != nil {
+				if err == io.EOF {
+					break
+				} else {
+					errCh <- err
+					break
+				}
+			}
+
+			var output bytes.Buffer
+			err = t.Execute(&output, struct {
+				Name  string
+				Value string
+			}{
+				Name:  s.Name,
+				Value: string(line),
+			})
+			if err != nil {
 				errCh <- err
 				break
 			}
+			fmt.Print(output.String())
 		}
-
-		var output bytes.Buffer
-		err = t.Execute(&output, struct {
-			Name  string
-			Value string
-		}{
-			Name:  s.Name,
-			Value: string(line),
-		})
-		if err != nil {
-			errCh <- err
-			break
-		}
-		fmt.Print(output.String())
 	}
 
 }
