@@ -88,7 +88,7 @@ func Exec(tagOrName, cmd string, singleServer bool) {
 				exec(ctx, server, singleServer, cmd, errCh)
 				select {
 				case err := <-errCh:
-					color.New(color.BgRed, color.FgHiWhite).Printf("%server:  %server", server.Name, err)
+					color.New(color.BgRed, color.FgHiWhite).Printf("%s:  %s", server.Name, err)
 					fmt.Println()
 				default:
 				}
