@@ -22,7 +22,14 @@ import (
 	"path"
 )
 
-func Uninstall() {
+func Uninstall(dir string) {
+
+	var BinPaths = []string{
+		path.Join(dir, "mcp"),
+		path.Join(dir, "mec"),
+		path.Join(dir, "mgo"),
+	}
+
 	CheckRoot()
 
 	fmt.Println("Uninstall")
@@ -31,6 +38,6 @@ func Uninstall() {
 		fmt.Printf("Remove %s\n", bin)
 		os.Remove(bin)
 	}
-	fmt.Printf("Remove %s\n", path.Join(InstallBaseDir, "mmh"))
-	os.Remove(path.Join(InstallBaseDir, "mmh"))
+	fmt.Printf("Remove %s\n", path.Join(dir, "mmh"))
+	os.Remove(path.Join(dir, "mmh"))
 }

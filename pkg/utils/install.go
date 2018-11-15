@@ -24,17 +24,15 @@ import (
 	"path"
 )
 
-const InstallBaseDir = "/usr/bin"
+func Install(dir string) {
 
-var BinPaths = []string{
-	path.Join(InstallBaseDir, "mcp"),
-	path.Join(InstallBaseDir, "mec"),
-	path.Join(InstallBaseDir, "mgo"),
-}
+	var BinPaths = []string{
+		path.Join(dir, "mcp"),
+		path.Join(dir, "mec"),
+		path.Join(dir, "mgo"),
+	}
 
-func Install() {
-
-	Uninstall()
+	Uninstall(dir)
 
 	fmt.Println("Install")
 	currentPath, err := exec.LookPath(os.Args[0])
@@ -42,16 +40,16 @@ func Install() {
 	f, err := os.Open(currentPath)
 	CheckAndExit(err)
 	defer f.Close()
-	target, err := os.OpenFile(path.Join(InstallBaseDir, "mmh"), os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0755)
+	target, err := os.OpenFile(path.Join(dir, "mmh"), os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0755)
 	CheckAndExit(err)
 	defer target.Close()
 
-	fmt.Printf("Install %s\n", path.Join(InstallBaseDir, "mmh"))
+	fmt.Printf("Install %s\n", path.Join(dir, "mmh"))
 	_, err = io.Copy(target, f)
 	CheckAndExit(err)
 	for _, bin := range BinPaths {
 		fmt.Printf("Install %s\n", bin)
-		err = os.Symlink(path.Join(InstallBaseDir, "mmh"), bin)
+		err = os.Symlink(path.Join(dir, "mmh"), bin)
 		CheckAndExit(err)
 	}
 }
