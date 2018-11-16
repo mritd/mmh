@@ -24,7 +24,7 @@ import (
 
 func Uninstall(dir string) {
 
-	var BinPaths = []string{
+	var binPaths = []string{
 		path.Join(dir, "mcp"),
 		path.Join(dir, "mec"),
 		path.Join(dir, "mgo"),
@@ -34,7 +34,7 @@ func Uninstall(dir string) {
 
 	fmt.Println("Uninstall")
 
-	for _, bin := range BinPaths {
+	for _, bin := range binPaths {
 		fmt.Printf("Remove %s\n", bin)
 		os.Remove(bin)
 	}

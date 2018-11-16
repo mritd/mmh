@@ -26,7 +26,7 @@ import (
 
 func Install(dir string) {
 
-	var BinPaths = []string{
+	var binPaths = []string{
 		path.Join(dir, "mcp"),
 		path.Join(dir, "mec"),
 		path.Join(dir, "mgo"),
@@ -47,7 +47,7 @@ func Install(dir string) {
 	fmt.Printf("Install %s\n", path.Join(dir, "mmh"))
 	_, err = io.Copy(target, f)
 	CheckAndExit(err)
-	for _, bin := range BinPaths {
+	for _, bin := range binPaths {
 		fmt.Printf("Install %s\n", bin)
 		err = os.Symlink(path.Join(dir, "mmh"), bin)
 		CheckAndExit(err)
