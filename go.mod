@@ -13,7 +13,7 @@ require (
 	github.com/mitchellh/go-homedir v1.0.0
 	github.com/mritd/promptx v0.0.0-20180727042559-599061ab5daa
 	github.com/mritd/readline v0.0.0-20180425151209-ae245b60ddeb // indirect
-	github.com/mritd/sshutils v0.0.0-20181115142407-18090e5b0160
+	github.com/mritd/sshutils v0.0.0-20181118045245-e6f9b947cb4d
 	github.com/pkg/errors v0.8.0 // indirect
 	github.com/pkg/sftp v1.8.3
 	github.com/pmezard/go-difflib v1.0.0 // indirect

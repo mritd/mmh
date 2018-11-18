@@ -115,56 +115,66 @@ func exec(ctx context.Context, s *Server, singleServer bool, cmd string, errCh c
 
 	sshSession := sshutils.New(session)
 	defer sshSession.Close()
+
+	// exec cmd
 	go sshSession.PipeExec(cmd)
-	<-sshSession.ReadDone
 
 	// copy error
 	go func() {
 		select {
 		case err := <-sshSession.ErrCh:
 			errCh <- err
-		case <-ctx.Done():
-			sshSession.Close()
 		}
 	}()
 
-	// read from sshSession.Stdout and print to os.stdout
-	if singleServer {
-		io.Copy(os.Stdout, sshSession.Stdout)
-	} else {
-		f := getColorFuncName()
-		t, err := template.New("").Funcs(ColorsFuncMap).Parse(fmt.Sprintf(`{{ .Name | %s}}{{ ":" | %s}}  {{ .Value }}`, f, f))
-		if err != nil {
-			errCh <- err
-			return
-		}
-
-		buf := bufio.NewReader(sshSession.Stdout)
-		for {
-			line, err := buf.ReadString('\n')
-			if err != nil {
-				if err == io.EOF {
-					break
-				} else {
+	// print std
+	go func() {
+		select {
+		case <-sshSession.ReadyCh:
+			// read from sshSession.Stdout and print to os.stdout
+			if singleServer {
+				io.Copy(os.Stdout, sshSession.Stdout)
+			} else {
+				f := getColorFuncName()
+				t, err := template.New("").Funcs(ColorsFuncMap).Parse(fmt.Sprintf(`{{ .Name | %s}}{{ ":" | %s}}  {{ .Value }}`, f, f))
+				if err != nil {
 					errCh <- err
-					break
+					return
+				}
+
+				buf := bufio.NewReader(sshSession.Stdout)
+				for {
+					line, err := buf.ReadString('\n')
+					if err != nil {
+						if err == io.EOF {
+							break
+						} else {
+							errCh <- err
+							break
+						}
+					}
+
+					var output bytes.Buffer
+					err = t.Execute(&output, struct {
+						Name  string
+						Value string
+					}{
+						Name:  s.Name,
+						Value: string(line),
+					})
+					if err != nil {
+						errCh <- err
+						break
+					}
+					fmt.Print(output.String())
 				}
 			}
-
-			var output bytes.Buffer
-			err = t.Execute(&output, struct {
-				Name  string
-				Value string
-			}{
-				Name:  s.Name,
-				Value: string(line),
-			})
-			if err != nil {
-				errCh <- err
-				break
-			}
-			fmt.Print(output.String())
 		}
+	}()
+
+	select {
+	case <-ctx.Done():
+	case <-sshSession.DoneCh:
 	}
 
 }
