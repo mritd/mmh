@@ -28,11 +28,10 @@ github.com/mitchellh/go-homedir v1.0.0 h1:vKb8ShqSby24Yrqr/yDYkuFz8d0WUjys40rvnG
 github.com/mitchellh/go-homedir v1.0.0/go.mod h1:SfyaCUpYCn1Vlf4IUYiD9fPX4A5wJrkLzIz1N1q0pr0=
 github.com/mitchellh/mapstructure v1.0.0 h1:vVpGvMXJPqSDh2VYHF7gsfQj8Ncx+Xw5Y1KHeTRY+7I=
 github.com/mitchellh/mapstructure v1.0.0/go.mod h1:FVVH3fgwuzCH5S8UJGiWEs2h04kUh9fWfEaFds41c1Y=
-github.com/mritd/promptx v0.0.0-20180727042559-599061ab5daa h1:RWbhu4foyqb29g/YzFNCDUkNYP8q17PuzWhtbX8lrXM=
-github.com/mritd/promptx v0.0.0-20180727042559-599061ab5daa/go.mod h1:pWpPn0PGyAiZ0JYFQNYvIcfA89XgXgIl9w+q0d6Su6A=
+github.com/mritd/promptx v0.0.0-20181104120837-d3bd32bd6d64 h1:XK7D4Ke4TnL3Ruf8XORFxHI5P5RkCGk1zSscunDcCdA=
+github.com/mritd/promptx v0.0.0-20181104120837-d3bd32bd6d64/go.mod h1:icKW5kjHMpPxfsbQy6hCd1FLhZFsztmnna3VJLQOC1M=
 github.com/mritd/readline v0.0.0-20180425151209-ae245b60ddeb h1:fB2rncglOnfNm4xZ/y5N00z1T9oFVLyadZVAPcVvyWQ=
 github.com/mritd/readline v0.0.0-20180425151209-ae245b60ddeb/go.mod h1:wvYAHAQUSCpYdQJIF/KWesOEv2JORGDkhM2hZzg+IOU=
-github.com/mritd/sshutils v0.0.0-20181115142407-18090e5b0160/go.mod h1:FkoaMgPYYjkfgSUc57VB3r9nVZxdkwUl1wk/Y0m0ojg=
 github.com/mritd/sshutils v0.0.0-20181118045245-e6f9b947cb4d h1:CaA3bYFBbgVXIDk4JrXpyThjaRz0V80SAm/cZlky39g=
 github.com/mritd/sshutils v0.0.0-20181118045245-e6f9b947cb4d/go.mod h1:FkoaMgPYYjkfgSUc57VB3r9nVZxdkwUl1wk/Y0m0ojg=
 github.com/pelletier/go-toml v1.2.0 h1:T5zMGML61Wp+FlcbWjRDT7yAxhJNAiPPLOFECq181zc=
@@ -60,6 +59,7 @@ github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXf
 golang.org/x/crypto v0.0.0-20181112202954-3d3f9f413869 h1:kkXA53yGe04D0adEYJwEVQjeBppL01Exg+fnMjfUraU=
 golang.org/x/crypto v0.0.0-20181112202954-3d3f9f413869/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
 golang.org/x/sys v0.0.0-20180906133057-8cf3aee42992/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
+golang.org/x/sys v0.0.0-20181031143558-9b800f95dbbc/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
 golang.org/x/sys v0.0.0-20181107165924-66b7b1311ac8 h1:YoY1wS6JYVRpIfFngRf2HHo9R9dAne3xbkGOQ5rJXjU=
 golang.org/x/sys v0.0.0-20181107165924-66b7b1311ac8/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
 golang.org/x/text v0.3.0 h1:g61tztE5qeGQ89tm6NTjjM9VPIm088od1l6aSorWRWg=
