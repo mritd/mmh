@@ -9,7 +9,7 @@ require (
 	github.com/mattn/go-isatty v0.0.4 // indirect
 	github.com/mitchellh/go-homedir v1.0.0
 	github.com/mritd/promptx v0.0.0-20181104120837-d3bd32bd6d64
-	github.com/mritd/sshutils v0.0.0-20181118045245-e6f9b947cb4d
+	github.com/mritd/sshutils v0.0.0-20181119101908-70094a49f15b
 	github.com/pkg/errors v0.8.0 // indirect
 	github.com/pkg/sftp v1.8.3
 	github.com/pmezard/go-difflib v1.0.0 // indirect

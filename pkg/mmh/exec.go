@@ -120,17 +120,23 @@ func exec(ctx context.Context, s *Server, singleServer bool, cmd string, errCh c
 	go sshSession.PipeExec(cmd)
 
 	// copy error
+	var errWg sync.WaitGroup
+	errWg.Add(1)
 	go func() {
+		// ensure that the error message is successfully output
+		defer errWg.Done()
 		select {
-		case err := <-sshSession.ErrCh:
-			errCh <- err
+		case err, ok := <-sshSession.Error():
+			if ok {
+				errCh <- err
+			}
 		}
 	}()
 
 	// print std
 	go func() {
 		select {
-		case <-sshSession.ReadyCh:
+		case <-sshSession.Ready():
 			// read from sshSession.Stdout and print to os.stdout
 			if singleServer {
 				io.Copy(os.Stdout, sshSession.Stdout)
@@ -174,7 +180,11 @@ func exec(ctx context.Context, s *Server, singleServer bool, cmd string, errCh c
 
 	select {
 	case <-ctx.Done():
-	case <-sshSession.DoneCh:
+		sshClient.Close()
+	case <-sshSession.Done():
+		sshClient.Close()
 	}
+
+	errWg.Wait()
 
 }
