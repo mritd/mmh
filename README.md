@@ -49,7 +49,7 @@ servers:
   tags:
   - doh
   user: root
-  publickey: "/Users/mritd/.ssh/id_rsa"
+  privatekey: "/Users/mritd/.ssh/id_rsa"
   address: 172.16.0.24
   port: 22
   proxy: "d33"
