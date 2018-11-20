@@ -59,12 +59,12 @@ func WriteExampleConfig() {
 			Proxy:    "prod12",
 		},
 		{
-			Name:      "prod12",
-			User:      "root",
-			Tags:      []string{"prod"},
-			Address:   "10.10.4.12",
-			Port:      22,
-			PublicKey: "/Users/mritd/.ssh/id_rsa",
+			Name:       "prod12",
+			User:       "root",
+			Tags:       []string{"prod"},
+			Address:    "10.10.4.12",
+			Port:       22,
+			PrivateKey: "/Users/mritd/.ssh/id_rsa",
 		},
 	})
 	viper.Set(keyTags, []string{
@@ -173,7 +173,7 @@ func AddServer() {
 	}
 
 	// Auth method
-	var password, publicKey string
+	var password, privateKey string
 	cfg := &promptx.SelectConfig{
 		ActiveTpl:    "»  {{ . | cyan }}",
 		InactiveTpl:  "  {{ . | white }}",
@@ -187,7 +187,7 @@ func AddServer() {
 
 	s := &promptx.Select{
 		Items: []string{
-			"PublicKey",
+			"PrivateKey",
 			"Password",
 		},
 		Config: cfg,
@@ -199,13 +199,13 @@ func AddServer() {
 			// Allow empty
 			return nil
 
-		}, "PublicKey:")
+		}, "PrivateKey:")
 
-		publicKey = p.Run()
-		if strings.TrimSpace(publicKey) == "" {
+		privateKey = p.Run()
+		if strings.TrimSpace(privateKey) == "" {
 			home, err := homedir.Dir()
 			utils.CheckAndExit(err)
-			publicKey = home + string(filepath.Separator) + ".ssh" + string(filepath.Separator) + "id_rsa"
+			privateKey = home + string(filepath.Separator) + ".ssh" + string(filepath.Separator) + "id_rsa"
 		}
 	} else {
 		p = promptx.NewDefaultPrompt(func(line []rune) error {
@@ -231,14 +231,14 @@ func AddServer() {
 	proxy := p.Run()
 
 	server := Server{
-		Name:      name,
-		Tags:      tags,
-		User:      user,
-		Address:   address,
-		Port:      port,
-		PublicKey: publicKey,
-		Password:  password,
-		Proxy:     proxy,
+		Name:       name,
+		Tags:       tags,
+		User:       user,
+		Address:    address,
+		Port:       port,
+		PrivateKey: privateKey,
+		Password:   password,
+		Proxy:      proxy,
 	}
 
 	// Save
