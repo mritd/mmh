@@ -42,5 +42,5 @@ Batch exec command.`,
 
 func init() {
 	RootCmd.AddCommand(execCmd)
-	execCmd.PersistentFlags().BoolVarP(&singleExecServer, "single", "s", false, "Single server")
+	execCmd.PersistentFlags().BoolVarP(&singleExecServer, "single", "s", false, "single server")
 }

@@ -40,6 +40,6 @@ Copies files between hosts on a network.`,
 
 func init() {
 	RootCmd.AddCommand(cpCmd)
-	cpCmd.PersistentFlags().BoolVarP(&singleCPServer, "single", "s", false, "Single server")
-	cpCmd.PersistentFlags().BoolVarP(&copyDir, "dir", "r", false, "Useless flag")
+	cpCmd.PersistentFlags().BoolVarP(&singleCPServer, "single", "s", false, "single server")
+	cpCmd.PersistentFlags().BoolVarP(&copyDir, "dir", "r", false, "useless flag")
 }
