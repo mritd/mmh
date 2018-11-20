@@ -113,7 +113,7 @@ func exec(ctx context.Context, s *Server, singleServer bool, cmd string, errCh c
 		return
 	}
 
-	sshSession := sshutils.New(session)
+	sshSession := sshutils.NewSSHSession(session)
 	defer sshSession.Close()
 
 	// exec cmd

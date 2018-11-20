@@ -152,7 +152,7 @@ func (s *Server) Connect() error {
 		return err
 	}
 
-	sshSession := sshutils.New(session)
+	sshSession := sshutils.NewSSHSession(session)
 	defer sshSession.Close()
 
 	return sshSession.Terminal()
