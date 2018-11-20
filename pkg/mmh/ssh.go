@@ -31,14 +31,15 @@ import (
 )
 
 type Server struct {
-	Name       string   `yml:"Name"`
-	Tags       []string `yml:"Tags"`
-	User       string   `yml:"User"`
-	Password   string   `yml:"Password"`
-	PrivateKey string   `yml:"PrivateKey"`
-	Address    string   `yml:"Address"`
-	Port       int      `yml:"Port"`
-	Proxy      string   `yml:"proxy"`
+	Name               string   `yml:"Name" mapstructure:"name"`
+	Tags               []string `yml:"Tags" mapstructure:"tags"`
+	User               string   `yml:"User" mapstructure:"user"`
+	Password           string   `yml:"Password" mapstructure:"password"`
+	PrivateKey         string   `yml:"PrivateKey" mapstructure:"privatekey"`
+	PrivateKeyPassword string   `yml:"PrivateKey" mapstructure:"privatekey_password"`
+	Address            string   `yml:"Address" mapstructure:"address"`
+	Port               int      `yml:"Port" mapstructure:"port"`
+	Proxy              string   `yml:"proxy" mapstructure:"proxy"`
 }
 
 type Servers []*Server
@@ -53,16 +54,23 @@ func (servers Servers) Swap(i, j int) {
 	servers[i], servers[j] = servers[j], servers[i]
 }
 
-func privateKeyFile(file string) (ssh.AuthMethod, error) {
+func privateKeyFile(file, password string) (ssh.AuthMethod, error) {
 	buffer, err := ioutil.ReadFile(file)
 	if err != nil {
 		return nil, err
 	}
-	key, err := ssh.ParsePrivateKey(buffer)
+	var signer ssh.Signer
+
+	if password == "" {
+		signer, err = ssh.ParsePrivateKey(buffer)
+	} else {
+		signer, err = ssh.ParsePrivateKeyWithPassphrase(buffer, []byte(password))
+	}
+
 	if err != nil {
 		return nil, err
 	}
-	return ssh.PublicKeys(key), nil
+	return ssh.PublicKeys(signer), nil
 }
 
 func password(password string) ssh.AuthMethod {
@@ -70,9 +78,8 @@ func password(password string) ssh.AuthMethod {
 }
 
 func (s *Server) authMethod() (ssh.AuthMethod, error) {
-	// Priority use of public key
 	if strings.TrimSpace(s.PrivateKey) != "" {
-		return privateKeyFile(s.PrivateKey)
+		return privateKeyFile(s.PrivateKey, s.PrivateKeyPassword)
 	} else {
 		return password(s.Password), nil
 	}
