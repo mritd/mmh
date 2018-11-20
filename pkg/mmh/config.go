@@ -59,12 +59,13 @@ func WriteExampleConfig() {
 			Proxy:    "prod12",
 		},
 		{
-			Name:       "prod12",
-			User:       "root",
-			Tags:       []string{"prod"},
-			Address:    "10.10.4.12",
-			Port:       22,
-			PrivateKey: "/Users/mritd/.ssh/id_rsa",
+			Name:               "prod12",
+			User:               "root",
+			Tags:               []string{"prod"},
+			Address:            "10.10.4.12",
+			Port:               22,
+			PrivateKey:         "/Users/mritd/.ssh/id_rsa",
+			PrivateKeyPassword: "password",
 		},
 	})
 	viper.Set(keyTags, []string{

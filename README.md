@@ -50,6 +50,7 @@ servers:
   - doh
   user: root
   privatekey: "/Users/mritd/.ssh/id_rsa"
+  privatekey_password: ""
   address: 172.16.0.24
   port: 22
   proxy: "d33"
