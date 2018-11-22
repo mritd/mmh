@@ -174,7 +174,7 @@ func AddServer() {
 	}
 
 	// Auth method
-	var password, privateKey string
+	var password, privateKey, privateKeyPassword string
 	cfg := &promptx.SelectConfig{
 		ActiveTpl:    "»  {{ . | cyan }}",
 		InactiveTpl:  "  {{ . | white }}",
@@ -208,6 +208,13 @@ func AddServer() {
 			utils.CheckAndExit(err)
 			privateKey = home + string(filepath.Separator) + ".ssh" + string(filepath.Separator) + "id_rsa"
 		}
+
+		p = promptx.NewDefaultPrompt(func(line []rune) error {
+			// Allow empty
+			return nil
+
+		}, "PrivateKey Password:")
+		privateKeyPassword = p.Run()
 	} else {
 		p = promptx.NewDefaultPrompt(func(line []rune) error {
 			if strings.TrimSpace(string(line)) == "" {
@@ -232,14 +239,15 @@ func AddServer() {
 	proxy := p.Run()
 
 	server := Server{
-		Name:       name,
-		Tags:       tags,
-		User:       user,
-		Address:    address,
-		Port:       port,
-		PrivateKey: privateKey,
-		Password:   password,
-		Proxy:      proxy,
+		Name:               name,
+		Tags:               tags,
+		User:               user,
+		Address:            address,
+		Port:               port,
+		PrivateKey:         privateKey,
+		PrivateKeyPassword: privateKeyPassword,
+		Password:           password,
+		Proxy:              proxy,
 	}
 
 	// Save

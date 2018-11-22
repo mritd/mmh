@@ -31,15 +31,15 @@ import (
 )
 
 type Server struct {
-	Name               string   `yml:"Name" mapstructure:"name"`
-	Tags               []string `yml:"Tags" mapstructure:"tags"`
-	User               string   `yml:"User" mapstructure:"user"`
-	Password           string   `yml:"Password" mapstructure:"password"`
-	PrivateKey         string   `yml:"PrivateKey" mapstructure:"privatekey"`
-	PrivateKeyPassword string   `yml:"PrivateKey" mapstructure:"privatekey_password"`
-	Address            string   `yml:"Address" mapstructure:"address"`
-	Port               int      `yml:"Port" mapstructure:"port"`
-	Proxy              string   `yml:"proxy" mapstructure:"proxy"`
+	Name               string   `yaml:"name" mapstructure:"name"`
+	Tags               []string `yaml:"tags" mapstructure:"tags"`
+	User               string   `yaml:"user" mapstructure:"user"`
+	Password           string   `yaml:"password" mapstructure:"password"`
+	PrivateKey         string   `yaml:"privatekey" mapstructure:"privatekey"`
+	PrivateKeyPassword string   `yaml:"privatekey_password" mapstructure:"privatekey_password"`
+	Address            string   `yaml:"address" mapstructure:"address"`
+	Port               int      `yaml:"port" mapstructure:"port"`
+	Proxy              string   `yaml:"proxy" mapstructure:"proxy"`
 }
 
 type Servers []*Server
