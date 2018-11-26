@@ -49,6 +49,7 @@ type Server struct {
 	Address            string   `yaml:"address" mapstructure:"address"`
 	Port               int      `yaml:"port" mapstructure:"port"`
 	Proxy              string   `yaml:"proxy" mapstructure:"proxy"`
+	proxyCount         int
 }
 
 type Servers []*Server
@@ -98,8 +99,6 @@ func (s *Server) sshClient() (*ssh.Client, error) {
 	s.setDefault()
 
 	var client *ssh.Client
-	var proxyCount int
-
 	auth, err := s.authMethod()
 	if err != nil {
 		return nil, err
@@ -116,10 +115,10 @@ func (s *Server) sshClient() (*ssh.Client, error) {
 
 	if s.Proxy != "" {
 
-		if proxyCount > maxProxy {
-			return nil, errors.New("too many proxy node")
+		if s.proxyCount > maxProxy {
+			return nil, errors.New(fmt.Sprintf("too many proxy server, proxy server must be <= %d", maxProxy))
 		} else {
-			proxyCount++
+			s.proxyCount++
 		}
 
 		// find proxy server
