@@ -44,6 +44,18 @@ Use "mmh [command] --help" for more information about a command.
 默认该工具在首次运行后将会创建 `$HOME/.mmh.yaml` 样例配置；配置中可以设置服务器地址、别名、登录方式等；样例配置如下:
 
 ```yaml
+# 最大跳板机数量
+maxProxy: 5
+
+# 默认配置
+basic:
+  user: root
+  port: 22
+  password:
+  privatekey: "/Users/mritd/.ssh/id_rsa"
+  privatekey_password: ""
+
+# 服务器配置
 servers:
 - name: d24
   tags:
@@ -62,6 +74,8 @@ servers:
   password: "password"
   address: 172.16.0.33
   port: 22
+
+# tags
 tags:
   - doh
   - k8s
