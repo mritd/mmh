@@ -30,6 +30,15 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
+type Basic struct {
+	User               string `yaml:"user" mapstructure:"user"`
+	Password           string `yaml:"password" mapstructure:"password"`
+	PrivateKey         string `yaml:"privatekey" mapstructure:"privatekey"`
+	PrivateKeyPassword string `yaml:"privatekey_password" mapstructure:"privatekey_password"`
+	Port               int    `yaml:"port" mapstructure:"port"`
+	Proxy              string `yaml:"proxy" mapstructure:"proxy"`
+}
+
 type Server struct {
 	Name               string   `yaml:"name" mapstructure:"name"`
 	Tags               []string `yaml:"tags" mapstructure:"tags"`
@@ -54,27 +63,25 @@ func (servers Servers) Swap(i, j int) {
 	servers[i], servers[j] = servers[j], servers[i]
 }
 
-func privateKeyFile(file, password string) (ssh.AuthMethod, error) {
-	buffer, err := ioutil.ReadFile(file)
-	if err != nil {
-		return nil, err
+func (s *Server) setDefault() {
+	if s.User == "" {
+		s.User = basic.User
 	}
-	var signer ssh.Signer
-
-	if password == "" {
-		signer, err = ssh.ParsePrivateKey(buffer)
-	} else {
-		signer, err = ssh.ParsePrivateKeyWithPassphrase(buffer, []byte(password))
+	if s.Port == 0 {
+		s.Port = basic.Port
 	}
-
-	if err != nil {
-		return nil, err
+	if s.Password == "" {
+		s.Password = basic.Password
 	}
-	return ssh.PublicKeys(signer), nil
-}
-
-func password(password string) ssh.AuthMethod {
-	return ssh.Password(password)
+	if s.PrivateKey == "" {
+		s.PrivateKey = basic.PrivateKey
+	}
+	if s.PrivateKeyPassword == "" {
+		s.PrivateKeyPassword = basic.PrivateKeyPassword
+	}
+	if s.Proxy == "" {
+		s.Proxy = basic.Proxy
+	}
 }
 
 func (s *Server) authMethod() (ssh.AuthMethod, error) {
@@ -87,11 +94,11 @@ func (s *Server) authMethod() (ssh.AuthMethod, error) {
 
 func (s *Server) sshClient() (*ssh.Client, error) {
 
+	// default to basic config
+	s.setDefault()
+
 	var client *ssh.Client
 	var proxyCount int
-	if maxProxy == 0 {
-		maxProxy = 5
-	}
 
 	auth, err := s.authMethod()
 	if err != nil {
@@ -120,7 +127,7 @@ func (s *Server) sshClient() (*ssh.Client, error) {
 		if proxy == nil {
 			return nil, errors.New(fmt.Sprintf("cloud not found proxy server: %s", s.Proxy))
 		} else {
-			fmt.Printf("Using proxy [%s], connect to %s\n", s.Proxy, s.Name)
+			fmt.Printf("Using proxy [%s], connect to => %s\n", s.Proxy, s.Name)
 		}
 
 		// recursive connect
@@ -163,4 +170,27 @@ func (s *Server) Connect() error {
 	defer sshSession.Close()
 
 	return sshSession.Terminal()
+}
+
+func privateKeyFile(file, password string) (ssh.AuthMethod, error) {
+	buffer, err := ioutil.ReadFile(file)
+	if err != nil {
+		return nil, err
+	}
+	var signer ssh.Signer
+
+	if password == "" {
+		signer, err = ssh.ParsePrivateKey(buffer)
+	} else {
+		signer, err = ssh.ParsePrivateKeyWithPassphrase(buffer, []byte(password))
+	}
+
+	if err != nil {
+		return nil, err
+	}
+	return ssh.PublicKeys(signer), nil
+}
+
+func password(password string) ssh.AuthMethod {
+	return ssh.Password(password)
 }

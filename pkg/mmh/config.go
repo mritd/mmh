@@ -19,6 +19,7 @@ package mmh
 import (
 	"errors"
 	"strings"
+	"sync"
 
 	"strconv"
 
@@ -38,16 +39,40 @@ import (
 )
 
 const keyServers = "servers"
+const keyBasic = "basic"
 const keyTags = "tags"
 
 var (
-	servers    = Servers{}
+	initOnce   sync.Once
+	allTags    []string
+	basic      Basic
+	servers    Servers
 	serversMap = make(map[string]*Server)
 	tagsMap    = make(map[string][]*Server)
 	maxProxy   = viper.GetInt("maxProxy")
 )
 
+var (
+	inputEmptyErr    = errors.New("input is empty")
+	inputTooLongErr  = errors.New("input length must be <= 12")
+	serverExistErr   = errors.New("server name exist")
+	notNumberErr     = errors.New("only number support")
+	proxyNotFoundErr = errors.New("proxy server not found")
+)
+
 func WriteExampleConfig() {
+
+	home, err := homedir.Dir()
+	utils.CheckAndExit(err)
+
+	viper.Set(keyBasic, Basic{
+		User:               "root",
+		Port:               22,
+		PrivateKey:         filepath.Join(home, ".ssh", "id_rsa"),
+		PrivateKeyPassword: "",
+		Password:           "",
+		Proxy:              "",
+	})
 	viper.Set(keyServers, []Server{
 		{
 			Name:     "prod11",
@@ -76,45 +101,74 @@ func WriteExampleConfig() {
 	viper.WriteConfig()
 }
 
-func InitServers() {
-	// init servers
-	utils.CheckAndExit(viper.UnmarshalKey(keyServers, &servers))
-	sort.Sort(servers)
+func InitConfig() {
 
-	// init servers map
-	for _, s := range servers {
-		serversMap[strings.ToLower(s.Name)] = s
-	}
+	initOnce.Do(
+		func() {
 
-	// init tags group
-	var tags []string
-	utils.CheckAndExit(viper.UnmarshalKey(keyTags, &tags))
-	for _, tag := range tags {
-		var tmpServers []*Server
-		for _, server := range servers {
-			for _, stag := range server.Tags {
-				if tag == stag {
-					tmpServers = append(tmpServers, server)
-					break
-				}
+			// set default max proxy
+			if maxProxy == 0 {
+				maxProxy = 5
 			}
-		}
-		tagsMap[tag] = tmpServers
-	}
+
+			// get home dir
+			home, err := homedir.Dir()
+			utils.CheckAndExit(err)
+
+			// set default basic config
+			viper.SetDefault(keyBasic, Basic{
+				User:               "root",
+				Port:               22,
+				PrivateKey:         filepath.Join(home, ".ssh", "id_rsa"),
+				PrivateKeyPassword: "",
+				Password:           "",
+				Proxy:              "",
+			})
+
+			// init basic config
+			utils.CheckAndExit(viper.UnmarshalKey(keyBasic, &basic))
+
+			// init servers
+			utils.CheckAndExit(viper.UnmarshalKey(keyServers, &servers))
+			sort.Sort(servers)
+
+			// init servers map
+			for _, s := range servers {
+				serversMap[strings.ToLower(s.Name)] = s
+			}
+
+			// init tags
+			utils.CheckAndExit(viper.UnmarshalKey(keyTags, &allTags))
+
+			// init tags group
+			for _, tag := range allTags {
+				var tmpServers []*Server
+				for _, server := range servers {
+					for _, stag := range server.Tags {
+						if tag == stag {
+							tmpServers = append(tmpServers, server)
+							break
+						}
+					}
+				}
+				tagsMap[tag] = tmpServers
+			}
+		})
+
 }
 
 func AddServer() {
 
-	// Name
+	// name
 	p := promptx.NewDefaultPrompt(func(line []rune) error {
 		if strings.TrimSpace(string(line)) == "" {
-			return errors.New("Input is empty!")
+			return inputEmptyErr
 		} else if len(line) > 12 {
-			return errors.New("Input length must <= 12!")
+			return inputTooLongErr
 		}
 
 		if s := findServerByName(string(line)); s != nil {
-			return errors.New("Server name exist!")
+			return serverExistErr
 		}
 		return nil
 
@@ -122,30 +176,37 @@ func AddServer() {
 
 	name := p.Run()
 
-	// Tags
+	// tags
 	p = promptx.NewDefaultPrompt(func(line []rune) error {
-		// Allow empty
+		// allow empty
 		return nil
 	}, "Tags:")
 
-	tags := strings.Fields(p.Run())
+	inputTags := strings.Fields(p.Run())
+	for _, tag := range inputTags {
+		newTag := tag
+		servers := tagsMap[newTag]
+		if len(servers) == 0 {
+			allTags = append(allTags, newTag)
+		}
+	}
 
-	// SSH user
+	// ssh user
 	p = promptx.NewDefaultPrompt(func(line []rune) error {
-		// Allow empty
+		// allow empty
 		return nil
 
 	}, "User:")
 
 	user := p.Run()
 	if strings.TrimSpace(user) == "" {
-		user = "root"
+		user = basic.User
 	}
 
-	// Server address
+	// server address
 	p = promptx.NewDefaultPrompt(func(line []rune) error {
 		if strings.TrimSpace(string(line)) == "" {
-			return errors.New("Input is empty!")
+			return inputEmptyErr
 		}
 		return nil
 
@@ -153,13 +214,12 @@ func AddServer() {
 
 	address := p.Run()
 
-	// Server port
+	// server port
 	var port int
 	p = promptx.NewDefaultPrompt(func(line []rune) error {
 		if strings.TrimSpace(string(line)) != "" {
-			_, err := strconv.Atoi(string(line))
-			if err != nil {
-				return errors.New("Only number support!")
+			if _, err := strconv.Atoi(string(line)); err != nil {
+				return notNumberErr
 			}
 		}
 		return nil
@@ -168,12 +228,12 @@ func AddServer() {
 
 	portStr := p.Run()
 	if strings.TrimSpace(portStr) == "" {
-		port = 22
+		port = basic.Port
 	} else {
 		port, _ = strconv.Atoi(portStr)
 	}
 
-	// Auth method
+	// auth method
 	var password, privateKey, privateKeyPassword string
 	cfg := &promptx.SelectConfig{
 		ActiveTpl:    "»  {{ . | cyan }}",
@@ -195,41 +255,47 @@ func AddServer() {
 	}
 
 	idx := s.Run()
+
+	// use private key
 	if idx == 0 {
 		p = promptx.NewDefaultPrompt(func(line []rune) error {
-			// Allow empty
+			// allow empty
 			return nil
 
 		}, "PrivateKey:")
 
 		privateKey = p.Run()
 		if strings.TrimSpace(privateKey) == "" {
-			home, err := homedir.Dir()
-			utils.CheckAndExit(err)
-			privateKey = home + string(filepath.Separator) + ".ssh" + string(filepath.Separator) + "id_rsa"
+			privateKey = basic.PrivateKey
 		}
 
 		p = promptx.NewDefaultPrompt(func(line []rune) error {
-			// Allow empty
+			// allow empty
 			return nil
 
 		}, "PrivateKey Password:")
 		privateKeyPassword = p.Run()
+		if strings.TrimSpace(privateKeyPassword) == "" {
+			privateKeyPassword = basic.PrivateKeyPassword
+		}
 	} else {
+		// use password
 		p = promptx.NewDefaultPrompt(func(line []rune) error {
-			if strings.TrimSpace(string(line)) == "" {
-				return errors.New("Input is empty!")
-			}
+			// allow empty
 			return nil
 
 		}, "Password:")
 		password = p.Run()
+		if strings.TrimSpace(password) == "" {
+			password = basic.Password
+		}
 	}
 
+	// server proxy
 	p = promptx.NewDefaultPrompt(func(line []rune) error {
 		if strings.TrimSpace(string(line)) != "" {
 			if findServerByName(string(line)) == nil {
-				return errors.New("Proxy server not found!")
+				return proxyNotFoundErr
 			}
 		}
 		return nil
@@ -237,10 +303,14 @@ func AddServer() {
 	}, "Proxy:")
 
 	proxy := p.Run()
+	if strings.TrimSpace(proxy) == "" {
+		proxy = basic.Proxy
+	}
 
+	// create server
 	server := Server{
 		Name:               name,
-		Tags:               tags,
+		Tags:               inputTags,
 		User:               user,
 		Address:            address,
 		Port:               port,
@@ -297,7 +367,8 @@ func ListServers() {
 func ListServer(serverName string) {
 	s := findServerByName(serverName)
 	if s == nil {
-		fmt.Println("Server not found!")
+		fmt.Println("server not found!")
+		return
 	}
 	tpl := `Name: {{ .Name }}
 User: {{ .User }}
