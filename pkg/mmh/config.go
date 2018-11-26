@@ -89,7 +89,7 @@ func WriteExampleConfig() {
 			Tags:               []string{"prod"},
 			Address:            "10.10.4.12",
 			Port:               22,
-			PrivateKey:         "/Users/mritd/.ssh/id_rsa",
+			PrivateKey:         filepath.Join(home, ".ssh", "id_rsa"),
 			PrivateKeyPassword: "password",
 		},
 	})
@@ -182,6 +182,7 @@ func AddServer() {
 		return nil
 	}, "Tags:")
 
+	// if it is a new tag, write the configuration file
 	inputTags := strings.Fields(p.Run())
 	for _, tag := range inputTags {
 		newTag := tag
@@ -190,6 +191,7 @@ func AddServer() {
 			allTags = append(allTags, newTag)
 		}
 	}
+	viper.Set(keyTags, allTags)
 
 	// ssh user
 	p = promptx.NewDefaultPrompt(func(line []rune) error {
