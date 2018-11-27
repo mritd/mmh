@@ -41,6 +41,8 @@ import (
 const keyServers = "servers"
 const keyBasic = "basic"
 const keyTags = "tags"
+const keyContext = "context"
+const keyCurrentContext = "current_context"
 
 var (
 	initOnce   sync.Once
@@ -65,6 +67,12 @@ func WriteExampleConfig() {
 	home, err := homedir.Dir()
 	utils.CheckAndExit(err)
 
+	// create main config
+	viper.Set(keyContext, []string{"default"})
+	viper.Set(keyCurrentContext, "default")
+	utils.CheckAndExit(viper.WriteConfig())
+
+	viper.SetConfigFile("default.yaml")
 	viper.Set(keyBasic, Basic{
 		User:               "root",
 		Port:               22,
