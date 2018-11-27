@@ -38,20 +38,40 @@ import (
 	"github.com/spf13/viper"
 )
 
-const keyServers = "servers"
-const keyBasic = "basic"
-const keyTags = "tags"
-const keyContext = "context"
-const keyCurrentContext = "current_context"
+const KeyServers = "servers"
+const KeyBasic = "basic"
+const KeyTags = "tags"
+const KeyContext = "context"
+const KeyCurrentContext = "current_context"
+
+type Context struct {
+	Name          string `yaml:"name" mapstructure:"name"`
+	IsRemote      bool   `yaml:"is_remote" mapstructure:"is_remote"`
+	RemoteAddress string `yaml:"remote_address" mapstructure:"remote_address"`
+}
+
+type Contexts []*Context
+
+func (ctxs Contexts) Len() int {
+	return len(ctxs)
+}
+func (ctxs Contexts) Less(i, j int) bool {
+	return ctxs[i].Name < ctxs[j].Name
+}
+func (ctxs Contexts) Swap(i, j int) {
+	ctxs[i], ctxs[j] = ctxs[j], ctxs[i]
+}
 
 var (
+	MainViper  = viper.New()
+	CtxViper   = viper.New()
 	initOnce   sync.Once
 	allTags    []string
 	basic      Basic
 	servers    Servers
 	serversMap = make(map[string]*Server)
 	tagsMap    = make(map[string][]*Server)
-	maxProxy   = viper.GetInt("maxProxy")
+	maxProxy   = CtxViper.GetInt("maxProxy")
 )
 
 var (
@@ -61,53 +81,6 @@ var (
 	notNumberErr     = errors.New("only number support")
 	proxyNotFoundErr = errors.New("proxy server not found")
 )
-
-func WriteExampleConfig() {
-
-	home, err := homedir.Dir()
-	utils.CheckAndExit(err)
-
-	// create main config
-	viper.Set(keyContext, []string{"default"})
-	viper.Set(keyCurrentContext, "default")
-	utils.CheckAndExit(viper.WriteConfig())
-
-	viper.SetConfigFile("default.yaml")
-	viper.Set(keyBasic, Basic{
-		User:               "root",
-		Port:               22,
-		PrivateKey:         filepath.Join(home, ".ssh", "id_rsa"),
-		PrivateKeyPassword: "",
-		Password:           "",
-		Proxy:              "",
-	})
-	viper.Set(keyServers, []Server{
-		{
-			Name:     "prod11",
-			User:     "root",
-			Tags:     []string{"prod"},
-			Address:  "10.10.4.11",
-			Port:     22,
-			Password: "password",
-			Proxy:    "prod12",
-		},
-		{
-			Name:               "prod12",
-			User:               "root",
-			Tags:               []string{"prod"},
-			Address:            "10.10.4.12",
-			Port:               22,
-			PrivateKey:         filepath.Join(home, ".ssh", "id_rsa"),
-			PrivateKeyPassword: "password",
-		},
-	})
-	viper.Set(keyTags, []string{
-		"prod",
-		"test",
-	})
-	viper.Set("MaxProxy", 5)
-	viper.WriteConfig()
-}
 
 func InitConfig() {
 
@@ -124,7 +97,7 @@ func InitConfig() {
 			utils.CheckAndExit(err)
 
 			// set default basic config
-			viper.SetDefault(keyBasic, Basic{
+			CtxViper.SetDefault(KeyBasic, Basic{
 				User:               "root",
 				Port:               22,
 				PrivateKey:         filepath.Join(home, ".ssh", "id_rsa"),
@@ -134,10 +107,10 @@ func InitConfig() {
 			})
 
 			// init basic config
-			utils.CheckAndExit(viper.UnmarshalKey(keyBasic, &basic))
+			utils.CheckAndExit(CtxViper.UnmarshalKey(KeyBasic, &basic))
 
 			// init servers
-			utils.CheckAndExit(viper.UnmarshalKey(keyServers, &servers))
+			utils.CheckAndExit(CtxViper.UnmarshalKey(KeyServers, &servers))
 			sort.Sort(servers)
 
 			// init servers map
@@ -146,7 +119,7 @@ func InitConfig() {
 			}
 
 			// init tags
-			utils.CheckAndExit(viper.UnmarshalKey(keyTags, &allTags))
+			utils.CheckAndExit(CtxViper.UnmarshalKey(KeyTags, &allTags))
 
 			// init tags group
 			for _, tag := range allTags {
@@ -199,7 +172,7 @@ func AddServer() {
 			allTags = append(allTags, newTag)
 		}
 	}
-	viper.Set(keyTags, allTags)
+	CtxViper.Set(KeyTags, allTags)
 
 	// ssh user
 	p = promptx.NewDefaultPrompt(func(line []rune) error {
@@ -333,8 +306,8 @@ func AddServer() {
 	// Save
 	servers = append(servers, &server)
 	sort.Sort(servers)
-	viper.Set(keyServers, servers)
-	utils.CheckAndExit(viper.WriteConfig())
+	CtxViper.Set(KeyServers, servers)
+	utils.CheckAndExit(CtxViper.WriteConfig())
 }
 
 func DeleteServer(name string) {
@@ -351,8 +324,8 @@ func DeleteServer(name string) {
 	} else {
 		servers = append(servers[:delIdx], servers[delIdx+1:]...)
 		sort.Sort(servers)
-		viper.Set(keyServers, servers)
-		utils.CheckAndExit(viper.WriteConfig())
+		CtxViper.Set(KeyServers, servers)
+		utils.CheckAndExit(CtxViper.WriteConfig())
 	}
 
 }

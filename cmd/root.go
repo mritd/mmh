@@ -26,10 +26,8 @@ import (
 	"github.com/mritd/mmh/pkg/mmh"
 	"github.com/mritd/mmh/pkg/utils"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
-var cfgFile string
 var RootCmd = &cobra.Command{
 	Use:   "mmh",
 	Short: "A simple Multi-server ssh tool",
@@ -48,34 +46,93 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initConfig, mmh.InitConfig)
-	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.mmh/mmh.yaml)")
 }
 
 func initConfig() {
 
-	if cfgFile != "" {
-		viper.SetConfigFile(cfgFile)
-	} else {
-		home, err := homedir.Dir()
-		utils.CheckAndExit(err)
-		cfgDir := filepath.Join(home, ".mmh")
-		cfgFile = filepath.Join(cfgDir, "mmh.yaml")
-		viper.AddConfigPath(cfgDir)
-		viper.SetConfigFile(cfgFile)
+	home, err := homedir.Dir()
+	utils.CheckAndExit(err)
+	cfgDir := filepath.Join(home, ".mmh")
+	mainConfigFile := filepath.Join(cfgDir, "main.yaml")
+	mmh.MainViper.SetConfigFile(mainConfigFile)
 
-		if _, err = os.Stat(cfgDir); err != nil {
-			// create config dir
-			utils.CheckAndExit(os.MkdirAll(cfgDir, 0755))
-			// create config file
-			_, err = os.Create(cfgFile)
-			util.CheckAndExit(err)
-			defaultCtxCfg := filepath.Join(cfgDir, "default.yaml")
-			_, err = os.Create(defaultCtxCfg)
-			util.CheckAndExit(err)
-			mmh.WriteExampleConfig()
-		}
-
+	if _, err = os.Stat(cfgDir); err != nil {
+		// create config dir
+		utils.CheckAndExit(os.MkdirAll(cfgDir, 0755))
+		// create config file
+		_, err = os.Create(mainConfigFile)
+		util.CheckAndExit(err)
+		// create default context config file
+		defaultCtxCfg := filepath.Join(cfgDir, "default.yaml")
+		_, err = os.Create(defaultCtxCfg)
+		util.CheckAndExit(err)
+		// write default config
+		writeExampleConfig(cfgDir)
 	}
-	viper.AutomaticEnv()
-	util.CheckAndExit(viper.ReadInConfig())
+
+	// load main config
+	mmh.MainViper.AutomaticEnv()
+	util.CheckAndExit(mmh.MainViper.ReadInConfig())
+
+	// get context
+	currentContext := mmh.MainViper.GetString(mmh.KeyCurrentContext)
+	mmh.CtxViper.SetConfigFile(filepath.Join(cfgDir, currentContext+".yaml"))
+
+	// load context config
+	mmh.CtxViper.AutomaticEnv()
+	util.CheckAndExit(mmh.CtxViper.ReadInConfig())
+}
+
+func writeExampleConfig(cfgDir string) {
+
+	// ignore this error, because it is already check
+	home, _ := homedir.Dir()
+
+	// write main config
+	mmh.MainViper.Set(mmh.KeyContext, mmh.Contexts{
+		{
+			Name:          "default",
+			IsRemote:      false,
+			RemoteAddress: "",
+		},
+	})
+	mmh.MainViper.Set(mmh.KeyCurrentContext, "default")
+	utils.CheckAndExit(mmh.MainViper.WriteConfig())
+
+	// write context config
+	mmh.CtxViper.SetConfigFile(filepath.Join(cfgDir, "default.yaml"))
+	mmh.CtxViper.Set(mmh.KeyBasic, mmh.Basic{
+		User:               "root",
+		Port:               22,
+		PrivateKey:         filepath.Join(home, ".ssh", "id_rsa"),
+		PrivateKeyPassword: "",
+		Password:           "",
+		Proxy:              "",
+	})
+	mmh.CtxViper.Set(mmh.KeyServers, []mmh.Server{
+		{
+			Name:     "prod11",
+			User:     "root",
+			Tags:     []string{"prod"},
+			Address:  "10.10.4.11",
+			Port:     22,
+			Password: "password",
+			Proxy:    "prod12",
+		},
+		{
+			Name:               "prod12",
+			User:               "root",
+			Tags:               []string{"prod"},
+			Address:            "10.10.4.12",
+			Port:               22,
+			PrivateKey:         filepath.Join(home, ".ssh", "id_rsa"),
+			PrivateKeyPassword: "password",
+		},
+	})
+	mmh.CtxViper.Set(mmh.KeyTags, []string{
+		"prod",
+		"test",
+	})
+	mmh.CtxViper.Set("MaxProxy", 5)
+	utils.CheckAndExit(mmh.CtxViper.WriteConfig())
 }
