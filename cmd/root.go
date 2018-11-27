@@ -61,17 +61,16 @@ func initConfig() {
 		cfgDir := filepath.Join(home, ".mmh")
 		cfgFile = filepath.Join(cfgDir, "mmh.yaml")
 		viper.AddConfigPath(cfgDir)
-		viper.SetConfigName("mmh")
-		viper.SetConfigType("yaml")
+		viper.SetConfigFile(cfgFile)
 
-		// create config dir
 		if _, err = os.Stat(cfgDir); err != nil {
+			// create config dir
 			utils.CheckAndExit(os.MkdirAll(cfgDir, 0755))
-		}
-
-		// create config file
-		if _, err = os.Stat(cfgFile); err != nil {
+			// create config file
 			_, err = os.Create(cfgFile)
+			util.CheckAndExit(err)
+			defaultCtxCfg := filepath.Join(cfgDir, "default.yaml")
+			_, err = os.Create(defaultCtxCfg)
 			util.CheckAndExit(err)
 			mmh.WriteExampleConfig()
 		}

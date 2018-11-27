@@ -19,25 +19,32 @@ package utils
 import (
 	"fmt"
 	"os"
-	"path"
+	"os/exec"
+	"path/filepath"
 )
 
 func Uninstall(dir string) {
 
 	var binPaths = []string{
-		path.Join(dir, "mcp"),
-		path.Join(dir, "mec"),
-		path.Join(dir, "mgo"),
+		filepath.Join(dir, "mcp"),
+		filepath.Join(dir, "mec"),
+		filepath.Join(dir, "mgo"),
 	}
 
-	CheckRoot()
+	currentPath, err := exec.LookPath(os.Args[0])
+	CheckAndExit(err)
 
-	fmt.Println("Uninstall")
-
-	for _, bin := range binPaths {
-		fmt.Printf("Remove %s\n", bin)
-		os.Remove(bin)
+	if !Root() {
+		cmd := exec.Command("sudo", currentPath, "uninstall")
+		cmd.Stdin = os.Stdin
+		cmd.Stdout = os.Stdout
+		CheckAndExit(cmd.Run())
+	} else {
+		for _, bin := range binPaths {
+			fmt.Printf("Remove %s\n", bin)
+			os.Remove(bin)
+		}
+		fmt.Printf("Remove %s\n", filepath.Join(dir, "mmh"))
+		os.Remove(filepath.Join(dir, "mmh"))
 	}
-	fmt.Printf("Remove %s\n", path.Join(dir, "mmh"))
-	os.Remove(path.Join(dir, "mmh"))
 }

@@ -77,11 +77,8 @@ func Render(tpl *template.Template, data interface{}) []byte {
 	return buf.Bytes()
 }
 
-func CheckRoot() {
+func Root() bool {
 	u, err := user.Current()
 	CheckAndExit(err)
-
-	if u.Uid != "0" || u.Gid != "0" {
-		Exit("This command must be run as root! (sudo)", 1)
-	}
+	return u.Uid == "0" || u.Gid == "0"
 }

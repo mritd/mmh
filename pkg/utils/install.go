@@ -21,35 +21,43 @@ import (
 	"io"
 	"os"
 	"os/exec"
-	"path"
+	"path/filepath"
 )
 
 func Install(dir string) {
 
 	var binPaths = []string{
-		path.Join(dir, "mcp"),
-		path.Join(dir, "mec"),
-		path.Join(dir, "mgo"),
+		filepath.Join(dir, "mcp"),
+		filepath.Join(dir, "mec"),
+		filepath.Join(dir, "mgo"),
 	}
 
-	Uninstall(dir)
-
-	fmt.Println("Install")
 	currentPath, err := exec.LookPath(os.Args[0])
 	CheckAndExit(err)
-	f, err := os.Open(currentPath)
-	CheckAndExit(err)
-	defer f.Close()
-	target, err := os.OpenFile(path.Join(dir, "mmh"), os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0755)
-	CheckAndExit(err)
-	defer target.Close()
 
-	fmt.Printf("Install %s\n", path.Join(dir, "mmh"))
-	_, err = io.Copy(target, f)
-	CheckAndExit(err)
-	for _, bin := range binPaths {
-		fmt.Printf("Install %s\n", bin)
-		err = os.Symlink(path.Join(dir, "mmh"), bin)
+	if !Root() {
+		cmd := exec.Command("sudo", currentPath, "install")
+		cmd.Stdin = os.Stdin
+		cmd.Stdout = os.Stdout
+		CheckAndExit(cmd.Run())
+	} else {
+
+		Uninstall(dir)
+
+		f, err := os.Open(currentPath)
 		CheckAndExit(err)
+		defer f.Close()
+		target, err := os.OpenFile(filepath.Join(dir, "mmh"), os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0755)
+		CheckAndExit(err)
+		defer target.Close()
+
+		fmt.Printf("Install %s\n", filepath.Join(dir, "mmh"))
+		_, err = io.Copy(target, f)
+		CheckAndExit(err)
+		for _, bin := range binPaths {
+			fmt.Printf("Install %s\n", bin)
+			CheckAndExit(os.Symlink(filepath.Join(dir, "mmh"), bin))
+		}
 	}
+
 }
