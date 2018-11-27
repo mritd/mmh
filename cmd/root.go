@@ -18,8 +18,9 @@ package cmd
 
 import (
 	"os"
+	"path/filepath"
 
-	"path"
+	"github.com/mritd/promptx/util"
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/mritd/mmh/pkg/mmh"
@@ -47,7 +48,7 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initConfig, mmh.InitConfig)
-	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.mmh.yaml)")
+	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.mmh/mmh.yaml)")
 }
 
 func initConfig() {
@@ -57,15 +58,23 @@ func initConfig() {
 	} else {
 		home, err := homedir.Dir()
 		utils.CheckAndExit(err)
-		cfgFile = path.Join(home, ".mmh.yaml")
+		cfgDir := filepath.Join(home, ".mmh")
+		cfgFile = filepath.Join(cfgDir, "mmh.yaml")
 		viper.SetConfigFile(cfgFile)
 
-		if _, err := os.Stat(cfgFile); err != nil {
-			os.Create(cfgFile)
+		// create config dir
+		if _, err = os.Stat(cfgDir); err != nil {
+			utils.CheckAndExit(os.MkdirAll(cfgDir, 0755))
+		}
+
+		// create config file
+		if _, err = os.Stat(cfgFile); err != nil {
+			_, err = os.Create(cfgFile)
+			util.CheckAndExit(err)
 			mmh.WriteExampleConfig()
 		}
 
 	}
 	viper.AutomaticEnv()
-	viper.ReadInConfig()
+	util.CheckAndExit(viper.ReadInConfig())
 }
