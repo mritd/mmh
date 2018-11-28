@@ -45,22 +45,12 @@ const KeyContext = "context"
 const KeyCurrentContext = "current_context"
 
 type Context struct {
-	Name          string `yaml:"name" mapstructure:"name"`
 	IsRemote      bool   `yaml:"is_remote" mapstructure:"is_remote"`
 	RemoteAddress string `yaml:"remote_address" mapstructure:"remote_address"`
+	ConfigPath    string `yaml:"config_path" mapstructure:"config_path"`
 }
 
-type Contexts []*Context
-
-func (ctxs Contexts) Len() int {
-	return len(ctxs)
-}
-func (ctxs Contexts) Less(i, j int) bool {
-	return ctxs[i].Name < ctxs[j].Name
-}
-func (ctxs Contexts) Swap(i, j int) {
-	ctxs[i], ctxs[j] = ctxs[j], ctxs[i]
-}
+type Contexts map[string]Context
 
 var (
 	MainViper  = viper.New()

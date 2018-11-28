@@ -17,6 +17,7 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -76,7 +77,22 @@ func initConfig() {
 
 	// get context
 	currentContext := mmh.MainViper.GetString(mmh.KeyCurrentContext)
-	mmh.CtxViper.SetConfigFile(filepath.Join(cfgDir, currentContext+".yaml"))
+	allContexts := mmh.MainViper.GetStringMap(mmh.KeyContext)
+
+	if currentContext == "" || len(allContexts) == 0 {
+		utils.Exit("get context failed", 1)
+	}
+	tmpCtx, ok := allContexts[currentContext]
+	if !ok {
+		utils.Exit(fmt.Sprintf("could not found current context: %s\n", currentContext), 1)
+	}
+	ctx := tmpCtx.(mmh.Context)
+	ctxConfig := filepath.Join(cfgDir, ctx.ConfigPath)
+	if _, err = os.Stat(ctxConfig); err != nil {
+		utils.Exit(fmt.Sprintf("current context [%s] config file %s not found\n", currentContext, ctx.ConfigPath), 1)
+	}
+
+	mmh.CtxViper.SetConfigFile(ctxConfig)
 
 	// load context config
 	mmh.CtxViper.AutomaticEnv()
@@ -90,10 +106,10 @@ func writeExampleConfig(cfgDir string) {
 
 	// write main config
 	mmh.MainViper.Set(mmh.KeyContext, mmh.Contexts{
-		{
-			Name:          "default",
+		"default": {
 			IsRemote:      false,
 			RemoteAddress: "",
+			ConfigPath:    "./default.yaml",
 		},
 	})
 	mmh.MainViper.Set(mmh.KeyCurrentContext, "default")
