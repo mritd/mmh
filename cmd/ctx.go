@@ -17,19 +17,49 @@
 package cmd
 
 import (
+	"github.com/mritd/mmh/pkg/mmh"
 	"github.com/spf13/cobra"
 )
 
 var ctxCmd = &cobra.Command{
-	Use:   "ctx",
+	Use:   "ctx CONTEXT",
 	Short: "Change current context",
 	Long: `
 Change current context.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		_ = cmd.Help()
+		if len(args) == 1 {
+			mmh.ContextUse(args[0])
+		} else {
+			_ = cmd.Help()
+		}
+	},
+}
+
+var ctxListCmd = &cobra.Command{
+	Use:   "ls",
+	Short: "List context",
+	Long: `
+List context`,
+	Run: func(cmd *cobra.Command, args []string) {
+		mmh.ContextList()
+	},
+}
+
+var ctxUseCmd = &cobra.Command{
+	Use:   "use",
+	Short: "Use context",
+	Long: `
+Use context`,
+	Run: func(cmd *cobra.Command, args []string) {
+		if len(args) != 1 {
+			_ = cmd.Help()
+			return
+		}
+		mmh.ContextUse(args[0])
 	},
 }
 
 func init() {
+	ctxCmd.AddCommand(ctxListCmd, ctxUseCmd)
 	RootCmd.AddCommand(ctxCmd)
 }

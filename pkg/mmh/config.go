@@ -59,9 +59,10 @@ var (
 	allTags    []string
 	basic      Basic
 	servers    Servers
+	conetxts   Contexts
 	serversMap = make(map[string]*Server)
 	tagsMap    = make(map[string][]*Server)
-	maxProxy   = CtxViper.GetInt("maxProxy")
+	maxProxy   = 0
 )
 
 var (
@@ -79,7 +80,7 @@ func InitConfig() {
 
 			// set default max proxy
 			if maxProxy == 0 {
-				maxProxy = 5
+				maxProxy = CtxViper.GetInt("maxProxy")
 			}
 
 			// get home dir
@@ -95,6 +96,9 @@ func InitConfig() {
 				Password:           "",
 				Proxy:              "",
 			})
+
+			// init contexts
+			utils.CheckAndExit(MainViper.UnmarshalKey(KeyContext, &conetxts))
 
 			// init basic config
 			utils.CheckAndExit(CtxViper.UnmarshalKey(KeyBasic, &basic))
@@ -128,7 +132,7 @@ func InitConfig() {
 
 }
 
-func AddServer() {
+func ServerAdd() {
 
 	// name
 	p := promptx.NewDefaultPrompt(func(line []rune) error {
@@ -300,7 +304,7 @@ func AddServer() {
 	utils.CheckAndExit(CtxViper.WriteConfig())
 }
 
-func DeleteServer(name string) {
+func ServerDelete(name string) {
 
 	delIdx := -1
 	for i, s := range servers {
@@ -320,7 +324,7 @@ func DeleteServer(name string) {
 
 }
 
-func ListServers() {
+func ServerList() {
 
 	tpl := `Name          User          Tags          Address
 -------------------------------------------------------------
@@ -353,6 +357,21 @@ Proxy: {{ .Proxy }}`
 	var buf bytes.Buffer
 	utils.CheckAndExit(t.Execute(&buf, s))
 	fmt.Println(buf.String())
+}
+
+func ContextList() {
+	for k := range conetxts {
+		fmt.Println(k)
+	}
+}
+
+func ContextUse(ctxName string) {
+	_, ok := conetxts[ctxName]
+	if !ok {
+		utils.Exit(fmt.Sprintf("context [%s] not found", ctxName), 1)
+	}
+	MainViper.Set(KeyCurrentContext, ctxName)
+	utils.CheckAndExit(MainViper.WriteConfig())
 }
 
 func listLayout(name string) string {
