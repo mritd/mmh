@@ -22,16 +22,13 @@ import (
 )
 
 var ctxCmd = &cobra.Command{
-	Use:   "ctx CONTEXT",
-	Short: "Change current context",
+	Use:     "ctx",
+	Short:   "Change current context",
+	Aliases: []string{"mcx"},
 	Long: `
 Change current context.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 1 {
-			mmh.ContextUse(args[0])
-		} else {
-			_ = cmd.Help()
-		}
+		_ = cmd.Help()
 	},
 }
 
