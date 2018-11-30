@@ -22,8 +22,9 @@ import (
 )
 
 var serverCmd = &cobra.Command{
-	Use:   "server",
-	Short: "Server command",
+	Use:     "server",
+	Short:   "Server command",
+	Aliases: []string{"mms"},
 	Long: `
 Server command.`,
 	Run: func(cmd *cobra.Command, args []string) {
