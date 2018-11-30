@@ -64,7 +64,7 @@ func Exec(tagOrName, cmd string, singleServer bool) {
 			exec(ctx, server, singleServer, cmd, errCh)
 			select {
 			case err := <-errCh:
-				color.New(color.BgRed, color.FgHiWhite).Print(err)
+				_, _ = color.New(color.BgRed, color.FgHiWhite).Print(err)
 				fmt.Println()
 			default:
 			}
@@ -88,7 +88,7 @@ func Exec(tagOrName, cmd string, singleServer bool) {
 				exec(ctx, server, singleServer, cmd, errCh)
 				select {
 				case err := <-errCh:
-					color.New(color.BgRed, color.FgHiWhite).Printf("%s:  %s", server.Name, err)
+					_, _ = color.New(color.BgRed, color.FgHiWhite).Printf("%s:  %s", server.Name, err)
 					fmt.Println()
 				default:
 				}
@@ -105,7 +105,9 @@ func exec(ctx context.Context, s *Server, singleServer bool, cmd string, errCh c
 		errCh <- err
 		return
 	}
-	defer sshClient.Close()
+	defer func() {
+		_ = sshClient.Close()
+	}()
 
 	session, err := sshClient.NewSession()
 	if err != nil {
@@ -114,7 +116,9 @@ func exec(ctx context.Context, s *Server, singleServer bool, cmd string, errCh c
 	}
 
 	sshSession := sshutils.NewSSHSession(session)
-	defer sshSession.Close()
+	defer func() {
+		_ = sshSession.Close()
+	}()
 
 	// exec cmd
 	go sshSession.PipeExec(cmd)
@@ -139,7 +143,7 @@ func exec(ctx context.Context, s *Server, singleServer bool, cmd string, errCh c
 		case <-sshSession.Ready():
 			// read from sshSession.Stdout and print to os.stdout
 			if singleServer {
-				io.Copy(os.Stdout, sshSession.Stdout)
+				_, _ = io.Copy(os.Stdout, sshSession.Stdout)
 			} else {
 				f := getColorFuncName()
 				t, err := template.New("").Funcs(ColorsFuncMap).Parse(fmt.Sprintf(`{{ .Name | %s}}{{ ":" | %s}}  {{ .Value }}`, f, f))
@@ -180,9 +184,9 @@ func exec(ctx context.Context, s *Server, singleServer bool, cmd string, errCh c
 
 	select {
 	case <-ctx.Done():
-		sshClient.Close()
+		_ = sshClient.Close()
 	case <-sshSession.Done():
-		sshClient.Close()
+		_ = sshClient.Close()
 	}
 
 	errWg.Wait()

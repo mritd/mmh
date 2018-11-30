@@ -30,7 +30,7 @@ Delete ssh server.`,
 		if len(args) == 1 {
 			mmh.DeleteServer(args[0])
 		} else {
-			cmd.Help()
+			_ = cmd.Help()
 		}
 	},
 }

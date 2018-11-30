@@ -42,9 +42,9 @@ func Uninstall(dir string) {
 	} else {
 		for _, bin := range binPaths {
 			fmt.Printf("Remove %s\n", bin)
-			os.Remove(bin)
+			_ = os.Remove(bin)
 		}
 		fmt.Printf("Remove %s\n", filepath.Join(dir, "mmh"))
-		os.Remove(filepath.Join(dir, "mmh"))
+		_ = os.Remove(filepath.Join(dir, "mmh"))
 	}
 }

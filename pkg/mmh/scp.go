@@ -54,7 +54,9 @@ func runCopy(args []string, singleServer bool) error {
 			if err != nil {
 				return err
 			}
-			defer client.Close()
+			defer func() {
+				_ = client.Close()
+			}()
 			scpClient, err := sshutils.NewSCPClient(client)
 			if err != nil {
 				return err
@@ -77,7 +79,9 @@ func runCopy(args []string, singleServer bool) error {
 				if err != nil {
 					return err
 				}
-				defer client.Close()
+				defer func() {
+					_ = client.Close()
+				}()
 				scpClient, err := sshutils.NewSCPClient(client)
 				if err != nil {
 					return err
@@ -101,13 +105,15 @@ func runCopy(args []string, singleServer bool) error {
 					defer wg.Done()
 					client, err := tmpServer.sshClient()
 					if err != nil {
-						color.New(color.BgRed, color.FgHiWhite).Printf("%s:  %s", tmpServer.Name, err)
+						_, _ = color.New(color.BgRed, color.FgHiWhite).Printf("%s:  %s", tmpServer.Name, err)
 						return
 					}
-					defer client.Close()
+					defer func() {
+						_ = client.Close()
+					}()
 					scpClient, err := sshutils.NewSCPClient(client)
 					if err != nil {
-						color.New(color.BgRed, color.FgHiWhite).Printf("%s:  %s", tmpServer.Name, err)
+						_, _ = color.New(color.BgRed, color.FgHiWhite).Printf("%s:  %s", tmpServer.Name, err)
 						return
 					}
 
@@ -115,7 +121,7 @@ func runCopy(args []string, singleServer bool) error {
 					allArg = append(allArg, remotePath)
 					err = scpClient.CopyLocal2Remote(allArg...)
 					if err != nil {
-						color.New(color.BgRed, color.FgHiWhite).Printf("%s:  %s", tmpServer.Name, err)
+						_, _ = color.New(color.BgRed, color.FgHiWhite).Printf("%s:  %s", tmpServer.Name, err)
 						return
 					}
 				}()

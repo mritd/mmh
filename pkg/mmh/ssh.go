@@ -158,7 +158,9 @@ func (s *Server) Connect() error {
 	if err != nil {
 		return err
 	}
-	defer sshClient.Close()
+	defer func() {
+		_ = sshClient.Close()
+	}()
 
 	session, err := sshClient.NewSession()
 	if err != nil {
@@ -166,7 +168,9 @@ func (s *Server) Connect() error {
 	}
 
 	sshSession := sshutils.NewSSHSession(session)
-	defer sshSession.Close()
+	defer func() {
+		_ = sshSession.Close()
+	}()
 
 	return sshSession.Terminal()
 }

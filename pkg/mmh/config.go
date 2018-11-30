@@ -331,7 +331,7 @@ func ListServers() {
 		"MergeTag":   mergeTag,
 	})
 
-	t.Parse(tpl)
+	_, _ = t.Parse(tpl)
 	var buf bytes.Buffer
 	utils.CheckAndExit(t.Execute(&buf, servers))
 	fmt.Println(buf.String())
@@ -349,7 +349,7 @@ Address: {{ .Address }}:{{ .Port }}
 Tags: {{ .Tags | MergeTag }}
 Proxy: {{ .Proxy }}`
 	t := template.New("").Funcs(map[string]interface{}{"MergeTag": mergeTag})
-	t.Parse(tpl)
+	_, _ = t.Parse(tpl)
 	var buf bytes.Buffer
 	utils.CheckAndExit(t.Execute(&buf, s))
 	fmt.Println(buf.String())

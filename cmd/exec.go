@@ -32,7 +32,7 @@ var execCmd = &cobra.Command{
 Batch exec command.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) < 2 {
-			cmd.Help()
+			_ = cmd.Help()
 		} else {
 			cmd := strings.Join(args[1:], " ")
 			mmh.Exec(args[0], cmd, singleExecServer)

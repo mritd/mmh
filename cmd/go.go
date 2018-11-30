@@ -31,7 +31,7 @@ Login single server.`,
 		if len(args) == 1 {
 			mmh.SingleLogin(args[0])
 		} else {
-			cmd.Help()
+			_ = cmd.Help()
 		}
 	},
 }

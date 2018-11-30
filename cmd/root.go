@@ -77,16 +77,17 @@ func initConfig() {
 
 	// get context
 	currentContext := mmh.MainViper.GetString(mmh.KeyCurrentContext)
-	allContexts := mmh.MainViper.GetStringMap(mmh.KeyContext)
+	var allContexts mmh.Contexts
+	utils.CheckAndExit(mmh.MainViper.UnmarshalKey(mmh.KeyContext, &allContexts))
 
 	if currentContext == "" || len(allContexts) == 0 {
 		utils.Exit("get context failed", 1)
 	}
-	tmpCtx, ok := allContexts[currentContext]
+
+	ctx, ok := allContexts[currentContext]
 	if !ok {
 		utils.Exit(fmt.Sprintf("could not found current context: %s\n", currentContext), 1)
 	}
-	ctx := tmpCtx.(mmh.Context)
 	ctxConfig := filepath.Join(cfgDir, ctx.ConfigPath)
 	if _, err = os.Stat(ctxConfig); err != nil {
 		utils.Exit(fmt.Sprintf("current context [%s] config file %s not found\n", currentContext, ctx.ConfigPath), 1)
