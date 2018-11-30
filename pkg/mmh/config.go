@@ -304,23 +304,43 @@ func ServerAdd() {
 	utils.CheckAndExit(CtxViper.WriteConfig())
 }
 
-func ServerDelete(name string) {
+func ServerDelete(serverNames []string) {
 
-	delIdx := -1
-	for i, s := range servers {
-		if strings.ToLower(s.Name) == strings.ToLower(name) {
-			delIdx = i
+	var deletesIdx []int
+
+	for _, serverName := range serverNames {
+		for i, s := range servers {
+			matched, err := filepath.Match(serverName, s.Name)
+			// server name may contain special characters
+			if err != nil {
+				// check equal
+				if strings.ToLower(s.Name) == strings.ToLower(serverName) {
+					deletesIdx = append(deletesIdx, i)
+				}
+			} else {
+				if matched {
+					deletesIdx = append(deletesIdx, i)
+				}
+			}
+
 		}
+
 	}
 
-	if delIdx == -1 {
+	if len(deletesIdx) == 0 {
 		utils.Exit("Server not found!", 1)
-	} else {
-		servers = append(servers[:delIdx], servers[delIdx+1:]...)
-		sort.Sort(servers)
-		CtxViper.Set(KeyServers, servers)
-		utils.CheckAndExit(CtxViper.WriteConfig())
 	}
+
+	// sort and delete
+	sort.Ints(deletesIdx)
+	for i, del := range deletesIdx {
+		servers = append(servers[:del-i], servers[del-i+1:]...)
+	}
+
+	// save config
+	sort.Sort(servers)
+	CtxViper.Set(KeyServers, servers)
+	utils.CheckAndExit(CtxViper.WriteConfig())
 
 }
 

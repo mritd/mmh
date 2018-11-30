@@ -43,13 +43,13 @@ Add ssh server.`,
 }
 
 var serverDelCmd = &cobra.Command{
-	Use:   "del SERVER_NAME",
+	Use:   "del SERVER1 SERVER2...",
 	Short: "Delete ssh server",
 	Long: `
 Delete ssh server.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 1 {
-			mmh.ServerDelete(args[0])
+		if len(args) > 0 {
+			mmh.ServerDelete(args)
 		} else {
 			_ = cmd.Help()
 		}
