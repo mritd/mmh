@@ -21,7 +21,27 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var delCmd = &cobra.Command{
+var serverCmd = &cobra.Command{
+	Use:   "server",
+	Short: "Server command",
+	Long: `
+Server command.`,
+	Run: func(cmd *cobra.Command, args []string) {
+		_ = cmd.Help()
+	},
+}
+
+var serverAddCmd = &cobra.Command{
+	Use:   "add",
+	Short: "Add ssh server",
+	Long: `
+Add ssh server.`,
+	Run: func(cmd *cobra.Command, args []string) {
+		mmh.AddServer()
+	},
+}
+
+var serverDelCmd = &cobra.Command{
 	Use:   "del SERVER_NAME",
 	Short: "Delete ssh server",
 	Long: `
@@ -35,6 +55,24 @@ Delete ssh server.`,
 	},
 }
 
+var serverListCmd = &cobra.Command{
+	Use:   "ls [SERVER_NAME]",
+	Short: "List ssh server",
+	Long: `
+List ssh server.`,
+	Run: func(cmd *cobra.Command, args []string) {
+		if len(args) == 1 {
+			mmh.ListServer(args[0])
+		} else {
+			mmh.ListServers()
+		}
+	},
+}
+
 func init() {
-	RootCmd.AddCommand(delCmd)
+	serverCmd.AddCommand(serverAddCmd)
+	serverCmd.AddCommand(serverDelCmd)
+	serverCmd.AddCommand(serverListCmd)
+	RootCmd.AddCommand(serverCmd)
+
 }

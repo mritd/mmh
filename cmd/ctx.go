@@ -17,24 +17,19 @@
 package cmd
 
 import (
-	"github.com/mritd/mmh/pkg/mmh"
 	"github.com/spf13/cobra"
 )
 
-var lsCmd = &cobra.Command{
-	Use:   "ls [SERVER_NAME]",
-	Short: "List ssh server",
+var ctxCmd = &cobra.Command{
+	Use:   "ctx",
+	Short: "Change current context",
 	Long: `
-List ssh server.`,
+Change current context.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 1 {
-			mmh.ListServer(args[0])
-		} else {
-			mmh.ListServers()
-		}
+		_ = cmd.Help()
 	},
 }
 
 func init() {
-	RootCmd.AddCommand(lsCmd)
+	RootCmd.AddCommand(ctxCmd)
 }
