@@ -30,7 +30,7 @@ import (
 
 func CheckAndExit(err error) {
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("😱 " + err.Error())
 		os.Exit(1)
 	}
 }
@@ -53,7 +53,7 @@ func Exit(message string, code int) {
 	if strings.TrimSpace(message) == "" {
 		message = "No message"
 	}
-	fmt.Println(message)
+	fmt.Println("😱 " + message)
 	os.Exit(code)
 }
 

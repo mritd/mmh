@@ -38,7 +38,7 @@ func Install(dir string) {
 	CheckAndExit(err)
 
 	if !Root() {
-		cmd := exec.Command("sudo", currentPath, "install")
+		cmd := exec.Command("sudo", currentPath, "install", "--dir", dir)
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
 		CheckAndExit(cmd.Run())
@@ -57,11 +57,11 @@ func Install(dir string) {
 			_ = target.Close()
 		}()
 
-		fmt.Printf("Install %s\n", filepath.Join(dir, "mmh"))
+		fmt.Printf("📥 install %s\n", filepath.Join(dir, "mmh"))
 		_, err = io.Copy(target, f)
 		CheckAndExit(err)
 		for _, bin := range binPaths {
-			fmt.Printf("Install %s\n", bin)
+			fmt.Printf("📥 install %s\n", bin)
 			CheckAndExit(os.Symlink(filepath.Join(dir, "mmh"), bin))
 		}
 	}

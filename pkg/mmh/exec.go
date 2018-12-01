@@ -58,7 +58,7 @@ func Exec(tagOrName, cmd string, singleServer bool) {
 	if singleServer {
 		server := findServerByName(tagOrName)
 		if server == nil {
-			utils.Exit("Server not found", 1)
+			utils.Exit("server not found", 1)
 		} else {
 			var errCh = make(chan error, 1)
 			exec(ctx, server, singleServer, cmd, errCh)
@@ -72,7 +72,7 @@ func Exec(tagOrName, cmd string, singleServer bool) {
 	} else {
 		servers := tagsMap[tagOrName]
 		if len(servers) == 0 {
-			utils.Exit("Tagged server not found", 1)
+			utils.Exit("tagged server not found", 1)
 		}
 
 		// create goroutine

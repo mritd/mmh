@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/mritd/promptx/util"
 
@@ -76,21 +77,33 @@ func initConfig() {
 	util.CheckAndExit(mmh.MainViper.ReadInConfig())
 
 	// get context
-	currentContext := mmh.MainViper.GetString(mmh.KeyCurrentContext)
+	contextUse := mmh.MainViper.GetString(mmh.KeyContextUse)
+	contextUseTime := mmh.MainViper.GetTime(mmh.KeyContextUseTime)
+	contextTimeout := mmh.MainViper.GetDuration(mmh.KeyContextTimeout)
+	contextAutoDowngrade := mmh.MainViper.GetString(mmh.KeyContextAutoDowngrade)
+	// if timeout, context will downgrade
+	if !contextUseTime.IsZero() && contextTimeout != 0 && contextAutoDowngrade != "" {
+		if time.Now().After(contextUseTime.Add(contextTimeout)) && contextUse != contextAutoDowngrade {
+			fmt.Printf("🍁 context timeout, auto downgrade => [%s]\n", contextAutoDowngrade)
+			contextUse = contextAutoDowngrade
+			mmh.MainViper.Set(mmh.KeyContextUse, contextUse)
+			utils.CheckAndExit(mmh.MainViper.WriteConfig())
+		}
+	}
 	var allContexts mmh.Contexts
 	utils.CheckAndExit(mmh.MainViper.UnmarshalKey(mmh.KeyContext, &allContexts))
 
-	if currentContext == "" || len(allContexts) == 0 {
+	if contextUse == "" || len(allContexts) == 0 {
 		utils.Exit("get context failed", 1)
 	}
 
-	ctx, ok := allContexts[currentContext]
+	ctx, ok := allContexts[contextUse]
 	if !ok {
-		utils.Exit(fmt.Sprintf("could not found current context: %s\n", currentContext), 1)
+		utils.Exit(fmt.Sprintf("could not found current context: %s\n", contextUse), 1)
 	}
 	ctxConfig := filepath.Join(cfgDir, ctx.ConfigPath)
 	if _, err = os.Stat(ctxConfig); err != nil {
-		utils.Exit(fmt.Sprintf("current context [%s] config file %s not found\n", currentContext, ctx.ConfigPath), 1)
+		utils.Exit(fmt.Sprintf("current context [%s] config file %s not found\n", contextUse, ctx.ConfigPath), 1)
 	}
 
 	mmh.CtxViper.SetConfigFile(ctxConfig)
@@ -113,7 +126,9 @@ func writeExampleConfig(cfgDir string) {
 			ConfigPath:    "./default.yaml",
 		},
 	})
-	mmh.MainViper.Set(mmh.KeyCurrentContext, "default")
+	mmh.MainViper.Set(mmh.KeyContextUse, "default")
+	mmh.MainViper.Set(mmh.KeyContextTimeout, "")
+	mmh.MainViper.Set(mmh.KeyContextAutoDowngrade, "default")
 	utils.CheckAndExit(mmh.MainViper.WriteConfig())
 
 	// write context config

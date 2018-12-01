@@ -37,16 +37,16 @@ func Uninstall(dir string) {
 	CheckAndExit(err)
 
 	if !Root() {
-		cmd := exec.Command("sudo", currentPath, "uninstall")
+		cmd := exec.Command("sudo", currentPath, "uninstall", "--dir", dir)
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
 		CheckAndExit(cmd.Run())
 	} else {
 		for _, bin := range binPaths {
-			fmt.Printf("Remove %s\n", bin)
+			fmt.Printf("👉 remove %s\n", bin)
 			_ = os.Remove(bin)
 		}
-		fmt.Printf("Remove %s\n", filepath.Join(dir, "mmh"))
+		fmt.Printf("👉 remove %s\n", filepath.Join(dir, "mmh"))
 		_ = os.Remove(filepath.Join(dir, "mmh"))
 	}
 }

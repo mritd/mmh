@@ -20,6 +20,7 @@ import (
 	"errors"
 	"strings"
 	"sync"
+	"time"
 
 	"strconv"
 
@@ -38,11 +39,16 @@ import (
 	"github.com/spf13/viper"
 )
 
-const KeyServers = "servers"
-const KeyBasic = "basic"
-const KeyTags = "tags"
-const KeyContext = "context"
-const KeyCurrentContext = "current_context"
+const (
+	KeyServers              = "servers"
+	KeyBasic                = "basic"
+	KeyTags                 = "tags"
+	KeyContext              = "context"
+	KeyContextUse           = "context_use"
+	KeyContextUseTime       = "context_use_time"
+	KeyContextTimeout       = "context_timeout"
+	KeyContextAutoDowngrade = "context_auto_downgrade"
+)
 
 type Context struct {
 	IsRemote      bool   `yaml:"is_remote" mapstructure:"is_remote"`
@@ -328,7 +334,7 @@ func ServerDelete(serverNames []string) {
 	}
 
 	if len(deletesIdx) == 0 {
-		utils.Exit("Server not found!", 1)
+		utils.Exit("server not found!", 1)
 	}
 
 	// sort and delete
@@ -364,8 +370,7 @@ func ServerList() {
 func ListServer(serverName string) {
 	s := findServerByName(serverName)
 	if s == nil {
-		fmt.Println("server not found!")
-		return
+		utils.Exit("server not found!", 1)
 	}
 	tpl := `Name: {{ .Name }}
 User: {{ .User }}
@@ -397,7 +402,7 @@ func ContextList() {
 		ConfigPath     string
 		CurrentContext bool
 	}
-	currentContext := MainViper.GetString(KeyCurrentContext)
+	currentContext := MainViper.GetString(KeyContextUse)
 
 	for k, v := range conetxts {
 		if k == currentContext {
@@ -433,7 +438,7 @@ func ContextUse(ctxName string) {
 	if !ok {
 		utils.Exit(fmt.Sprintf("context [%s] not found", ctxName), 1)
 	}
-	MainViper.Set(KeyCurrentContext, ctxName)
+	MainViper.Set(KeyContextUse, ctxName)
 	utils.CheckAndExit(MainViper.WriteConfig())
 }
 
@@ -451,4 +456,9 @@ func mergeTag(tags []string) string {
 
 func findServerByName(name string) *Server {
 	return serversMap[strings.ToLower(name)]
+}
+
+func UpdateContextTimestamp() {
+	MainViper.Set(KeyContextUseTime, time.Now())
+	utils.CheckAndExit(MainViper.WriteConfig())
 }

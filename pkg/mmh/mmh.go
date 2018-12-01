@@ -24,7 +24,7 @@ import (
 func SingleLogin(name string) {
 	s := findServerByName(name)
 	if s == nil {
-		utils.Exit("Server not found!", 1)
+		utils.Exit("server not found!", 1)
 	} else {
 		utils.CheckAndExit(s.Connect())
 	}

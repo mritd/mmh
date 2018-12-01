@@ -126,7 +126,7 @@ func (s *Server) sshClient() (*ssh.Client, error) {
 		if proxy == nil {
 			return nil, errors.New(fmt.Sprintf("cloud not found proxy server: %s", s.Proxy))
 		} else {
-			fmt.Printf("Using proxy [%s], connect to => %s\n", s.Proxy, s.Name)
+			fmt.Printf("🔑 using proxy [%s], connect to => %s\n", s.Proxy, s.Name)
 		}
 
 		// recursive connect
