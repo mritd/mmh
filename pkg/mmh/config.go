@@ -380,9 +380,52 @@ Proxy: {{ .Proxy }}`
 }
 
 func ContextList() {
-	for k := range conetxts {
-		fmt.Println(k)
+
+	tpl := `  Name          Path
+---------------------------------
+{{ range .}}{{ if .CurrentContext }}» {{ .Name | ListLayout }}{{ else }}  {{ .Name | ListLayout }}{{ end }}  {{ .ConfigPath }}
+{{ end }}`
+
+	t := template.New("").Funcs(map[string]interface{}{
+		"ListLayout": listLayout,
+		"MergeTag":   mergeTag,
+	})
+	_, _ = t.Parse(tpl)
+
+	var dataType []struct {
+		Name           string
+		ConfigPath     string
+		CurrentContext bool
 	}
+	currentContext := MainViper.GetString(KeyCurrentContext)
+
+	for k, v := range conetxts {
+		if k == currentContext {
+			dataType = append(dataType, struct {
+				Name           string
+				ConfigPath     string
+				CurrentContext bool
+			}{
+				Name:           k,
+				ConfigPath:     v.ConfigPath,
+				CurrentContext: true,
+			})
+		} else {
+			dataType = append(dataType, struct {
+				Name           string
+				ConfigPath     string
+				CurrentContext bool
+			}{
+				Name:           k,
+				ConfigPath:     v.ConfigPath,
+				CurrentContext: false,
+			})
+		}
+	}
+
+	var buf bytes.Buffer
+	utils.CheckAndExit(t.Execute(&buf, dataType))
+	fmt.Println(buf.String())
 }
 
 func ContextUse(ctxName string) {
