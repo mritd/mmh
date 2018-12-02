@@ -4,8 +4,7 @@
 
 ### 安装
 
-可直接从 [release](https://github.com/mritd/mmh/releases) 页下载预编译的二进制文件，然后执行 `sudo mmh install` 即可；
-卸载直接执行 `sudo mmh uninstall`，卸载命令不会删除 `~/.mmh.yaml` 配置文件。
+可直接从 [release](https://github.com/mritd/mmh/releases) 页下载预编译的二进制文件，然后执行 `mmh install` (需要root 权限，自动请求 `sudo`)即可；卸载直接执行 `mmh uninstall`，卸载命令不会删除 `~/.mmh.yaml` 配置文件。
 
 **默认安装到 `/usr/bin` 目录下，如果受权限限制无法安装，请使用 `--dir` 选项指定其他安装目录**
 
@@ -21,67 +20,94 @@ Usage:
   mmh [command]
 
 Available Commands:
-  add         Add ssh server
   cp          Copies files between hosts on a network
-  del         Delete ssh server
+  ctx         Change current context
   exec        Batch exec command
   go          Login single server
   help        Help about any command
   install     Install mmh
-  ls          List ssh server
+  server      Server command
   uninstall   Uninstall mmh
   version     Print version
 
 Flags:
-      --config string   config file (default is $HOME/.mmh.yaml)
-  -h, --help            help for mmh
+  -h, --help   help for mmh
 
 Use "mmh [command] --help" for more information about a command.
 ```
 
-### 自动登录 
+### 配置文件
 
-默认该工具在首次运行后将会创建 `$HOME/.mmh.yaml` 样例配置；配置中可以设置服务器地址、别名、登录方式等；样例配置如下:
+从 `v1.3.0` 版本开始，支持多配置文件切换功能；安装完成后将会自动在 `$HOME/.mmh` 下创建样例配置，默认配置文件结构如下
 
-```yaml
-# 最大跳板机数量
-maxProxy: 5
-
-# 默认配置
-basic:
-  user: root
-  port: 22
-  password:
-  privatekey: "/Users/mritd/.ssh/id_rsa"
-  privatekey_password: ""
-
-# 服务器配置
-servers:
-- name: d24
-  tags:
-  - doh
-  user: root
-  privatekey: "/Users/mritd/.ssh/id_rsa"
-  privatekey_password: ""
-  address: 172.16.0.24
-  port: 22
-  proxy: "d33"
-- name: d33
-  tags:
-  - doh
-  - k8s
-  user: root
-  password: "password"
-  address: 172.16.0.33
-  port: 22
-
-# tags
-tags:
-  - doh
-  - k8s
+``` sh
+➜  ~ tree .mmh
+.mmh
+├── default.yaml
+└── main.yaml
 ```
 
-修改配置文件后可以使用 `mgo SERVER_NAME` 直接登录，如需交互式登录可执行 `mmh` 即可；其他相关命令如 `mmh ls/add/del` 
+#### main.yaml
+
+主配置文件结构如下
+
+``` yaml
+context:
+  default:
+    config_path: ./default.yaml
+context_auto_downgrade: default
+context_timeout: 30m
+context_use: default
+context_use_time: 2018-12-02T19:50:44.681871+08:00
+```
+
+主配置文件中可以配置多个 `context`，由 `context_use` 字段指明当前使用哪个 `context`，**在每个 `context` 下执行完命令都会刷新 `context_use_time` 时间戳**；如果同时配置了 `context_timeout` 和 `context_auto_downgrade` 字段，**每次执行命令前都会检查上次使用时间距今是否超过了 `context_timeout`，如果超过则将会自动回退到 `context_auto_downgrade` 指定的 `context`**；这样可以避免长时间停留在某个重要的 `context` 上从而造成误操作(比如线上环境)
+
+#### default.yaml
+
+这个是真正的 SSH 配置，一般情况下其与对应的 `context` 名称相同；该配置文件样例如下
+
+``` yaml
+basic:
+  user: root
+  password: ""
+  privatekey: /Users/mritd/.ssh/id_rsa
+  privatekey_password: ""
+  port: 22
+  proxy: ""
+maxproxy: 5
+servers:
+- name: prod11
+  tags:
+  - prod
+  user: root
+  password: password
+  privatekey: ""
+  privatekey_password: ""
+  address: 10.10.4.11
+  port: 22
+  proxy: prod12
+- name: prod12
+  tags:
+  - prod
+  user: root
+  password: ""
+  privatekey: /Users/mritd/.ssh/id_rsa
+  privatekey_password: password
+  address: 10.10.4.12
+  port: 22
+  proxy: ""
+tags:
+- prod
+- test
+```
+
+`basic` 段为默认配置，用于在 `servers` 段中某项配置不存在时进行填充；`servers` 段中可以配置 N 多个服务器(`server`)；每个 `server` 除了常规的 SSH 相关配置外还增加了 `proxy` 字段用于支持无限跳板(具体见下文)；`tag` 字段必须存在于在下面的 `tags` 段中，该配置主要是为了给服务器打 `tag` 方便批量复制与执行；`maxproxy` 是一个数字，用于处理当出现配置错误导致 "真·无限跳板" 情况时自动断开链接
+
+
+### 自动登录 
+
+可以使用 `mgo SERVER_NAME` 直接登录，如需交互式登录可执行 `mmh` 即可；其他相关命令如 `mms ls/add/del` 
 都与添加修改服务器配置相关，请自行尝试:
 
 ![mmh](img/mmh.gif)
@@ -93,7 +119,7 @@ tags:
 如果 C 的 `proxy` 设置为 B，同时 B 的 `proxy` 设置为 A，那么实际在登录 C 时，工具实际连接顺序为: `local->A->B->C`
 
 **不要去尝试循环登录，比如 `A->B->C->A` 这种配置，工具内部已经做了检测防止产生这种 "真·无限跳板" 的情况，
-默认最大跳板机数量被限制为 5 台，可通过在配置文件根节点中增加 `maxProxy` 字段进行调整**
+默认最大跳板机数量被限制为 5 台，可通过在配置文件中增加 `maxProxy` 字段进行调整**
 
 ### 管道式批量执行
 
@@ -112,7 +138,7 @@ Aliases:
 
 Flags:
   -h, --help     help for exec
-  -s, --single   Single server
+  -s, --single   single server
 ```
 
 在配置文件中每个服务器可以配置多个 tag，**`mec` 默认对给定的 tag 下所有机器执行命令**，如需对单个机器执行请使用 `-s` 选项；
@@ -149,3 +175,32 @@ Flags:
 但是复制功能是有能力造成文件覆盖的，从而造成灾难性后果；所以请谨慎使用，目前只针对常规情况作了大部分测试。**
 
 ![mcp](img/mcp.gif)
+
+### 多环境切换
+
+考虑到同时将多个环境的配置放在同一个配置文件中会有混乱，同时也可能出现误操作的情况，`v1.3.0` 版本增加了 `context` 的概念；每个 `context` 被认为是一种环境，比如 `prod`、`test`、`uat` 等，每个环境的机器配置被分成了独立的文件以方便单独修改与加载；控制使用哪个 `context` 可以使用 `mcx use CONTEXT_NAME` 命令
+
+``` sh
+➜  ~ mcx --help
+
+Change current context.
+
+Usage:
+  ctx [flags]
+  ctx [command]
+
+Aliases:
+  ctx, mcx
+
+Available Commands:
+  help        Help about any command
+  ls          List context
+  use         Use context
+
+Flags:
+  -h, --help   help for ctx
+
+Use "ctx [command] --help" for more information about a command.
+```
+
+同时又增加了 `context` 自动回退功能，即给定一个超时时间，当在给定的超时时间内无操作(不会强行断开任何命令)，下次操作将会自动回退到指定的 `context`，具体请参考上文配置段
