@@ -39,10 +39,11 @@ func (s *Server) setDefault() {
 	}
 	if s.Password == "" {
 		s.Password = basic.Password
+		if s.PrivateKey == "" {
+			s.PrivateKey = basic.PrivateKey
+		}
 	}
-	if s.PrivateKey == "" {
-		s.PrivateKey = basic.PrivateKey
-	}
+
 	if s.PrivateKeyPassword == "" {
 		s.PrivateKeyPassword = basic.PrivateKeyPassword
 	}
