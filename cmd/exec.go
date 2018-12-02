@@ -38,6 +38,7 @@ Batch exec command.`,
 			mmh.Exec(args[0], cmd, singleExecServer)
 		}
 	},
+	PostRun: mmh.UpdateContextTimestamp,
 }
 
 func init() {

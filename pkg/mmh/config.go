@@ -22,6 +22,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/spf13/cobra"
+
 	"strconv"
 
 	"path/filepath"
@@ -430,7 +432,7 @@ func findServerByName(name string) *Server {
 	return serversMap[strings.ToLower(name)]
 }
 
-func UpdateContextTimestamp() {
+func UpdateContextTimestamp(_ *cobra.Command, _ []string) {
 	MainViper.Set(KeyContextUseTime, time.Now())
 	utils.CheckAndExit(MainViper.WriteConfig())
 }

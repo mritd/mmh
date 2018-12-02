@@ -38,6 +38,7 @@ A simple Multi-server ssh tool.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		mmh.InteractiveLogin()
 	},
+	PostRun: mmh.UpdateContextTimestamp,
 }
 
 func Execute() {

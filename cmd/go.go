@@ -34,6 +34,7 @@ Login single server.`,
 			_ = cmd.Help()
 		}
 	},
+	PostRun: mmh.UpdateContextTimestamp,
 }
 
 func init() {
