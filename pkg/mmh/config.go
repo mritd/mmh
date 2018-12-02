@@ -50,14 +50,6 @@ const (
 	KeyContextAutoDowngrade = "context_auto_downgrade"
 )
 
-type Context struct {
-	IsRemote      bool   `yaml:"is_remote" mapstructure:"is_remote"`
-	RemoteAddress string `yaml:"remote_address" mapstructure:"remote_address"`
-	ConfigPath    string `yaml:"config_path" mapstructure:"config_path"`
-}
-
-type Contexts map[string]Context
-
 var (
 	MainViper  = viper.New()
 	CtxViper   = viper.New()
@@ -65,7 +57,7 @@ var (
 	allTags    []string
 	basic      Basic
 	servers    Servers
-	conetxts   Contexts
+	contexts   Contexts
 	serversMap = make(map[string]*Server)
 	tagsMap    = make(map[string][]*Server)
 	maxProxy   = 0
@@ -104,7 +96,7 @@ func InitConfig() {
 			})
 
 			// init contexts
-			utils.CheckAndExit(MainViper.UnmarshalKey(KeyContext, &conetxts))
+			utils.CheckAndExit(MainViper.UnmarshalKey(KeyContext, &contexts))
 
 			// init basic config
 			utils.CheckAndExit(CtxViper.UnmarshalKey(KeyBasic, &basic))
@@ -367,7 +359,7 @@ func ServerList() {
 	fmt.Println(buf.String())
 }
 
-func ListServer(serverName string) {
+func ServerDetail(serverName string) {
 	s := findServerByName(serverName)
 	if s == nil {
 		utils.Exit("server not found!", 1)
@@ -388,7 +380,7 @@ func ContextList() {
 
 	tpl := `  Name          Path
 ---------------------------------
-{{ range .}}{{ if .CurrentContext }}» {{ .Name | ListLayout }}{{ else }}  {{ .Name | ListLayout }}{{ end }}  {{ .ConfigPath }}
+{{ range . }}{{ if .CurrentContext }}» {{ .Name | ListLayout }}{{ else }}  {{ .Name | ListLayout }}{{ end }}  {{ .ConfigPath }}
 {{ end }}`
 
 	t := template.New("").Funcs(map[string]interface{}{
@@ -397,44 +389,24 @@ func ContextList() {
 	})
 	_, _ = t.Parse(tpl)
 
-	var dataType []struct {
-		Name           string
-		ConfigPath     string
-		CurrentContext bool
-	}
 	currentContext := MainViper.GetString(KeyContextUse)
 
-	for k, v := range conetxts {
-		if k == currentContext {
-			dataType = append(dataType, struct {
-				Name           string
-				ConfigPath     string
-				CurrentContext bool
-			}{
-				Name:           k,
-				ConfigPath:     v.ConfigPath,
-				CurrentContext: true,
-			})
-		} else {
-			dataType = append(dataType, struct {
-				Name           string
-				ConfigPath     string
-				CurrentContext bool
-			}{
-				Name:           k,
-				ConfigPath:     v.ConfigPath,
-				CurrentContext: false,
-			})
-		}
+	var ctxList contextDetails
+	for k, v := range contexts {
+		ctxList = append(ctxList, contextDetail{
+			Name:           k,
+			ConfigPath:     v.ConfigPath,
+			CurrentContext: k == currentContext,
+		})
 	}
-
+	sort.Sort(ctxList)
 	var buf bytes.Buffer
-	utils.CheckAndExit(t.Execute(&buf, dataType))
+	utils.CheckAndExit(t.Execute(&buf, ctxList))
 	fmt.Println(buf.String())
 }
 
 func ContextUse(ctxName string) {
-	_, ok := conetxts[ctxName]
+	_, ok := contexts[ctxName]
 	if !ok {
 		utils.Exit(fmt.Sprintf("context [%s] not found", ctxName), 1)
 	}

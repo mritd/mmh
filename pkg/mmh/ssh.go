@@ -30,40 +30,6 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-type Basic struct {
-	User               string `yaml:"user" mapstructure:"user"`
-	Password           string `yaml:"password" mapstructure:"password"`
-	PrivateKey         string `yaml:"privatekey" mapstructure:"privatekey"`
-	PrivateKeyPassword string `yaml:"privatekey_password" mapstructure:"privatekey_password"`
-	Port               int    `yaml:"port" mapstructure:"port"`
-	Proxy              string `yaml:"proxy" mapstructure:"proxy"`
-}
-
-type Server struct {
-	Name               string   `yaml:"name" mapstructure:"name"`
-	Tags               []string `yaml:"tags" mapstructure:"tags"`
-	User               string   `yaml:"user" mapstructure:"user"`
-	Password           string   `yaml:"password" mapstructure:"password"`
-	PrivateKey         string   `yaml:"privatekey" mapstructure:"privatekey"`
-	PrivateKeyPassword string   `yaml:"privatekey_password" mapstructure:"privatekey_password"`
-	Address            string   `yaml:"address" mapstructure:"address"`
-	Port               int      `yaml:"port" mapstructure:"port"`
-	Proxy              string   `yaml:"proxy" mapstructure:"proxy"`
-	proxyCount         int
-}
-
-type Servers []*Server
-
-func (servers Servers) Len() int {
-	return len(servers)
-}
-func (servers Servers) Less(i, j int) bool {
-	return servers[i].Name < servers[j].Name
-}
-func (servers Servers) Swap(i, j int) {
-	servers[i], servers[j] = servers[j], servers[i]
-}
-
 func (s *Server) setDefault() {
 	if s.User == "" {
 		s.User = basic.User

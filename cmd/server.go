@@ -63,7 +63,7 @@ var serverListCmd = &cobra.Command{
 List ssh server.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 1 {
-			mmh.ListServer(args[0])
+			mmh.ServerDetail(args[0])
 		} else {
 			mmh.ServerList()
 		}

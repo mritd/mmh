@@ -145,8 +145,8 @@ func exec(ctx context.Context, s *Server, singleServer bool, cmd string, errCh c
 			if singleServer {
 				_, _ = io.Copy(os.Stdout, sshSession.Stdout)
 			} else {
-				f := getColorFuncName()
-				t, err := template.New("").Funcs(ColorsFuncMap).Parse(fmt.Sprintf(`{{ .Name | %s}}{{ ":" | %s}}  {{ .Value }}`, f, f))
+				f := utils.GetColorFuncName()
+				t, err := template.New("").Funcs(utils.ColorsFuncMap).Parse(fmt.Sprintf(`{{ .Name | %s}}{{ ":" | %s}}  {{ .Value }}`, f, f))
 				if err != nil {
 					errCh <- err
 					return

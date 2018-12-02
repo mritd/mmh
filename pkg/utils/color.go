@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package mmh
+package utils
 
 import (
 	"sort"
@@ -73,7 +73,7 @@ var ColorsFuncMap = template.FuncMap{
 	ColorWhite:   color.New(color.FgWhite).SprintfFunc(),
 }
 
-func getColorFuncName() string {
+func GetColorFuncName() string {
 	colorMux.Lock()
 	defer colorMux.Unlock()
 	sort.Sort(cs)
