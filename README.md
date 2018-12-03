@@ -4,7 +4,7 @@
 
 ### 安装
 
-可直接从 [release](https://github.com/mritd/mmh/releases) 页下载预编译的二进制文件，然后执行 `mmh install` (需要root 权限，自动请求 `sudo`)即可；卸载直接执行 `mmh uninstall`，卸载命令不会删除 `~/.mmh.yaml` 配置文件。
+可直接从 [release](https://github.com/mritd/mmh/releases) 页下载预编译的二进制文件，然后执行 `mmh install` (需要root 权限，自动请求 `sudo`)即可；卸载直接执行 `mmh uninstall`，卸载命令不会删除 `~/.mmh` 配置目录。
 
 **默认安装到 `/usr/bin` 目录下，如果受权限限制无法安装，请使用 `--dir` 选项指定其他安装目录**
 
