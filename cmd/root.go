@@ -122,9 +122,7 @@ func writeExampleConfig(cfgDir string) {
 	// write main config
 	mmh.MainViper.Set(mmh.KeyContext, mmh.Contexts{
 		"default": {
-			IsRemote:      false,
-			RemoteAddress: "",
-			ConfigPath:    "./default.yaml",
+			ConfigPath: "./default.yaml",
 		},
 	})
 	mmh.MainViper.Set(mmh.KeyContextUse, "default")
