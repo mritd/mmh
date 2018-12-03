@@ -102,7 +102,13 @@ func initConfig() {
 	if !ok {
 		utils.Exit(fmt.Sprintf("could not found current context: %s\n", contextUse), 1)
 	}
-	ctxConfig := filepath.Join(cfgDir, ctx.ConfigPath)
+
+	var ctxConfig string
+	if filepath.IsAbs(ctx.ConfigPath) {
+		ctxConfig = ctx.ConfigPath
+	} else {
+		ctxConfig = filepath.Join(cfgDir, ctx.ConfigPath)
+	}
 	if _, err = os.Stat(ctxConfig); err != nil {
 		utils.Exit(fmt.Sprintf("current context [%s] config file %s not found\n", contextUse, ctx.ConfigPath), 1)
 	}
