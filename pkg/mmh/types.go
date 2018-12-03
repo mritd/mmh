@@ -17,9 +17,7 @@
 package mmh
 
 type Context struct {
-	IsRemote      bool   `yaml:"is_remote" mapstructure:"is_remote"`
-	RemoteAddress string `yaml:"remote_address" mapstructure:"remote_address"`
-	ConfigPath    string `yaml:"config_path" mapstructure:"config_path"`
+	ConfigPath string `yaml:"config_path" mapstructure:"config_path"`
 }
 
 type Contexts map[string]Context
