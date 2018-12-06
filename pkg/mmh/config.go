@@ -18,6 +18,7 @@ package mmh
 
 import (
 	"errors"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -53,16 +54,16 @@ const (
 )
 
 var (
-	MainViper  = viper.New()
-	CtxViper   = viper.New()
-	initOnce   sync.Once
-	allTags    []string
-	basic      Basic
-	servers    Servers
-	contexts   Contexts
-	serversMap = make(map[string]*Server)
-	tagsMap    = make(map[string][]*Server)
-	maxProxy   = 0
+	MainViper   = viper.New()
+	CtxViper    = viper.New()
+	AllContexts Contexts
+	initOnce    sync.Once
+	allTags     []string
+	basic       Basic
+	servers     Servers
+	serversMap  = make(map[string]*Server)
+	tagsMap     = make(map[string][]*Server)
+	maxProxy    = 0
 )
 
 var (
@@ -96,9 +97,6 @@ func InitConfig() {
 				Password:           "",
 				Proxy:              "",
 			})
-
-			// init contexts
-			utils.CheckAndExit(MainViper.UnmarshalKey(KeyContext, &contexts))
 
 			// init basic config
 			utils.CheckAndExit(CtxViper.UnmarshalKey(KeyBasic, &basic))
@@ -394,7 +392,7 @@ func ContextList() {
 	currentContext := MainViper.GetString(KeyContextUse)
 
 	var ctxList contextDetails
-	for k, v := range contexts {
+	for k, v := range AllContexts {
 		ctxList = append(ctxList, contextDetail{
 			Name:           k,
 			ConfigPath:     v.ConfigPath,
@@ -408,7 +406,7 @@ func ContextList() {
 }
 
 func ContextUse(ctxName string) {
-	_, ok := contexts[ctxName]
+	_, ok := AllContexts[ctxName]
 	if !ok {
 		utils.Exit(fmt.Sprintf("context [%s] not found", ctxName), 1)
 	}
@@ -435,4 +433,40 @@ func findServerByName(name string) *Server {
 func UpdateContextTimestamp(_ *cobra.Command, _ []string) {
 	MainViper.Set(KeyContextUseTime, time.Now())
 	utils.CheckAndExit(MainViper.WriteConfig())
+}
+
+func UpdateContextTimestampTask(_ *cobra.Command, _ []string) {
+
+	// get context
+	contextUse := MainViper.GetString(KeyContextUse)
+	contextUseTime := MainViper.GetTime(KeyContextUseTime)
+	contextTimeout := MainViper.GetDuration(KeyContextTimeout)
+	contextAutoDowngrade := MainViper.GetString(KeyContextAutoDowngrade)
+
+	// if context auto downgrade is open
+	if !contextUseTime.IsZero() && contextTimeout != 0 && contextAutoDowngrade != "" {
+		// set current pid to current context
+		currentContext := AllContexts[contextUse]
+		if currentContext.UpdatePID == 0 || currentContext.UpdatePID != os.Getpid() {
+			currentContext.UpdatePID = os.Getpid()
+			AllContexts[contextUse] = currentContext
+			MainViper.Set(KeyContext, AllContexts)
+			utils.CheckAndExit(MainViper.WriteConfig())
+			// update timestamp background
+			go func() {
+				for {
+					select {
+					case <-time.Tick(contextTimeout - 1*time.Second):
+						MainViper.Set(KeyContextUseTime, time.Now())
+						err := MainViper.WriteConfig()
+						if err != nil {
+							fmt.Println(err)
+						}
+					}
+				}
+			}()
+		}
+
+	}
+
 }

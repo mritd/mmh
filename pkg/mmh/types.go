@@ -18,6 +18,7 @@ package mmh
 
 type Context struct {
 	ConfigPath string `yaml:"config_path" mapstructure:"config_path"`
+	UpdatePID  int    `yaml:"update_pid" mapstructure:"update_pid"`
 }
 
 type Contexts map[string]Context

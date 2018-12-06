@@ -38,6 +38,7 @@ A simple Multi-server ssh tool.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		mmh.InteractiveLogin()
 	},
+	PreRun:  mmh.UpdateContextTimestampTask,
 	PostRun: mmh.UpdateContextTimestamp,
 }
 
@@ -91,14 +92,13 @@ func initConfig() {
 			utils.CheckAndExit(mmh.MainViper.WriteConfig())
 		}
 	}
-	var allContexts mmh.Contexts
-	utils.CheckAndExit(mmh.MainViper.UnmarshalKey(mmh.KeyContext, &allContexts))
+	utils.CheckAndExit(mmh.MainViper.UnmarshalKey(mmh.KeyContext, &mmh.AllContexts))
 
-	if contextUse == "" || len(allContexts) == 0 {
+	if contextUse == "" || len(mmh.AllContexts) == 0 {
 		utils.Exit("get context failed", 1)
 	}
 
-	ctx, ok := allContexts[contextUse]
+	ctx, ok := mmh.AllContexts[contextUse]
 	if !ok {
 		utils.Exit(fmt.Sprintf("could not found current context: %s\n", contextUse), 1)
 	}

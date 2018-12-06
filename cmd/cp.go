@@ -36,6 +36,7 @@ Copies files between hosts on a network.`,
 			mmh.Copy(args, singleCPServer)
 		}
 	},
+	PreRun:  mmh.UpdateContextTimestampTask,
 	PostRun: mmh.UpdateContextTimestamp,
 }
 
