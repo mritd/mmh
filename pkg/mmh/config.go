@@ -18,6 +18,7 @@ package mmh
 
 import (
 	"errors"
+	"io/ioutil"
 	"os"
 	"strings"
 	"sync"
@@ -438,34 +439,41 @@ func UpdateContextTimestamp(_ *cobra.Command, _ []string) {
 func UpdateContextTimestampTask(_ *cobra.Command, _ []string) {
 
 	// get context
-	contextUse := MainViper.GetString(KeyContextUse)
 	contextUseTime := MainViper.GetTime(KeyContextUseTime)
 	contextTimeout := MainViper.GetDuration(KeyContextTimeout)
 	contextAutoDowngrade := MainViper.GetString(KeyContextAutoDowngrade)
 
 	// if context auto downgrade is open
 	if !contextUseTime.IsZero() && contextTimeout != 0 && contextAutoDowngrade != "" {
-		// set current pid to current context
-		currentContext := AllContexts[contextUse]
-		if currentContext.UpdatePID == 0 || currentContext.UpdatePID != os.Getpid() {
-			currentContext.UpdatePID = os.Getpid()
-			AllContexts[contextUse] = currentContext
-			MainViper.Set(KeyContext, AllContexts)
-			utils.CheckAndExit(MainViper.WriteConfig())
-			// update timestamp background
-			go func() {
-				for {
-					select {
-					case <-time.Tick(contextTimeout - 1*time.Second):
+
+		home, _ := homedir.Dir()
+		pid := strconv.Itoa(os.Getpid())
+		pidFile := filepath.Join(home, ".mmh", ".pid")
+
+		// write current pid to pid file
+		utils.CheckAndExit(ioutil.WriteFile(pidFile, []byte(pid), 0644))
+
+		go func() {
+			for {
+				select {
+				case <-time.Tick(contextTimeout - 3*time.Second):
+
+					p, err := ioutil.ReadFile(pidFile)
+					if err != nil {
+						fmt.Println(err)
+					}
+
+					// check pid
+					if string(p) == pid {
 						MainViper.Set(KeyContextUseTime, time.Now())
-						err := MainViper.WriteConfig()
+						err = MainViper.WriteConfig()
 						if err != nil {
 							fmt.Println(err)
 						}
 					}
 				}
-			}()
-		}
+			}
+		}()
 
 	}
 
