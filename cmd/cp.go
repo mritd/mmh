@@ -31,7 +31,7 @@ var cpCmd = &cobra.Command{
 Copies files between hosts on a network.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) < 2 {
-			cmd.Help()
+			_ = cmd.Help()
 		} else {
 			mmh.Copy(args, singleCPServer)
 		}
