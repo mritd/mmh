@@ -435,10 +435,7 @@ func UpdateContextTimestamp(_ *cobra.Command, _ []string) {
 
 	home, _ := homedir.Dir()
 	pidFile := filepath.Join(home, ".mmh", ".pid")
-	err := os.Remove(pidFile)
-	if err != nil {
-		fmt.Println(err)
-	}
+	_ = os.Remove(pidFile)
 
 	MainViper.Set(KeyContextUseTime, time.Now())
 	utils.CheckAndExit(MainViper.WriteConfig())
