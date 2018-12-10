@@ -432,6 +432,14 @@ func findServerByName(name string) *Server {
 }
 
 func UpdateContextTimestamp(_ *cobra.Command, _ []string) {
+
+	home, _ := homedir.Dir()
+	pidFile := filepath.Join(home, ".mmh", ".pid")
+	err := os.Remove(pidFile)
+	if err != nil {
+		fmt.Println(err)
+	}
+
 	MainViper.Set(KeyContextUseTime, time.Now())
 	utils.CheckAndExit(MainViper.WriteConfig())
 }
@@ -450,27 +458,30 @@ func UpdateContextTimestampTask(_ *cobra.Command, _ []string) {
 		pid := strconv.Itoa(os.Getpid())
 		pidFile := filepath.Join(home, ".mmh", ".pid")
 
-		// write current pid to pid file
-		utils.CheckAndExit(ioutil.WriteFile(pidFile, []byte(pid), 0644))
-
 		go func() {
 			for {
 				select {
 				case <-time.Tick(contextTimeout - 3*time.Second):
 
-					p, err := ioutil.ReadFile(pidFile)
-					if err != nil {
-						fmt.Println(err)
-					}
-
-					// check pid
-					if string(p) == pid {
-						MainViper.Set(KeyContextUseTime, time.Now())
-						err = MainViper.WriteConfig()
+					if _, err := os.Stat(pidFile); os.IsNotExist(err) {
+						// write current pid to pid file
+						utils.CheckAndExit(ioutil.WriteFile(pidFile, []byte(pid), 0644))
+					} else {
+						p, err := ioutil.ReadFile(pidFile)
 						if err != nil {
 							fmt.Println(err)
 						}
+
+						// check pid
+						if string(p) == pid {
+							MainViper.Set(KeyContextUseTime, time.Now())
+							err = MainViper.WriteConfig()
+							if err != nil {
+								fmt.Println(err)
+							}
+						}
 					}
+
 				}
 			}
 		}()
