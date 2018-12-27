@@ -10,7 +10,7 @@ all:
                     -X 'github.com/mritd/mmh/cmd.CommitID=${COMMIT_SHA1}'"
 
 release: all
-	ghr -u mritd -t $(GITHUB_RELEASE_TOKEN) -replace -recreate --debug $(version) dist
+	ghr -u mritd -t $(GITHUB_RELEASE_TOKEN) -replace -recreate --debug ${BUILD_VERSION} dist
 
 clean:
 	rm -rf dist
