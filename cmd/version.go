@@ -31,13 +31,13 @@ var versionTpl = `%s
 Name: mmh
 Version: %s
 Arch: %s
-BuildTime: %s
+BuildDate: %s
 CommitID: %s
 `
 
 var (
 	Version   string
-	BuildTime string
+	BuildDate string
 	CommitID  string
 )
 
@@ -48,7 +48,7 @@ var versionCmd = &cobra.Command{
 Print version.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		banner, _ := base64.StdEncoding.DecodeString(bannerBase64)
-		fmt.Printf(versionTpl, banner, Version, runtime.GOOS+"/"+runtime.GOARCH, BuildTime, CommitID)
+		fmt.Printf(versionTpl, banner, Version, runtime.GOOS+"/"+runtime.GOARCH, BuildDate, CommitID)
 	},
 }
 

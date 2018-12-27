@@ -39,8 +39,6 @@ github.com/mritd/promptx v0.0.0-20181104120837-d3bd32bd6d64 h1:XK7D4Ke4TnL3Ruf8X
 github.com/mritd/promptx v0.0.0-20181104120837-d3bd32bd6d64/go.mod h1:icKW5kjHMpPxfsbQy6hCd1FLhZFsztmnna3VJLQOC1M=
 github.com/mritd/readline v0.0.0-20180425151209-ae245b60ddeb h1:fB2rncglOnfNm4xZ/y5N00z1T9oFVLyadZVAPcVvyWQ=
 github.com/mritd/readline v0.0.0-20180425151209-ae245b60ddeb/go.mod h1:wvYAHAQUSCpYdQJIF/KWesOEv2JORGDkhM2hZzg+IOU=
-github.com/mritd/sshutils v0.0.0-20181203033601-a28da5f4ef05 h1:YNDvTwJ9EUrVt6dfh9rcCD77DsuJASjSokI51LGJlVg=
-github.com/mritd/sshutils v0.0.0-20181203033601-a28da5f4ef05/go.mod h1:+cVyiQac2HvfV2RUM7ZrjdTk5MWtNb7bpRqEtVRSY28=
 github.com/mritd/sshutils v0.0.0-20181227030943-b85e20a7d4b8 h1:mswT9d7IVcvFCAt1zZT+3VDbn0HDrtMQDu4h2yWcUzc=
 github.com/mritd/sshutils v0.0.0-20181227030943-b85e20a7d4b8/go.mod h1:+cVyiQac2HvfV2RUM7ZrjdTk5MWtNb7bpRqEtVRSY28=
 github.com/pelletier/go-toml v1.2.0 h1:T5zMGML61Wp+FlcbWjRDT7yAxhJNAiPPLOFECq181zc=

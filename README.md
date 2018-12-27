@@ -73,6 +73,7 @@ basic:
   password: ""
   privatekey: /Users/mritd/.ssh/id_rsa
   privatekey_password: ""
+  server_alive_interval: 20s
   port: 22
   proxy: ""
 maxproxy: 5
@@ -94,6 +95,7 @@ servers:
   password: ""
   privatekey: /Users/mritd/.ssh/id_rsa
   privatekey_password: password
+  server_alive_interval: 10s
   address: 10.10.4.12
   port: 22
   proxy: ""
