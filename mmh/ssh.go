@@ -135,6 +135,7 @@ func (s *Server) Terminal() error {
 		_ = sshSession.Close()
 	}()
 
+	// keep alive
 	if s.ServerAliveInterval > 0 {
 		return sshSession.TerminalWithKeepAlive(s.ServerAliveInterval)
 	}
