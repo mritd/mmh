@@ -16,6 +16,8 @@
 
 package mmh
 
+import "time"
+
 type Context struct {
 	ConfigPath string `yaml:"config_path" mapstructure:"config_path"`
 }
@@ -50,16 +52,17 @@ type Basic struct {
 }
 
 type Server struct {
-	Name               string   `yaml:"name" mapstructure:"name"`
-	Tags               []string `yaml:"tags" mapstructure:"tags"`
-	User               string   `yaml:"user" mapstructure:"user"`
-	Password           string   `yaml:"password" mapstructure:"password"`
-	PrivateKey         string   `yaml:"privatekey" mapstructure:"privatekey"`
-	PrivateKeyPassword string   `yaml:"privatekey_password" mapstructure:"privatekey_password"`
-	Address            string   `yaml:"address" mapstructure:"address"`
-	Port               int      `yaml:"port" mapstructure:"port"`
-	Proxy              string   `yaml:"proxy" mapstructure:"proxy"`
-	proxyCount         int
+	Name                string        `yaml:"name" mapstructure:"name"`
+	Tags                []string      `yaml:"tags" mapstructure:"tags"`
+	User                string        `yaml:"user" mapstructure:"user"`
+	Password            string        `yaml:"password" mapstructure:"password"`
+	PrivateKey          string        `yaml:"privatekey" mapstructure:"privatekey"`
+	PrivateKeyPassword  string        `yaml:"privatekey_password" mapstructure:"privatekey_password"`
+	Address             string        `yaml:"address" mapstructure:"address"`
+	Port                int           `yaml:"port" mapstructure:"port"`
+	Proxy               string        `yaml:"proxy" mapstructure:"proxy"`
+	ServerAliveInterval time.Duration `yaml:"server_alive_interval" mapstructure:"server_alive_interval"`
+	proxyCount          int
 }
 
 type Servers []*Server

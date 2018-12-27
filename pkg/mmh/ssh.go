@@ -139,7 +139,11 @@ func (s *Server) Connect() error {
 		_ = sshSession.Close()
 	}()
 
+	if s.ServerAliveInterval > 0 {
+		return sshSession.TerminalWithKeepAlive(s.ServerAliveInterval)
+	}
 	return sshSession.Terminal()
+
 }
 
 func privateKeyFile(file, password string) (ssh.AuthMethod, error) {
