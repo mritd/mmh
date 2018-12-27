@@ -17,16 +17,16 @@
 package mmh
 
 import (
-	"github.com/mritd/mmh/pkg/utils"
+	"github.com/mritd/mmh/utils"
 	"github.com/mritd/promptx"
 )
 
 func SingleLogin(name string) {
-	s := findServerByName(name)
+	s := ServersCfg.FindServerByName(name)
 	if s == nil {
 		utils.Exit("server not found!", 1)
 	} else {
-		utils.CheckAndExit(s.Connect())
+		utils.CheckAndExit(s.Terminal())
 	}
 }
 
@@ -46,9 +46,9 @@ func InteractiveLogin() {
 	}
 
 	s := &promptx.Select{
-		Items:  servers,
+		Items:  ServersCfg,
 		Config: cfg,
 	}
 	idx := s.Run()
-	SingleLogin(servers[idx].Name)
+	SingleLogin(ServersCfg[idx].Name)
 }

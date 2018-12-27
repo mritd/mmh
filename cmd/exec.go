@@ -19,7 +19,7 @@ package cmd
 import (
 	"strings"
 
-	"github.com/mritd/mmh/pkg/mmh"
+	"github.com/mritd/mmh/mmh"
 	"github.com/spf13/cobra"
 )
 

@@ -17,7 +17,7 @@
 package cmd
 
 import (
-	"github.com/mritd/mmh/pkg/mmh"
+	"github.com/mritd/mmh/mmh"
 	"github.com/spf13/cobra"
 )
 
@@ -40,7 +40,7 @@ var serverAddCmd = &cobra.Command{
 	Long: `
 Add ssh server.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		mmh.ServerAdd()
+		mmh.AddServer()
 	},
 	PreRun:  mmh.UpdateContextTimestampTask,
 	PostRun: mmh.UpdateContextTimestamp,
@@ -53,7 +53,7 @@ var serverDelCmd = &cobra.Command{
 Delete ssh server.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) > 0 {
-			mmh.ServerDelete(args)
+			mmh.DeleteServer(args)
 		} else {
 			_ = cmd.Help()
 		}
@@ -71,7 +71,7 @@ List ssh server.`,
 		if len(args) == 1 {
 			mmh.ServerDetail(args[0])
 		} else {
-			mmh.ServerList()
+			mmh.ListServers()
 		}
 	},
 	PreRun:  mmh.UpdateContextTimestampTask,

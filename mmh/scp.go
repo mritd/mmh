@@ -21,7 +21,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/mritd/mmh/pkg/utils"
+	"github.com/mritd/mmh/utils"
 
 	"github.com/fatih/color"
 
@@ -46,7 +46,7 @@ func runCopy(args []string, singleServer bool) error {
 		serverName := strings.Split(args[0], ":")[0]
 		remotePath := strings.Split(args[0], ":")[1]
 		localPath := args[1]
-		s := findServerByName(serverName)
+		s := ServersCfg.FindServerByName(serverName)
 		if s == nil {
 			return errors.New("server not found")
 		} else {
@@ -70,8 +70,9 @@ func runCopy(args []string, singleServer bool) error {
 		serverOrTag := strings.Split(args[len(args)-1], ":")[0]
 		remotePath := strings.Split(args[len(args)-1], ":")[1]
 
+		// single server copy
 		if singleServer {
-			s := findServerByName(serverOrTag)
+			s := ServersCfg.FindServerByName(serverOrTag)
 			if s == nil {
 				return errors.New("server not found")
 			} else {
@@ -91,7 +92,8 @@ func runCopy(args []string, singleServer bool) error {
 				return scpClient.CopyLocal2Remote(allArg...)
 			}
 		} else {
-			servers := tagsMap[serverOrTag]
+			// multi server copy
+			servers := ServersCfg.FindServersByTag(serverOrTag)
 			if len(servers) == 0 {
 				return errors.New("tagged server not found")
 			}

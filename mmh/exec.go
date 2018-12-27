@@ -35,10 +35,11 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/mritd/mmh/pkg/utils"
+	"github.com/mritd/mmh/utils"
 	"github.com/mritd/sshutils"
 )
 
+// batch execution of commands
 func Exec(tagOrName, cmd string, singleServer bool) {
 
 	// use context to manage goroutine
@@ -55,8 +56,9 @@ func Exec(tagOrName, cmd string, singleServer bool) {
 		}
 	}()
 
+	// single server exec
 	if singleServer {
-		server := findServerByName(tagOrName)
+		server := ServersCfg.FindServerByName(tagOrName)
 		if server == nil {
 			utils.Exit("server not found", 1)
 		} else {
@@ -70,7 +72,8 @@ func Exec(tagOrName, cmd string, singleServer bool) {
 			}
 		}
 	} else {
-		servers := tagsMap[tagOrName]
+		// multiple servers
+		servers := ServersCfg.FindServersByTag(tagOrName)
 		if len(servers) == 0 {
 			utils.Exit("tagged server not found", 1)
 		}
@@ -98,8 +101,11 @@ func Exec(tagOrName, cmd string, singleServer bool) {
 	}
 }
 
+// single server execution command
+// since multiple tasks are executed async, the error is returned using channel
 func exec(ctx context.Context, s *Server, singleServer bool, cmd string, errCh chan error) {
 
+	// get ssh client
 	sshClient, err := s.sshClient()
 	if err != nil {
 		errCh <- err
@@ -109,12 +115,14 @@ func exec(ctx context.Context, s *Server, singleServer bool, cmd string, errCh c
 		_ = sshClient.Close()
 	}()
 
+	// get ssh session
 	session, err := sshClient.NewSession()
 	if err != nil {
 		errCh <- err
 		return
 	}
 
+	// ssh utils session
 	sshSession := sshutils.NewSSHSession(session)
 	defer func() {
 		_ = sshSession.Close()
@@ -137,7 +145,7 @@ func exec(ctx context.Context, s *Server, singleServer bool, cmd string, errCh c
 		}
 	}()
 
-	// print std
+	// print to stdout
 	go func() {
 		select {
 		case <-sshSession.Ready():

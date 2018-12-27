@@ -30,36 +30,30 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
+// set server default config
 func (s *Server) setDefault() {
 	if s.User == "" {
-		s.User = basic.User
+		s.User = BasicCfg.User
 	}
 	if s.Port == 0 {
-		s.Port = basic.Port
+		s.Port = BasicCfg.Port
 	}
 	if s.Password == "" {
-		s.Password = basic.Password
+		s.Password = BasicCfg.Password
 		if s.PrivateKey == "" {
-			s.PrivateKey = basic.PrivateKey
+			s.PrivateKey = BasicCfg.PrivateKey
 		}
 	}
 
 	if s.PrivateKeyPassword == "" {
-		s.PrivateKeyPassword = basic.PrivateKeyPassword
+		s.PrivateKeyPassword = BasicCfg.PrivateKeyPassword
 	}
 	if s.Proxy == "" {
-		s.Proxy = basic.Proxy
+		s.Proxy = BasicCfg.Proxy
 	}
 }
 
-func (s *Server) authMethod() (ssh.AuthMethod, error) {
-	if strings.TrimSpace(s.PrivateKey) != "" {
-		return privateKeyFile(s.PrivateKey, s.PrivateKeyPassword)
-	} else {
-		return password(s.Password), nil
-	}
-}
-
+// return a ssh client intense point
 func (s *Server) sshClient() (*ssh.Client, error) {
 
 	// default to basic config
@@ -82,22 +76,23 @@ func (s *Server) sshClient() (*ssh.Client, error) {
 
 	if s.Proxy != "" {
 
-		if s.proxyCount > maxProxy {
-			return nil, errors.New(fmt.Sprintf("too many proxy server, proxy server must be <= %d", maxProxy))
+		// check max proxy
+		if s.proxyCount > MaxProxy {
+			return nil, errors.New(fmt.Sprintf("too many proxy server, proxy server must be <= %d", MaxProxy))
 		} else {
 			s.proxyCount++
 		}
 
 		// find proxy server
-		proxy := findServerByName(s.Proxy)
-		if proxy == nil {
+		proxyServer := ServersCfg.FindServerByName(s.Proxy)
+		if proxyServer == nil {
 			return nil, errors.New(fmt.Sprintf("cloud not found proxy server: %s", s.Proxy))
 		} else {
 			fmt.Printf("🔑 using proxy [%s], connect to => %s\n", s.Proxy, s.Name)
 		}
 
 		// recursive connect
-		proxyClient, err := proxy.sshClient()
+		proxyClient, err := proxyServer.sshClient()
 		if err != nil {
 			return nil, err
 		}
@@ -120,7 +115,8 @@ func (s *Server) sshClient() (*ssh.Client, error) {
 	return client, nil
 }
 
-func (s *Server) Connect() error {
+// start a ssh terminal
+func (s *Server) Terminal() error {
 	sshClient, err := s.sshClient()
 	if err != nil {
 		return err
@@ -146,6 +142,17 @@ func (s *Server) Connect() error {
 
 }
 
+// get auth method
+// priority use privateKey method
+func (s *Server) authMethod() (ssh.AuthMethod, error) {
+	if strings.TrimSpace(s.PrivateKey) != "" {
+		return privateKeyFile(s.PrivateKey, s.PrivateKeyPassword)
+	} else {
+		return password(s.Password), nil
+	}
+}
+
+// use private key to return ssh auth method
 func privateKeyFile(file, password string) (ssh.AuthMethod, error) {
 	buffer, err := ioutil.ReadFile(file)
 	if err != nil {
@@ -165,6 +172,7 @@ func privateKeyFile(file, password string) (ssh.AuthMethod, error) {
 	return ssh.PublicKeys(signer), nil
 }
 
+// use password to return ssh auth method
 func password(password string) ssh.AuthMethod {
 	return ssh.Password(password)
 }

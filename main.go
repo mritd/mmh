@@ -21,7 +21,7 @@ import (
 	"path/filepath"
 
 	"github.com/mritd/mmh/cmd"
-	"github.com/mritd/mmh/pkg/utils"
+	"github.com/mritd/mmh/utils"
 	"github.com/spf13/cobra"
 )
 

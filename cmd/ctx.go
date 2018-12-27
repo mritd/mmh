@@ -17,7 +17,7 @@
 package cmd
 
 import (
-	"github.com/mritd/mmh/pkg/mmh"
+	"github.com/mritd/mmh/mmh"
 	"github.com/spf13/cobra"
 )
 
@@ -40,7 +40,7 @@ var ctxListCmd = &cobra.Command{
 	Long: `
 List context`,
 	Run: func(cmd *cobra.Command, args []string) {
-		mmh.ContextList()
+		mmh.ListContexts()
 	},
 	PreRun:  mmh.UpdateContextTimestampTask,
 	PostRun: mmh.UpdateContextTimestamp,
