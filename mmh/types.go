@@ -42,7 +42,7 @@ type Server struct {
 	Password            string        `yaml:"password" mapstructure:"password"`
 	SuRoot              bool          `yaml:"su_root" mapstructure:"su_root"`
 	UseSudo             bool          `yaml:"use_sudo" mapstructure:"use_sudo"`
-	RootPassword        string        `yaml:"password" mapstructure:"password"`
+	RootPassword        string        `yaml:"root_password" mapstructure:"root_password"`
 	PrivateKey          string        `yaml:"privatekey" mapstructure:"privatekey"`
 	PrivateKeyPassword  string        `yaml:"privatekey_password" mapstructure:"privatekey_password"`
 	Address             string        `yaml:"address" mapstructure:"address"`
