@@ -130,7 +130,13 @@ func (s *Server) Terminal() error {
 		return err
 	}
 
-	sshSession := sshutils.NewSSHSession(session)
+	var sshSession *sshutils.SSHSession
+	if s.SuRoot {
+		sshSession = sshutils.NewSSHSessionWithRoot(session, s.UseSudo, s.RootPassword, s.Password)
+	} else {
+		sshSession = sshutils.NewSSHSession(session)
+	}
+
 	defer func() {
 		_ = sshSession.Close()
 	}()

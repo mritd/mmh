@@ -40,6 +40,9 @@ type Server struct {
 	Tags                []string      `yaml:"tags" mapstructure:"tags"`
 	User                string        `yaml:"user" mapstructure:"user"`
 	Password            string        `yaml:"password" mapstructure:"password"`
+	SuRoot              bool          `yaml:"su_root" mapstructure:"su_root"`
+	UseSudo             bool          `yaml:"use_sudo" mapstructure:"use_sudo"`
+	RootPassword        string        `yaml:"password" mapstructure:"password"`
 	PrivateKey          string        `yaml:"privatekey" mapstructure:"privatekey"`
 	PrivateKeyPassword  string        `yaml:"privatekey_password" mapstructure:"privatekey_password"`
 	Address             string        `yaml:"address" mapstructure:"address"`
@@ -141,6 +144,9 @@ func ExampleServers() Servers {
 			Address:             "10.10.4.11",
 			Port:                22,
 			Password:            "password",
+			SuRoot:              true,
+			UseSudo:             true,
+			RootPassword:        "root",
 			Proxy:               "prod12",
 			ServerAliveInterval: 20 * time.Second,
 		},
