@@ -64,85 +64,55 @@ func initConfig() {
 
 	// set main config file
 	mainConfigFile := filepath.Join(cfgDir, "main.yaml")
-	mmh.MainViper.SetConfigFile(mainConfigFile)
 
 	if _, err = os.Stat(cfgDir); os.IsNotExist(err) {
 		// create config dir
 		utils.CheckAndExit(os.MkdirAll(cfgDir, 0755))
-		// create main config file
-		_, err = os.Create(mainConfigFile)
-		util.CheckAndExit(err)
 		// create default context config file
 		defaultCtxCfg := filepath.Join(cfgDir, "default.yaml")
-		_, err = os.Create(defaultCtxCfg)
-		util.CheckAndExit(err)
-		// write default config
-		writeExampleConfig(cfgDir)
+		// write main config
+		utils.CheckAndExit(mmh.MainConfigExample().SetConfigPath(mainConfigFile).Write())
+		// write context config
+		utils.CheckAndExit(mmh.ContextConfigExample().SetConfigPath(defaultCtxCfg).Write())
 	} else if err != nil {
 		utils.CheckAndExit(err)
 	}
 
 	// load main config
-	mmh.MainViper.AutomaticEnv()
-	utils.CheckAndExit(mmh.MainViper.ReadInConfig())
-	utils.CheckAndExit(mmh.MainViper.UnmarshalKey(mmh.KeyContexts, &mmh.ContextsCfg))
+	utils.CheckAndExit(mmh.MainCfg.Load(mainConfigFile))
 
 	// if timeout, context will downgrade
-	if !mmh.ContextsCfg.TimeStamp.IsZero() && mmh.ContextsCfg.TimeOut != 0 && mmh.ContextsCfg.AutoDowngrade != "" {
-		if time.Now().After(mmh.ContextsCfg.TimeStamp.Add(mmh.ContextsCfg.TimeOut)) && mmh.ContextsCfg.Current != mmh.ContextsCfg.AutoDowngrade {
-			fmt.Printf("🍁 context timeout, auto downgrade => [%s]\n", mmh.ContextsCfg.AutoDowngrade)
-			mmh.ContextsCfg.Current = mmh.ContextsCfg.AutoDowngrade
-			mmh.MainViper.Set(mmh.KeyContexts, mmh.ContextsCfg)
-			utils.CheckAndExit(mmh.MainViper.WriteConfig())
+	if !mmh.MainCfg.Contexts.TimeStamp.IsZero() && mmh.MainCfg.Contexts.TimeOut != 0 && mmh.MainCfg.Contexts.AutoDowngrade != "" {
+		if time.Now().After(mmh.MainCfg.Contexts.TimeStamp.Add(mmh.MainCfg.Contexts.TimeOut)) && mmh.MainCfg.Contexts.Current != mmh.MainCfg.Contexts.AutoDowngrade {
+			fmt.Printf("🍁 context timeout, auto downgrade => [%s]\n", mmh.MainCfg.Contexts.AutoDowngrade)
+			mmh.MainCfg.Contexts.Current = mmh.MainCfg.Contexts.AutoDowngrade
+			util.CheckAndExit(mmh.MainCfg.Write())
 		}
 	}
 
 	// check context
-	if len(mmh.ContextsCfg.Context) == 0 {
+	if len(mmh.MainCfg.Contexts.Context) == 0 {
 		utils.Exit("get context failed", 1)
 	}
 
 	// get current use context
-	ctx, ok := mmh.ContextsCfg.FindContextByName(mmh.ContextsCfg.Current)
+	ctx, ok := mmh.MainCfg.Contexts.FindContextByName(mmh.MainCfg.Contexts.Current)
 	if !ok {
-		utils.Exit(fmt.Sprintf("could not found current context: %s\n", mmh.ContextsCfg.Current), 1)
+		utils.Exit(fmt.Sprintf("could not found current context: %s\n", mmh.MainCfg.Contexts.Current), 1)
 	}
 
-	var ctxConfig string
+	var ctxConfigFile string
 	if filepath.IsAbs(ctx.ConfigPath) {
-		ctxConfig = ctx.ConfigPath
+		ctxConfigFile = ctx.ConfigPath
 	} else {
-		ctxConfig = filepath.Join(cfgDir, ctx.ConfigPath)
+		ctxConfigFile = filepath.Join(cfgDir, ctx.ConfigPath)
 	}
-	if _, err = os.Stat(ctxConfig); os.IsNotExist(err) {
-		utils.Exit(fmt.Sprintf("current context [%s] config file %s not found\n", mmh.ContextsCfg.Current, ctx.ConfigPath), 1)
+	if _, err = os.Stat(ctxConfigFile); os.IsNotExist(err) {
+		utils.Exit(fmt.Sprintf("current context [%s] config file %s not found\n", mmh.MainCfg.Contexts.Current, ctx.ConfigPath), 1)
 	} else if err != nil {
-		utils.Exit(fmt.Sprintf("current context [%s] config file %s load failed: %s\n", mmh.ContextsCfg.Current, ctx.ConfigPath, err.Error()), 1)
+		utils.Exit(fmt.Sprintf("current context [%s] config file %s load failed: %s\n", mmh.MainCfg.Contexts.Current, ctx.ConfigPath, err.Error()), 1)
 	}
-
-	mmh.CtxViper.SetConfigFile(ctxConfig)
 
 	// load current context
-	mmh.CtxViper.AutomaticEnv()
-	utils.CheckAndExit(mmh.CtxViper.ReadInConfig())
-	utils.CheckAndExit(mmh.CtxViper.UnmarshalKey(mmh.KeyBasic, &mmh.BasicCfg))
-	utils.CheckAndExit(mmh.CtxViper.UnmarshalKey(mmh.KeyServers, &mmh.ServersCfg))
-	utils.CheckAndExit(mmh.CtxViper.UnmarshalKey(mmh.KeyTags, &mmh.TagsCfg))
-	utils.CheckAndExit(mmh.CtxViper.UnmarshalKey(mmh.KeyMaxProxy, &mmh.MaxProxy))
-}
-
-// write example config to config file
-func writeExampleConfig(cfgDir string) {
-
-	// write main example config
-	mmh.MainViper.Set(mmh.KeyContexts, mmh.ExampleContexts())
-	utils.CheckAndExit(mmh.MainViper.WriteConfig())
-
-	// write server example config
-	mmh.CtxViper.SetConfigFile(filepath.Join(cfgDir, "default.yaml"))
-	mmh.CtxViper.Set(mmh.KeyBasic, mmh.ExampleBasic())
-	mmh.CtxViper.Set(mmh.KeyServers, mmh.ExampleServers())
-	mmh.CtxViper.Set(mmh.KeyTags, mmh.ExampleTags())
-	mmh.CtxViper.Set(mmh.KeyMaxProxy, 5)
-	utils.CheckAndExit(mmh.CtxViper.WriteConfig())
+	utils.CheckAndExit(mmh.ContextCfg.Load(ctxConfigFile))
 }

@@ -22,7 +22,7 @@ import (
 )
 
 func SingleLogin(name string) {
-	s := ServersCfg.FindServerByName(name)
+	s := ContextCfg.Servers.FindServerByName(name)
 	if s == nil {
 		utils.Exit("server not found!", 1)
 	} else {
@@ -46,9 +46,9 @@ func InteractiveLogin() {
 	}
 
 	s := &promptx.Select{
-		Items:  ServersCfg,
+		Items:  ContextCfg.Servers,
 		Config: cfg,
 	}
 	idx := s.Run()
-	SingleLogin(ServersCfg[idx].Name)
+	SingleLogin(ContextCfg.Servers[idx].Name)
 }

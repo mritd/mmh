@@ -30,14 +30,7 @@ import (
 
 func CheckAndExit(err error) {
 	if err != nil {
-		fmt.Println("😱 " + err.Error())
-		os.Exit(1)
-	}
-}
-
-func CheckAndExitPrintStack(err error) {
-	if err != nil {
-		panic(err)
+		panic("😱 " + err.Error())
 	}
 }
 

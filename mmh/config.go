@@ -39,27 +39,12 @@ import (
 	"github.com/mitchellh/go-homedir"
 	"github.com/mritd/mmh/utils"
 	"github.com/mritd/promptx"
-	"github.com/spf13/viper"
-)
-
-const (
-	KeyServers  = "servers"
-	KeyBasic    = "basic"
-	KeyTags     = "tags"
-	KeyMaxProxy = "max_proxy"
-	KeyContexts = "contexts"
 )
 
 var (
-	// main viper
-	MainViper = viper.New()
-	// context viper
-	CtxViper    = viper.New()
-	ContextsCfg Contexts
-	BasicCfg    Basic
-	ServersCfg  Servers
-	TagsCfg     Tags
-	MaxProxy    int
+	MainCfg    MainConfig
+	ContextCfg ContextConfig
+	MaxProxy   int
 )
 
 // error def
@@ -72,8 +57,8 @@ var (
 )
 
 // find context by name
-func (ctxs Contexts) FindContextByName(name string) (Context, bool) {
-	for _, ctx := range ctxs.Context {
+func (ctxList ContextList) FindContextByName(name string) (Context, bool) {
+	for _, ctx := range ctxList.Context {
 		if name == ctx.Name {
 			return ctx, true
 		}
@@ -119,7 +104,7 @@ func AddServer() {
 			return inputTooLongErr
 		}
 
-		if s := ServersCfg.FindServerByName(string(line)); s != nil {
+		if s := ContextCfg.Servers.FindServerByName(string(line)); s != nil {
 			return serverExistErr
 		}
 		return nil
@@ -138,16 +123,15 @@ func AddServer() {
 	inputTags := strings.Split(p.Run(), ",")
 	for _, tag := range inputTags {
 		tagExist := false
-		for _, extTag := range TagsCfg {
+		for _, extTag := range ContextCfg.Tags {
 			if tag == extTag {
 				tagExist = true
 			}
 		}
 		if !tagExist {
-			TagsCfg = append(TagsCfg, tag)
+			ContextCfg.Tags = append(ContextCfg.Tags, tag)
 		}
 	}
-	CtxViper.Set(KeyTags, TagsCfg)
 
 	// ssh user
 	p = promptx.NewDefaultPrompt(func(line []rune) error {
@@ -158,7 +142,7 @@ func AddServer() {
 
 	user := p.Run()
 	if strings.TrimSpace(user) == "" {
-		user = BasicCfg.User
+		user = ContextCfg.Basic.User
 	}
 
 	// server address
@@ -186,7 +170,7 @@ func AddServer() {
 
 	portStr := p.Run()
 	if strings.TrimSpace(portStr) == "" {
-		port = BasicCfg.Port
+		port = ContextCfg.Basic.Port
 	} else {
 		port, _ = strconv.Atoi(portStr)
 	}
@@ -224,7 +208,7 @@ func AddServer() {
 
 		privateKey = p.Run()
 		if strings.TrimSpace(privateKey) == "" {
-			privateKey = BasicCfg.PrivateKey
+			privateKey = ContextCfg.Basic.PrivateKey
 		}
 
 		p = promptx.NewDefaultPrompt(func(line []rune) error {
@@ -234,7 +218,7 @@ func AddServer() {
 		}, "PrivateKey Password:")
 		privateKeyPassword = p.Run()
 		if strings.TrimSpace(privateKeyPassword) == "" {
-			privateKeyPassword = BasicCfg.PrivateKeyPassword
+			privateKeyPassword = ContextCfg.Basic.PrivateKeyPassword
 		}
 	} else {
 		// use password
@@ -245,14 +229,14 @@ func AddServer() {
 		}, "Password:")
 		password = p.Run()
 		if strings.TrimSpace(password) == "" {
-			password = BasicCfg.Password
+			password = ContextCfg.Basic.Password
 		}
 	}
 
 	// server proxy
 	p = promptx.NewDefaultPrompt(func(line []rune) error {
 		if strings.TrimSpace(string(line)) != "" {
-			if ServersCfg.FindServerByName(string(line)) == nil {
+			if ContextCfg.Servers.FindServerByName(string(line)) == nil {
 				return proxyNotFoundErr
 			}
 		}
@@ -262,7 +246,7 @@ func AddServer() {
 
 	proxy := p.Run()
 	if strings.TrimSpace(proxy) == "" {
-		proxy = BasicCfg.Proxy
+		proxy = ContextCfg.Basic.Proxy
 	}
 
 	// create server
@@ -279,10 +263,9 @@ func AddServer() {
 	}
 
 	// Save
-	ServersCfg = append(ServersCfg, &server)
-	sort.Sort(ServersCfg)
-	CtxViper.Set(KeyServers, ServersCfg)
-	utils.CheckAndExit(CtxViper.WriteConfig())
+	ContextCfg.Servers = append(ContextCfg.Servers, &server)
+	sort.Sort(ContextCfg.Servers)
+	utils.CheckAndExit(ContextCfg.Write())
 }
 
 // delete server
@@ -291,7 +274,7 @@ func DeleteServer(serverNames []string) {
 	var deletesIdx []int
 
 	for _, serverName := range serverNames {
-		for i, s := range ServersCfg {
+		for i, s := range ContextCfg.Servers {
 			matched, err := filepath.Match(serverName, s.Name)
 			// server name may contain special characters
 			if err != nil {
@@ -316,13 +299,12 @@ func DeleteServer(serverNames []string) {
 	// sort and delete
 	sort.Ints(deletesIdx)
 	for i, del := range deletesIdx {
-		ServersCfg = append(ServersCfg[:del-i], ServersCfg[del-i+1:]...)
+		ContextCfg.Servers = append(ContextCfg.Servers[:del-i], ContextCfg.Servers[del-i+1:]...)
 	}
 
 	// save config
-	sort.Sort(ServersCfg)
-	CtxViper.Set(KeyServers, ServersCfg)
-	utils.CheckAndExit(CtxViper.WriteConfig())
+	sort.Sort(ContextCfg.Servers)
+	utils.CheckAndExit(ContextCfg.Write())
 
 }
 
@@ -340,13 +322,13 @@ func ListServers() {
 
 	_, _ = t.Parse(tpl)
 	var buf bytes.Buffer
-	utils.CheckAndExit(t.Execute(&buf, ServersCfg))
+	utils.CheckAndExit(t.Execute(&buf, ContextCfg.Servers))
 	fmt.Println(buf.String())
 }
 
 // print single server detail
 func ServerDetail(serverName string) {
-	s := ServersCfg.FindServerByName(serverName)
+	s := ContextCfg.Servers.FindServerByName(serverName)
 	if s == nil {
 		utils.Exit("server not found!", 1)
 	}
@@ -377,11 +359,11 @@ func ListContexts() {
 	_, _ = t.Parse(tpl)
 
 	var ctxList ContextDetails
-	for _, c := range ContextsCfg.Context {
+	for _, c := range MainCfg.Contexts.Context {
 		ctxList = append(ctxList, ContextDetail{
 			Name:           c.Name,
 			ConfigPath:     c.ConfigPath,
-			CurrentContext: c.Name == ContextsCfg.Current,
+			CurrentContext: c.Name == MainCfg.Contexts.Current,
 		})
 	}
 	sort.Sort(ctxList)
@@ -392,13 +374,12 @@ func ListContexts() {
 
 // set current context
 func ContextUse(ctxName string) {
-	_, ok := ContextsCfg.FindContextByName(ctxName)
+	_, ok := MainCfg.Contexts.FindContextByName(ctxName)
 	if !ok {
 		utils.Exit(fmt.Sprintf("context [%s] not found", ctxName), 1)
 	}
-	ContextsCfg.Current = ctxName
-	MainViper.Set(KeyContexts, ContextsCfg)
-	utils.CheckAndExit(MainViper.WriteConfig())
+	MainCfg.Contexts.Current = ctxName
+	utils.CheckAndExit(MainCfg.Write())
 }
 
 // print layout func
@@ -422,29 +403,28 @@ func UpdateContextTimestamp(_ *cobra.Command, _ []string) {
 	pidFile := filepath.Join(home, ".mmh", ".pid")
 	_ = os.Remove(pidFile)
 
-	ContextsCfg.TimeStamp = time.Now()
-	MainViper.Set(KeyContexts, ContextsCfg)
-	utils.CheckAndExit(MainViper.WriteConfig())
+	MainCfg.Contexts.TimeStamp = time.Now()
+	utils.CheckAndExit(MainCfg.Write())
 }
 
 // update context latest use timestamp in background
 func UpdateContextTimestampTask(_ *cobra.Command, _ []string) {
 
 	// if context auto downgrade is open
-	if !ContextsCfg.TimeStamp.IsZero() && ContextsCfg.TimeOut != 0 && ContextsCfg.AutoDowngrade != "" {
+	if !MainCfg.Contexts.TimeStamp.IsZero() && MainCfg.Contexts.TimeOut != 0 && MainCfg.Contexts.AutoDowngrade != "" {
 
 		home, _ := homedir.Dir()
 		pid := strconv.Itoa(os.Getpid())
 		pidFile := filepath.Join(home, ".mmh", ".pid")
 
-		if ContextsCfg.TimeOut < 60*time.Second {
-			ContextsCfg.TimeOut = 60 * time.Second
+		if MainCfg.Contexts.TimeOut < 60*time.Second {
+			MainCfg.Contexts.TimeOut = 60 * time.Second
 		}
 
 		go func() {
 			for {
 				select {
-				case <-time.Tick(ContextsCfg.TimeOut - 3*time.Second):
+				case <-time.Tick(MainCfg.Contexts.TimeOut - 3*time.Second):
 
 					if _, err := os.Stat(pidFile); os.IsNotExist(err) {
 						// write current pid to pid file
@@ -457,10 +437,8 @@ func UpdateContextTimestampTask(_ *cobra.Command, _ []string) {
 
 						// check pid
 						if string(p) == pid {
-							ContextsCfg.TimeStamp = time.Now()
-							MainViper.Set(KeyContexts, ContextsCfg)
-							err = MainViper.WriteConfig()
-							if err != nil {
+							MainCfg.Contexts.TimeStamp = time.Now()
+							if err := MainCfg.Write(); err != nil {
 								fmt.Println(err)
 							}
 						}

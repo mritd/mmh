@@ -58,7 +58,7 @@ func Exec(tagOrName, cmd string, singleServer bool) {
 
 	// single server exec
 	if singleServer {
-		server := ServersCfg.FindServerByName(tagOrName)
+		server := ContextCfg.Servers.FindServerByName(tagOrName)
 		if server == nil {
 			utils.Exit("server not found", 1)
 		} else {
@@ -73,7 +73,7 @@ func Exec(tagOrName, cmd string, singleServer bool) {
 		}
 	} else {
 		// multiple servers
-		servers := ServersCfg.FindServersByTag(tagOrName)
+		servers := ContextCfg.Servers.FindServersByTag(tagOrName)
 		if len(servers) == 0 {
 			utils.Exit("tagged server not found", 1)
 		}

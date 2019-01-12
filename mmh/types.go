@@ -17,8 +17,12 @@
 package mmh
 
 import (
+	"errors"
+	"io/ioutil"
 	"path/filepath"
 	"time"
+
+	"gopkg.in/yaml.v2"
 
 	"github.com/mitchellh/go-homedir"
 )
@@ -62,7 +66,7 @@ type Context struct {
 }
 
 // mmh context list
-type Contexts struct {
+type ContextList struct {
 	Context       []Context     `yaml:"context" mapstructure:"context"`
 	Current       string        `yaml:"current" mapstructure:"current"`
 	TimeStamp     time.Time     `yaml:"timestamp" mapstructure:"timestamp"`
@@ -104,23 +108,33 @@ func (servers Servers) Swap(i, j int) {
 }
 
 // context config example
-func ExampleContexts() Contexts {
-	return Contexts{
-		Context: []Context{
-			{
-				Name:       "default",
-				ConfigPath: "./default.yaml",
+func MainConfigExample() MainConfig {
+	return MainConfig{
+		Contexts: ContextList{
+			Context: []Context{
+				{
+					Name:       "default",
+					ConfigPath: "./default.yaml",
+				},
 			},
+			AutoDowngrade: "default",
+			Current:       "default",
+			TimeStamp:     time.Now(),
+			TimeOut:       0,
 		},
-		AutoDowngrade: "default",
-		Current:       "default",
-		TimeStamp:     time.Now(),
-		TimeOut:       0,
+	}
+}
+
+func ContextConfigExample() ContextConfig {
+	return ContextConfig{
+		Basic:   BasicExample(),
+		Servers: ServersExample(),
+		Tags:    TagsExample(),
 	}
 }
 
 // basic config example
-func ExampleBasic() Basic {
+func BasicExample() Basic {
 	home, _ := homedir.Dir()
 	return Basic{
 		User:                "root",
@@ -134,7 +148,7 @@ func ExampleBasic() Basic {
 }
 
 // server config example
-func ExampleServers() Servers {
+func ServersExample() Servers {
 	home, _ := homedir.Dir()
 	return Servers{
 		{
@@ -164,8 +178,85 @@ func ExampleServers() Servers {
 }
 
 // tags config example
-func ExampleTags() Tags {
+func TagsExample() Tags {
 	return Tags{
 		"prod",
 	}
+}
+
+// main.yaml config struct
+type MainConfig struct {
+	configPath string
+	Contexts   ContextList `yaml:"context_list"`
+}
+
+// set config file path
+func (cfg MainConfig) SetConfigPath(configPath string) MainConfig {
+	cfg.configPath = configPath
+	return cfg
+}
+
+// write config to yaml file
+func (cfg MainConfig) Write() error {
+	if cfg.configPath == "" {
+		return errors.New("config path not set")
+	}
+	out, err := yaml.Marshal(cfg)
+	if err != nil {
+		return err
+	}
+	return ioutil.WriteFile(cfg.configPath, out, 0644)
+}
+
+// load config from yaml file
+func (cfg *MainConfig) Load(filePath string) error {
+	if filePath == "" {
+		return errors.New("file path is empty")
+	}
+	cfg.configPath = filePath
+	buf, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		return err
+	}
+	err = yaml.Unmarshal(buf, cfg)
+	return err
+}
+
+// context config(eg: default.yaml)
+type ContextConfig struct {
+	configPath string
+	Basic      Basic   `yaml:"basic"`
+	Servers    Servers `yaml:"servers"`
+	Tags       Tags    `yaml:"tags"`
+}
+
+// set config file path
+func (cfg ContextConfig) SetConfigPath(configPath string) ContextConfig {
+	cfg.configPath = configPath
+	return cfg
+}
+
+// write config to yaml file
+func (cfg ContextConfig) Write() error {
+	if cfg.configPath == "" {
+		return errors.New("config path not set")
+	}
+	out, err := yaml.Marshal(cfg)
+	if err != nil {
+		return err
+	}
+	return ioutil.WriteFile(cfg.configPath, out, 0644)
+}
+
+// load config from yaml file
+func (cfg *ContextConfig) Load(filePath string) error {
+	if filePath == "" {
+		return errors.New("file path is empty")
+	}
+	cfg.configPath = filePath
+	buf, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		return err
+	}
+	return yaml.Unmarshal(buf, cfg)
 }
