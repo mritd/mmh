@@ -29,30 +29,31 @@ import (
 
 // server basic config
 type Basic struct {
-	User                string        `yaml:"user" `
-	Password            string        `yaml:"password" `
-	PrivateKey          string        `yaml:"privatekey" `
-	PrivateKeyPassword  string        `yaml:"privatekey_password" `
-	Port                int           `yaml:"port" `
-	Proxy               string        `yaml:"proxy" `
-	ServerAliveInterval time.Duration `yaml:"server_alive_interval" `
+	User                string        `yaml:"user"`
+	Password            string        `yaml:"password"`
+	PrivateKey          string        `yaml:"privatekey"`
+	PrivateKeyPassword  string        `yaml:"privatekey_password"`
+	Port                int           `yaml:"port"`
+	Proxy               string        `yaml:"proxy"`
+	ServerAliveInterval time.Duration `yaml:"server_alive_interval"`
 }
 
 // server config
 type Server struct {
-	Name                string        `yaml:"name" `
-	Tags                []string      `yaml:"tags" `
-	User                string        `yaml:"user" `
-	Password            string        `yaml:"password" `
-	SuRoot              bool          `yaml:"su_root" `
-	UseSudo             bool          `yaml:"use_sudo" `
-	RootPassword        string        `yaml:"root_password" `
-	PrivateKey          string        `yaml:"privatekey" `
-	PrivateKeyPassword  string        `yaml:"privatekey_password" `
-	Address             string        `yaml:"address" `
-	Port                int           `yaml:"port" `
-	Proxy               string        `yaml:"proxy" `
-	ServerAliveInterval time.Duration `yaml:"server_alive_interval" `
+	Name                string        `yaml:"name"`
+	Tags                []string      `yaml:"tags"`
+	User                string        `yaml:"user"`
+	Password            string        `yaml:"password"`
+	SuRoot              bool          `yaml:"su_root"`
+	UseSudo             bool          `yaml:"use_sudo"`
+	NoPasswordSudo      bool          `yaml:"no_password_sudo"`
+	RootPassword        string        `yaml:"root_password"`
+	PrivateKey          string        `yaml:"privatekey"`
+	PrivateKeyPassword  string        `yaml:"privatekey_password"`
+	Address             string        `yaml:"address"`
+	Port                int           `yaml:"port"`
+	Proxy               string        `yaml:"proxy"`
+	ServerAliveInterval time.Duration `yaml:"server_alive_interval"`
 	proxyCount          int
 }
 
@@ -61,17 +62,17 @@ type Tags []string
 
 // mmh context
 type Context struct {
-	Name       string `yaml:"name" `
-	ConfigPath string `yaml:"config_path" `
+	Name       string `yaml:"name"`
+	ConfigPath string `yaml:"config_path"`
 }
 
 // mmh context list
 type ContextList struct {
-	Context       []Context     `yaml:"context" `
-	Current       string        `yaml:"current" `
-	TimeStamp     time.Time     `yaml:"timestamp" `
-	TimeOut       time.Duration `yaml:"timeout" `
-	AutoDowngrade string        `yaml:"auto_downgrade" `
+	Context       []Context     `yaml:"context"`
+	Current       string        `yaml:"current"`
+	TimeStamp     time.Time     `yaml:"timestamp"`
+	TimeOut       time.Duration `yaml:"timeout"`
+	AutoDowngrade string        `yaml:"auto_downgrade"`
 }
 
 // mmh context detail

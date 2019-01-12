@@ -8,7 +8,7 @@ require (
 	github.com/mattn/go-isatty v0.0.4 // indirect
 	github.com/mitchellh/go-homedir v1.0.0
 	github.com/mritd/promptx v0.0.0-20181104120837-d3bd32bd6d64
-	github.com/mritd/sshutils v0.0.0-20190110122219-993eafba219d
+	github.com/mritd/sshutils v0.0.0-20190112100234-b73e8d3b1dbc
 	github.com/spf13/cobra v0.0.3
 	github.com/spf13/pflag v1.0.3 // indirect
 	golang.org/x/crypto v0.0.0-20181127143415-eb0de9b17e85

@@ -27,8 +27,8 @@ github.com/mritd/promptx v0.0.0-20181104120837-d3bd32bd6d64 h1:XK7D4Ke4TnL3Ruf8X
 github.com/mritd/promptx v0.0.0-20181104120837-d3bd32bd6d64/go.mod h1:icKW5kjHMpPxfsbQy6hCd1FLhZFsztmnna3VJLQOC1M=
 github.com/mritd/readline v0.0.0-20180425151209-ae245b60ddeb h1:fB2rncglOnfNm4xZ/y5N00z1T9oFVLyadZVAPcVvyWQ=
 github.com/mritd/readline v0.0.0-20180425151209-ae245b60ddeb/go.mod h1:wvYAHAQUSCpYdQJIF/KWesOEv2JORGDkhM2hZzg+IOU=
-github.com/mritd/sshutils v0.0.0-20190110122219-993eafba219d h1:10HoOTyCFHJoDJMaQ7cVQBLH0xnEOIziXOeSM+HNfCI=
-github.com/mritd/sshutils v0.0.0-20190110122219-993eafba219d/go.mod h1:+cVyiQac2HvfV2RUM7ZrjdTk5MWtNb7bpRqEtVRSY28=
+github.com/mritd/sshutils v0.0.0-20190112100234-b73e8d3b1dbc h1:rC+dxxgBW7jwrwSkW/ke64+sxMG48F/jaQVbizOZJ3Y=
+github.com/mritd/sshutils v0.0.0-20190112100234-b73e8d3b1dbc/go.mod h1:+cVyiQac2HvfV2RUM7ZrjdTk5MWtNb7bpRqEtVRSY28=
 github.com/pkg/errors v0.8.0 h1:WdK/asTD0HN+q6hsWO3/vpuAkAr+tw6aNJNDFFf0+qw=
 github.com/pkg/errors v0.8.0/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/sftp v1.8.3 h1:9jSe2SxTM8/3bXZjtqnkgTBW+lA8db0knZJyns7gpBA=
