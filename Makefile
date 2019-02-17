@@ -7,7 +7,8 @@ all:
         -output="dist/{{.Dir}}_{{.OS}}_{{.Arch}}" \
     	-ldflags   "-X 'github.com/mritd/mmh/cmd.Version=${BUILD_VERSION}' \
                     -X 'github.com/mritd/mmh/cmd.BuildDate=${BUILD_DATE}' \
-                    -X 'github.com/mritd/mmh/cmd.CommitID=${COMMIT_SHA1}'"
+                    -X 'github.com/mritd/mmh/cmd.CommitID=${COMMIT_SHA1}' \
+                    -w -s"
 
 release: all
 	ghr -u mritd -t $(GITHUB_RELEASE_TOKEN) -replace -recreate --debug ${BUILD_VERSION} dist
