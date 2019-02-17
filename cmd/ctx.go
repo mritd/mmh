@@ -14,8 +14,6 @@ Change current context.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		_ = cmd.Help()
 	},
-	PreRun:  mmh.UpdateContextTimestampTask,
-	PostRun: mmh.UpdateContextTimestamp,
 }
 
 var ctxListCmd = &cobra.Command{
@@ -26,8 +24,6 @@ List context`,
 	Run: func(cmd *cobra.Command, args []string) {
 		mmh.ListContexts()
 	},
-	PreRun:  mmh.UpdateContextTimestampTask,
-	PostRun: mmh.UpdateContextTimestamp,
 }
 
 var ctxUseCmd = &cobra.Command{
@@ -42,8 +38,6 @@ Use context`,
 		}
 		mmh.ContextUse(args[0])
 	},
-	PreRun:  mmh.UpdateContextTimestampTask,
-	PostRun: mmh.UpdateContextTimestamp,
 }
 
 func init() {

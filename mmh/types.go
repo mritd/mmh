@@ -52,11 +52,9 @@ type Context struct {
 
 // mmh context list
 type ContextList struct {
-	Context       []Context     `yaml:"context"`
-	Current       string        `yaml:"current"`
-	TimeStamp     time.Time     `yaml:"timestamp"`
-	TimeOut       time.Duration `yaml:"timeout"`
-	AutoDowngrade string        `yaml:"auto_downgrade"`
+	Context []Context     `yaml:"context"`
+	Current string        `yaml:"current"`
+	TimeOut time.Duration `yaml:"timeout"`
 }
 
 // mmh context detail
@@ -102,10 +100,8 @@ func MainConfigExample() MainConfig {
 					ConfigPath: "./default.yaml",
 				},
 			},
-			AutoDowngrade: "default",
-			Current:       "default",
-			TimeStamp:     time.Now(),
-			TimeOut:       0,
+			Current: "default",
+			TimeOut: 0,
 		},
 	}
 }

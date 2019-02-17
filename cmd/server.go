@@ -14,8 +14,6 @@ Server command.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		_ = cmd.Help()
 	},
-	PreRun:  mmh.UpdateContextTimestampTask,
-	PostRun: mmh.UpdateContextTimestamp,
 }
 
 var serverAddCmd = &cobra.Command{
@@ -26,8 +24,6 @@ Add ssh server.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		mmh.AddServer()
 	},
-	PreRun:  mmh.UpdateContextTimestampTask,
-	PostRun: mmh.UpdateContextTimestamp,
 }
 
 var serverDelCmd = &cobra.Command{
@@ -42,8 +38,6 @@ Delete ssh server.`,
 			_ = cmd.Help()
 		}
 	},
-	PreRun:  mmh.UpdateContextTimestampTask,
-	PostRun: mmh.UpdateContextTimestamp,
 }
 
 var serverListCmd = &cobra.Command{
@@ -58,8 +52,6 @@ List ssh server.`,
 			mmh.ListServers()
 		}
 	},
-	PreRun:  mmh.UpdateContextTimestampTask,
-	PostRun: mmh.UpdateContextTimestamp,
 }
 
 func init() {

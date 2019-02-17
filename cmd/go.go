@@ -18,8 +18,6 @@ Login single server.`,
 			_ = cmd.Help()
 		}
 	},
-	PreRun:  mmh.UpdateContextTimestampTask,
-	PostRun: mmh.UpdateContextTimestamp,
 }
 
 func init() {

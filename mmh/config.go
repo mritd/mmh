@@ -2,14 +2,8 @@ package mmh
 
 import (
 	"errors"
-	"io/ioutil"
-	"os"
-	"strings"
-	"time"
-
-	"github.com/spf13/cobra"
-
 	"strconv"
+	"strings"
 
 	"path/filepath"
 
@@ -20,7 +14,6 @@ import (
 
 	"sort"
 
-	"github.com/mitchellh/go-homedir"
 	"github.com/mritd/mmh/utils"
 	"github.com/mritd/promptx"
 )
@@ -378,60 +371,4 @@ func listLayout(name string) string {
 // merge tags
 func mergeTags(tags []string) string {
 	return strings.Join(tags, ",")
-}
-
-// update context latest use timestamp
-func UpdateContextTimestamp(_ *cobra.Command, _ []string) {
-
-	home, _ := homedir.Dir()
-	pidFile := filepath.Join(home, ".mmh", ".pid")
-	_ = os.Remove(pidFile)
-
-	MainCfg.Contexts.TimeStamp = time.Now()
-	utils.CheckAndExit(MainCfg.Write())
-}
-
-// update context latest use timestamp in background
-func UpdateContextTimestampTask(_ *cobra.Command, _ []string) {
-
-	// if context auto downgrade is open
-	if !MainCfg.Contexts.TimeStamp.IsZero() && MainCfg.Contexts.TimeOut != 0 && MainCfg.Contexts.AutoDowngrade != "" {
-
-		home, _ := homedir.Dir()
-		pid := strconv.Itoa(os.Getpid())
-		pidFile := filepath.Join(home, ".mmh", ".pid")
-
-		if MainCfg.Contexts.TimeOut < 60*time.Second {
-			MainCfg.Contexts.TimeOut = 60 * time.Second
-		}
-
-		go func() {
-			for {
-				select {
-				case <-time.Tick(MainCfg.Contexts.TimeOut - 3*time.Second):
-
-					if _, err := os.Stat(pidFile); os.IsNotExist(err) {
-						// write current pid to pid file
-						utils.CheckAndExit(ioutil.WriteFile(pidFile, []byte(pid), 0644))
-					} else {
-						p, err := ioutil.ReadFile(pidFile)
-						if err != nil {
-							fmt.Println(err)
-						}
-
-						// check pid
-						if string(p) == pid {
-							MainCfg.Contexts.TimeStamp = time.Now()
-							if err := MainCfg.Write(); err != nil {
-								fmt.Println(err)
-							}
-						}
-					}
-
-				}
-			}
-		}()
-
-	}
-
 }

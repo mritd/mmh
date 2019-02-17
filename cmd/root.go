@@ -4,9 +4,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"time"
-
-	"github.com/mritd/promptx/util"
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/mritd/mmh/mmh"
@@ -22,8 +19,6 @@ A simple Multi-server ssh tool.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		mmh.InteractiveLogin()
 	},
-	PreRun:  mmh.UpdateContextTimestampTask,
-	PostRun: mmh.UpdateContextTimestamp,
 }
 
 func Execute() {
@@ -64,15 +59,6 @@ func initConfig() {
 
 	// load main config
 	utils.CheckAndExit(mmh.MainCfg.Load(mainConfigFile))
-
-	// if timeout, context will downgrade
-	if !mmh.MainCfg.Contexts.TimeStamp.IsZero() && mmh.MainCfg.Contexts.TimeOut != 0 && mmh.MainCfg.Contexts.AutoDowngrade != "" {
-		if time.Now().After(mmh.MainCfg.Contexts.TimeStamp.Add(mmh.MainCfg.Contexts.TimeOut)) && mmh.MainCfg.Contexts.Current != mmh.MainCfg.Contexts.AutoDowngrade {
-			fmt.Printf("🍁 context timeout, auto downgrade => [%s]\n", mmh.MainCfg.Contexts.AutoDowngrade)
-			mmh.MainCfg.Contexts.Current = mmh.MainCfg.Contexts.AutoDowngrade
-			util.CheckAndExit(mmh.MainCfg.Write())
-		}
-	}
 
 	// check context
 	if len(mmh.MainCfg.Contexts.Context) == 0 {
