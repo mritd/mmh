@@ -19,7 +19,7 @@ import (
 )
 
 var (
-	MainCfg    MainConfig
+	Main       MainConfig
 	ContextCfg ContextConfig
 	MaxProxy   int
 )
@@ -35,7 +35,7 @@ var (
 
 // find context by name
 func (ctxList ContextList) FindContextByName(name string) (Context, bool) {
-	for _, ctx := range ctxList.Context {
+	for _, ctx := range ctxList.Contexts {
 		if name == ctx.Name {
 			return ctx, true
 		}
@@ -336,11 +336,11 @@ func ListContexts() {
 	_, _ = t.Parse(tpl)
 
 	var ctxList ContextDetails
-	for _, c := range MainCfg.Contexts.Context {
+	for _, c := range Main.Contexts.Contexts {
 		ctxList = append(ctxList, ContextDetail{
 			Name:           c.Name,
 			ConfigPath:     c.ConfigPath,
-			CurrentContext: c.Name == MainCfg.Contexts.Current,
+			CurrentContext: c.Name == Main.Contexts.Current,
 		})
 	}
 	sort.Sort(ctxList)
@@ -351,12 +351,12 @@ func ListContexts() {
 
 // set current context
 func ContextUse(ctxName string) {
-	_, ok := MainCfg.Contexts.FindContextByName(ctxName)
+	_, ok := Main.Contexts.FindContextByName(ctxName)
 	if !ok {
 		utils.Exit(fmt.Sprintf("context [%s] not found", ctxName), 1)
 	}
-	MainCfg.Contexts.Current = ctxName
-	utils.CheckAndExit(MainCfg.Write())
+	Main.Contexts.Current = ctxName
+	utils.CheckAndExit(Main.Write())
 }
 
 // print layout func

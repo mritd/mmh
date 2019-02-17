@@ -50,33 +50,6 @@ type Context struct {
 	ConfigPath string `yaml:"config_path"`
 }
 
-// mmh context list
-type ContextList struct {
-	Context []Context     `yaml:"context"`
-	Current string        `yaml:"current"`
-	TimeOut time.Duration `yaml:"timeout"`
-}
-
-// mmh context detail
-type ContextDetail struct {
-	Name           string
-	ConfigPath     string
-	CurrentContext bool
-}
-
-// mmh context details
-type ContextDetails []ContextDetail
-
-func (cd ContextDetails) Len() int {
-	return len(cd)
-}
-func (cd ContextDetails) Less(i, j int) bool {
-	return cd[i].Name < cd[j].Name
-}
-func (cd ContextDetails) Swap(i, j int) {
-	cd[i], cd[j] = cd[j], cd[i]
-}
-
 // mmh servers
 type Servers []*Server
 
@@ -88,22 +61,6 @@ func (servers Servers) Less(i, j int) bool {
 }
 func (servers Servers) Swap(i, j int) {
 	servers[i], servers[j] = servers[j], servers[i]
-}
-
-// context config example
-func MainConfigExample() MainConfig {
-	return MainConfig{
-		Contexts: ContextList{
-			Context: []Context{
-				{
-					Name:       "default",
-					ConfigPath: "./default.yaml",
-				},
-			},
-			Current: "default",
-			TimeOut: 0,
-		},
-	}
 }
 
 func ContextConfigExample() ContextConfig {
@@ -165,10 +122,28 @@ func TagsExample() Tags {
 	}
 }
 
-// main.yaml config struct
+// main config struct
 type MainConfig struct {
 	configPath string
-	Contexts   ContextList `yaml:"context_list"`
+	Basic      string    `yaml:"basic"`
+	Contexts   []Context `yaml:"contexts"`
+	Current    string    `yaml:"current"`
+}
+
+// main config example
+func MainConfigExample() MainConfig {
+	return MainConfig{
+		Contexts: []Context{
+			{
+				Name:       "default",
+				ConfigPath: "./default.yaml",
+			},
+			{
+				Name:       "test",
+				ConfigPath: "./test.yaml",
+			},
+		},
+	}
 }
 
 // set config file path

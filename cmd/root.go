@@ -58,17 +58,17 @@ func initConfig() {
 	}
 
 	// load main config
-	utils.CheckAndExit(mmh.MainCfg.Load(mainConfigFile))
+	utils.CheckAndExit(mmh.Main.Load(mainConfigFile))
 
 	// check context
-	if len(mmh.MainCfg.Contexts.Context) == 0 {
+	if len(mmh.Main.Contexts.Contexts) == 0 {
 		utils.Exit("get context failed", 1)
 	}
 
 	// get current use context
-	ctx, ok := mmh.MainCfg.Contexts.FindContextByName(mmh.MainCfg.Contexts.Current)
+	ctx, ok := mmh.Main.Contexts.FindContextByName(mmh.Main.Contexts.Current)
 	if !ok {
-		utils.Exit(fmt.Sprintf("could not found current context: %s\n", mmh.MainCfg.Contexts.Current), 1)
+		utils.Exit(fmt.Sprintf("could not found current context: %s\n", mmh.Main.Contexts.Current), 1)
 	}
 
 	var ctxConfigFile string
@@ -78,9 +78,9 @@ func initConfig() {
 		ctxConfigFile = filepath.Join(cfgDir, ctx.ConfigPath)
 	}
 	if _, err = os.Stat(ctxConfigFile); os.IsNotExist(err) {
-		utils.Exit(fmt.Sprintf("current context [%s] config file %s not found\n", mmh.MainCfg.Contexts.Current, ctx.ConfigPath), 1)
+		utils.Exit(fmt.Sprintf("current context [%s] config file %s not found\n", mmh.Main.Contexts.Current, ctx.ConfigPath), 1)
 	} else if err != nil {
-		utils.Exit(fmt.Sprintf("current context [%s] config file %s load failed: %s\n", mmh.MainCfg.Contexts.Current, ctx.ConfigPath, err.Error()), 1)
+		utils.Exit(fmt.Sprintf("current context [%s] config file %s load failed: %s\n", mmh.Main.Contexts.Current, ctx.ConfigPath, err.Error()), 1)
 	}
 
 	// load current context
