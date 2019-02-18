@@ -34,8 +34,8 @@ var (
 )
 
 // find context by name
-func (ctxList ContextList) FindContextByName(name string) (Context, bool) {
-	for _, ctx := range ctxList.Contexts {
+func (cs Contexts) FindContextByName(name string) (Context, bool) {
+	for _, ctx := range cs {
 		if name == ctx.Name {
 			return ctx, true
 		}
@@ -44,7 +44,7 @@ func (ctxList ContextList) FindContextByName(name string) (Context, bool) {
 }
 
 // find server by name
-func (servers Servers) FindServerByName(name string) *Server {
+func (servers Servers) FindServerByName(name string) *ServerConfig {
 
 	for _, s := range servers {
 		if s.Name == name {
@@ -227,7 +227,7 @@ func AddServer() {
 	}
 
 	// create server
-	server := Server{
+	server := ServerConfig{
 		Name:               name,
 		Tags:               inputTags,
 		User:               user,
@@ -326,7 +326,7 @@ func ListContexts() {
 
 	tpl := `  Name          Path
 ---------------------------------
-{{ range . }}{{ if .CurrentContext }}» {{ .Name | ListLayout }}{{ else }}  {{ .Name | ListLayout }}{{ end }}  {{ .ConfigPath }}
+{{ range . }}{{ if .IsContext }}» {{ .Name | ListLayout }}{{ else }}  {{ .Name | ListLayout }}{{ end }}  {{ .ConfigPath }}
 {{ end }}`
 
 	t := template.New("").Funcs(map[string]interface{}{
@@ -335,27 +335,33 @@ func ListContexts() {
 	})
 	_, _ = t.Parse(tpl)
 
-	var ctxList ContextDetails
-	for _, c := range Main.Contexts.Contexts {
-		ctxList = append(ctxList, ContextDetail{
-			Name:           c.Name,
-			ConfigPath:     c.ConfigPath,
-			CurrentContext: c.Name == Main.Contexts.Current,
-		})
+	var ctxList []struct {
+		Context
+		IsContext bool
 	}
-	sort.Sort(ctxList)
+
+	sort.Sort(Main.Contexts)
+	for _, c := range Main.Contexts {
+		ctxList = append(ctxList, struct {
+			Context
+			IsContext bool
+		}{
+			Context:   c,
+			IsContext: c.Name == Main.Current})
+	}
+
 	var buf bytes.Buffer
 	utils.CheckAndExit(t.Execute(&buf, ctxList))
 	fmt.Println(buf.String())
 }
 
 // set current context
-func ContextUse(ctxName string) {
+func UseContext(ctxName string) {
 	_, ok := Main.Contexts.FindContextByName(ctxName)
 	if !ok {
 		utils.Exit(fmt.Sprintf("context [%s] not found", ctxName), 1)
 	}
-	Main.Contexts.Current = ctxName
+	Main.Current = ctxName
 	utils.CheckAndExit(Main.Write())
 }
 

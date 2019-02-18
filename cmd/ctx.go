@@ -36,7 +36,7 @@ Use context`,
 			_ = cmd.Help()
 			return
 		}
-		mmh.ContextUse(args[0])
+		mmh.UseContext(args[0])
 	},
 }
 

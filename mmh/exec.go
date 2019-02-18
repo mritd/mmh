@@ -87,7 +87,7 @@ func Exec(tagOrName, cmd string, singleServer bool) {
 
 // single server execution command
 // since multiple tasks are executed async, the error is returned using channel
-func exec(ctx context.Context, s *Server, singleServer bool, cmd string, errCh chan error) {
+func exec(ctx context.Context, s *ServerConfig, singleServer bool, cmd string, errCh chan error) {
 
 	// get ssh client
 	sshClient, err := s.sshClient()

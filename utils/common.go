@@ -1,15 +1,10 @@
 package utils
 
 import (
-	"bytes"
 	"fmt"
-	"math/rand"
 	"os"
 	"os/user"
-	"reflect"
 	"strings"
-	"text/template"
-	"time"
 )
 
 func CheckAndExit(err error) {
@@ -33,26 +28,6 @@ func Exit(message string, code int) {
 	}
 	fmt.Println("😱 " + message)
 	os.Exit(code)
-}
-
-func RandInt(min, max int) int {
-	rand.Seed(time.Now().UnixNano())
-	return min + rand.Intn(max-min)
-}
-
-func MapRandomKeyGet(mapI interface{}) interface{} {
-	keys := reflect.ValueOf(mapI).MapKeys()
-
-	return keys[rand.Intn(len(keys))].Interface()
-}
-
-func Render(tpl *template.Template, data interface{}) []byte {
-	var buf bytes.Buffer
-	err := tpl.Execute(&buf, data)
-	if err != nil {
-		return []byte(fmt.Sprintf("%v", data))
-	}
-	return buf.Bytes()
 }
 
 func Root() bool {

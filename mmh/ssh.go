@@ -15,7 +15,7 @@ import (
 )
 
 // set server default config
-func (s *Server) setDefault() {
+func (s *ServerConfig) setDefault() {
 	if s.User == "" {
 		s.User = ContextCfg.Basic.User
 	}
@@ -38,7 +38,7 @@ func (s *Server) setDefault() {
 }
 
 // return a ssh client intense point
-func (s *Server) sshClient() (*ssh.Client, error) {
+func (s *ServerConfig) sshClient() (*ssh.Client, error) {
 
 	// default to basic config
 	s.setDefault()
@@ -100,7 +100,7 @@ func (s *Server) sshClient() (*ssh.Client, error) {
 }
 
 // start a ssh terminal
-func (s *Server) Terminal() error {
+func (s *ServerConfig) Terminal() error {
 	sshClient, err := s.sshClient()
 	if err != nil {
 		return err
@@ -135,7 +135,7 @@ func (s *Server) Terminal() error {
 
 // get auth method
 // priority use privateKey method
-func (s *Server) authMethod() (ssh.AuthMethod, error) {
+func (s *ServerConfig) authMethod() (ssh.AuthMethod, error) {
 	if strings.TrimSpace(s.PrivateKey) != "" {
 		return privateKeyFile(s.PrivateKey, s.PrivateKeyPassword)
 	} else {
