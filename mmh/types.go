@@ -186,14 +186,6 @@ func (cfg *ContextConfig) LoadFrom(filePath string) error {
 	return cfg.Load()
 }
 
-func ContextConfigExample() ContextConfig {
-	return ContextConfig{
-		Basic:   BasicServerExample(),
-		Servers: ServersExample(),
-		Tags:    TagsExample(),
-	}
-}
-
 // basic config example
 func BasicServerExample() BasicServerConfig {
 	home, _ := homedir.Dir()
@@ -246,8 +238,8 @@ func TagsExample() Tags {
 }
 
 // main config example
-func MainConfigExample() MainConfig {
-	return MainConfig{
+func MainConfigExample() *MainConfig {
+	return &MainConfig{
 		Basic: "default",
 		Contexts: []Context{
 			{
@@ -259,5 +251,14 @@ func MainConfigExample() MainConfig {
 				ConfigPath: "./test.yaml",
 			},
 		},
+	}
+}
+
+// context config example
+func ContextConfigExample() *ContextConfig {
+	return &ContextConfig{
+		Basic:   BasicServerExample(),
+		Servers: ServersExample(),
+		Tags:    TagsExample(),
 	}
 }
