@@ -251,6 +251,7 @@ func MainConfigExample() *MainConfig {
 				ConfigPath: "./test.yaml",
 			},
 		},
+		Current: "default",
 	}
 }
 
