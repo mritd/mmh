@@ -83,6 +83,25 @@ func initConfig() {
 		utils.Exit(fmt.Sprintf("current context [%s] config file %s load failed: %s\n", mmh.Main.Current, ctx.ConfigPath, err.Error()), 1)
 	}
 
-	// load current context
-	utils.CheckAndExit(mmh.ContextCfg.LoadFrom(ctxConfigFile))
+	// load basic context
+	utils.CheckAndExit(mmh.CurrentContext.LoadFrom(ctxConfigFile))
+
+	// get current use context
+	basicCtx, ok := mmh.Main.Contexts.FindContextByName(mmh.Main.Basic)
+	if ok {
+		if filepath.IsAbs(basicCtx.ConfigPath) {
+			ctxConfigFile = basicCtx.ConfigPath
+		} else {
+			ctxConfigFile = filepath.Join(cfgDir, basicCtx.ConfigPath)
+		}
+		if _, err = os.Stat(ctxConfigFile); os.IsNotExist(err) {
+			utils.Exit(fmt.Sprintf("basic context [%s] config file %s not found\n", mmh.Main.Current, ctx.ConfigPath), 1)
+		} else if err != nil {
+			utils.Exit(fmt.Sprintf("basic context [%s] config file %s load failed: %s\n", mmh.Main.Current, ctx.ConfigPath, err.Error()), 1)
+		}
+
+		// load current context
+		utils.CheckAndExit(mmh.BasicContext.LoadFrom(ctxConfigFile))
+	}
+
 }

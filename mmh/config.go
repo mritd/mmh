@@ -19,9 +19,10 @@ import (
 )
 
 var (
-	Main       MainConfig
-	ContextCfg ContextConfig
-	MaxProxy   int
+	Main           MainConfig
+	BasicContext   ContextConfig
+	CurrentContext ContextConfig
+	MaxProxy       int
 )
 
 // error def
@@ -44,22 +45,29 @@ func (cs Contexts) FindContextByName(name string) (Context, bool) {
 }
 
 // find server by name
-func (servers Servers) FindServerByName(name string) *ServerConfig {
+func FindServerByName(name string) *ServerConfig {
 
-	for _, s := range servers {
+	for _, s := range BasicContext.Servers {
 		if s.Name == name {
 			return s
 		}
 	}
+
+	for _, s := range CurrentContext.Servers {
+		if s.Name == name {
+			return s
+		}
+	}
+
 	return nil
 }
 
 // find servers by tag
-func (servers Servers) FindServersByTag(tag string) Servers {
+func FindServersByTag(tag string) Servers {
 
 	ss := Servers{}
 
-	for _, s := range servers {
+	for _, s := range BasicContext.Servers {
 		tmpServer := s
 		for _, t := range tmpServer.Tags {
 			if tag == t {
@@ -67,6 +75,16 @@ func (servers Servers) FindServersByTag(tag string) Servers {
 			}
 		}
 	}
+
+	for _, s := range CurrentContext.Servers {
+		tmpServer := s
+		for _, t := range tmpServer.Tags {
+			if tag == t {
+				ss = append(ss, tmpServer)
+			}
+		}
+	}
+
 	return ss
 }
 
@@ -81,7 +99,7 @@ func AddServer() {
 			return inputTooLongErr
 		}
 
-		if s := ContextCfg.Servers.FindServerByName(string(line)); s != nil {
+		if s := FindServerByName(string(line)); s != nil {
 			return serverExistErr
 		}
 		return nil
@@ -100,13 +118,13 @@ func AddServer() {
 	inputTags := strings.Split(p.Run(), ",")
 	for _, tag := range inputTags {
 		tagExist := false
-		for _, extTag := range ContextCfg.Tags {
+		for _, extTag := range CurrentContext.Tags {
 			if tag == extTag {
 				tagExist = true
 			}
 		}
 		if !tagExist {
-			ContextCfg.Tags = append(ContextCfg.Tags, tag)
+			CurrentContext.Tags = append(CurrentContext.Tags, tag)
 		}
 	}
 
@@ -119,7 +137,7 @@ func AddServer() {
 
 	user := p.Run()
 	if strings.TrimSpace(user) == "" {
-		user = ContextCfg.Basic.User
+		user = CurrentContext.Basic.User
 	}
 
 	// server address
@@ -147,7 +165,7 @@ func AddServer() {
 
 	portStr := p.Run()
 	if strings.TrimSpace(portStr) == "" {
-		port = ContextCfg.Basic.Port
+		port = CurrentContext.Basic.Port
 	} else {
 		port, _ = strconv.Atoi(portStr)
 	}
@@ -185,7 +203,7 @@ func AddServer() {
 
 		privateKey = p.Run()
 		if strings.TrimSpace(privateKey) == "" {
-			privateKey = ContextCfg.Basic.PrivateKey
+			privateKey = CurrentContext.Basic.PrivateKey
 		}
 
 		p = promptx.NewDefaultPrompt(func(line []rune) error {
@@ -195,7 +213,7 @@ func AddServer() {
 		}, "PrivateKey Password:")
 		privateKeyPassword = p.Run()
 		if strings.TrimSpace(privateKeyPassword) == "" {
-			privateKeyPassword = ContextCfg.Basic.PrivateKeyPassword
+			privateKeyPassword = CurrentContext.Basic.PrivateKeyPassword
 		}
 	} else {
 		// use password
@@ -206,14 +224,14 @@ func AddServer() {
 		}, "Password:")
 		password = p.Run()
 		if strings.TrimSpace(password) == "" {
-			password = ContextCfg.Basic.Password
+			password = CurrentContext.Basic.Password
 		}
 	}
 
 	// server proxy
 	p = promptx.NewDefaultPrompt(func(line []rune) error {
 		if strings.TrimSpace(string(line)) != "" {
-			if ContextCfg.Servers.FindServerByName(string(line)) == nil {
+			if FindServerByName(string(line)) == nil {
 				return proxyNotFoundErr
 			}
 		}
@@ -223,7 +241,7 @@ func AddServer() {
 
 	proxy := p.Run()
 	if strings.TrimSpace(proxy) == "" {
-		proxy = ContextCfg.Basic.Proxy
+		proxy = CurrentContext.Basic.Proxy
 	}
 
 	// create server
@@ -240,9 +258,9 @@ func AddServer() {
 	}
 
 	// Save
-	ContextCfg.Servers = append(ContextCfg.Servers, &server)
-	sort.Sort(ContextCfg.Servers)
-	utils.CheckAndExit(ContextCfg.Write())
+	CurrentContext.Servers = append(CurrentContext.Servers, &server)
+	sort.Sort(CurrentContext.Servers)
+	utils.CheckAndExit(CurrentContext.Write())
 }
 
 // delete server
@@ -251,7 +269,7 @@ func DeleteServer(serverNames []string) {
 	var deletesIdx []int
 
 	for _, serverName := range serverNames {
-		for i, s := range ContextCfg.Servers {
+		for i, s := range CurrentContext.Servers {
 			matched, err := filepath.Match(serverName, s.Name)
 			// server name may contain special characters
 			if err != nil {
@@ -276,12 +294,12 @@ func DeleteServer(serverNames []string) {
 	// sort and delete
 	sort.Ints(deletesIdx)
 	for i, del := range deletesIdx {
-		ContextCfg.Servers = append(ContextCfg.Servers[:del-i], ContextCfg.Servers[del-i+1:]...)
+		CurrentContext.Servers = append(CurrentContext.Servers[:del-i], CurrentContext.Servers[del-i+1:]...)
 	}
 
 	// save config
-	sort.Sort(ContextCfg.Servers)
-	utils.CheckAndExit(ContextCfg.Write())
+	sort.Sort(CurrentContext.Servers)
+	utils.CheckAndExit(CurrentContext.Write())
 
 }
 
@@ -299,13 +317,13 @@ func ListServers() {
 
 	_, _ = t.Parse(tpl)
 	var buf bytes.Buffer
-	utils.CheckAndExit(t.Execute(&buf, ContextCfg.Servers))
+	utils.CheckAndExit(t.Execute(&buf, CurrentContext.Servers))
 	fmt.Println(buf.String())
 }
 
 // print single server detail
 func ServerDetail(serverName string) {
-	s := ContextCfg.Servers.FindServerByName(serverName)
+	s := FindServerByName(serverName)
 	if s == nil {
 		utils.Exit("server not found!", 1)
 	}

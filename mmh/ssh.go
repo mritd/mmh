@@ -17,23 +17,23 @@ import (
 // set server default config
 func (s *ServerConfig) setDefault() {
 	if s.User == "" {
-		s.User = ContextCfg.Basic.User
+		s.User = CurrentContext.Basic.User
 	}
 	if s.Port == 0 {
-		s.Port = ContextCfg.Basic.Port
+		s.Port = CurrentContext.Basic.Port
 	}
 	if s.Password == "" {
-		s.Password = ContextCfg.Basic.Password
+		s.Password = CurrentContext.Basic.Password
 		if s.PrivateKey == "" {
-			s.PrivateKey = ContextCfg.Basic.PrivateKey
+			s.PrivateKey = CurrentContext.Basic.PrivateKey
 		}
 	}
 
 	if s.PrivateKeyPassword == "" {
-		s.PrivateKeyPassword = ContextCfg.Basic.PrivateKeyPassword
+		s.PrivateKeyPassword = CurrentContext.Basic.PrivateKeyPassword
 	}
 	if s.Proxy == "" {
-		s.Proxy = ContextCfg.Basic.Proxy
+		s.Proxy = CurrentContext.Basic.Proxy
 	}
 }
 
@@ -68,7 +68,7 @@ func (s *ServerConfig) sshClient() (*ssh.Client, error) {
 		}
 
 		// find proxy server
-		proxyServer := ContextCfg.Servers.FindServerByName(s.Proxy)
+		proxyServer := FindServerByName(s.Proxy)
 		if proxyServer == nil {
 			return nil, errors.New(fmt.Sprintf("cloud not found proxy server: %s", s.Proxy))
 		} else {
