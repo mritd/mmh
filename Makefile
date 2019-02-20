@@ -13,6 +13,9 @@ all:
 release: all
 	ghr -u mritd -t $(GITHUB_RELEASE_TOKEN) -replace -recreate --debug ${BUILD_VERSION} dist
 
+pre-release: all
+	ghr -u mritd -t $(GITHUB_RELEASE_TOKEN) -replace -recreate -prerelease --debug ${BUILD_VERSION} dist
+
 clean:
 	rm -rf dist
 
