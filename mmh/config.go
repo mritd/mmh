@@ -57,7 +57,6 @@ func findServerByName(name string) *ServerConfig {
 
 func getServers() Servers {
 	var servers Servers
-	//ss := append(BasicContext.Servers, CurrentContext.Servers...)
 	for _, s := range BasicContext.Servers {
 		if s.User == "" {
 			s.User = BasicContext.Basic.User
