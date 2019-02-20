@@ -64,12 +64,12 @@ func getServers() Servers {
 		}
 		if s.Password == "" {
 			s.Password = BasicContext.Basic.Password
-		}
-		if s.PrivateKey == "" {
-			s.PrivateKey = BasicContext.Basic.PrivateKey
-		}
-		if s.PrivateKeyPassword == "" {
-			s.PrivateKeyPassword = BasicContext.Basic.PrivateKeyPassword
+			if s.PrivateKey == "" {
+				s.PrivateKey = BasicContext.Basic.PrivateKey
+			}
+			if s.PrivateKeyPassword == "" {
+				s.PrivateKeyPassword = BasicContext.Basic.PrivateKeyPassword
+			}
 		}
 		if s.Port == 0 {
 			s.Port = BasicContext.Basic.Port
@@ -86,12 +86,12 @@ func getServers() Servers {
 		}
 		if s.Password == "" {
 			s.Password = CurrentContext.Basic.Password
-		}
-		if s.PrivateKey == "" {
-			s.PrivateKey = CurrentContext.Basic.PrivateKey
-		}
-		if s.PrivateKeyPassword == "" {
-			s.PrivateKeyPassword = CurrentContext.Basic.PrivateKeyPassword
+			if s.PrivateKey == "" {
+				s.PrivateKey = CurrentContext.Basic.PrivateKey
+			}
+			if s.PrivateKeyPassword == "" {
+				s.PrivateKeyPassword = CurrentContext.Basic.PrivateKeyPassword
+			}
 		}
 		if s.Port == 0 {
 			s.Port = CurrentContext.Basic.Port
