@@ -14,7 +14,7 @@ func Install(dir string) {
 		filepath.Join(dir, "mcp"),
 		filepath.Join(dir, "mec"),
 		filepath.Join(dir, "mgo"),
-		filepath.Join(dir, "mms"),
+		filepath.Join(dir, "mcs"),
 		filepath.Join(dir, "mcx"),
 	}
 

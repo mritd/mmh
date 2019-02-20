@@ -14,34 +14,8 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-// set server default config
-func (s *ServerConfig) setDefault() {
-	if s.User == "" {
-		s.User = CurrentContext.Basic.User
-	}
-	if s.Port == 0 {
-		s.Port = CurrentContext.Basic.Port
-	}
-	if s.Password == "" {
-		s.Password = CurrentContext.Basic.Password
-		if s.PrivateKey == "" {
-			s.PrivateKey = CurrentContext.Basic.PrivateKey
-		}
-	}
-
-	if s.PrivateKeyPassword == "" {
-		s.PrivateKeyPassword = CurrentContext.Basic.PrivateKeyPassword
-	}
-	if s.Proxy == "" {
-		s.Proxy = CurrentContext.Basic.Proxy
-	}
-}
-
 // return a ssh client intense point
 func (s *ServerConfig) sshClient() (*ssh.Client, error) {
-
-	// default to basic config
-	s.setDefault()
 
 	var client *ssh.Client
 	auth, err := s.authMethod()
@@ -68,7 +42,7 @@ func (s *ServerConfig) sshClient() (*ssh.Client, error) {
 		}
 
 		// find proxy server
-		proxyServer := FindServerByName(s.Proxy)
+		proxyServer := findServerByName(s.Proxy)
 		if proxyServer == nil {
 			return nil, errors.New(fmt.Sprintf("cloud not found proxy server: %s", s.Proxy))
 		} else {

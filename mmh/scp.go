@@ -30,7 +30,7 @@ func runCopy(args []string, singleServer bool) error {
 		serverName := strings.Split(args[0], ":")[0]
 		remotePath := strings.Split(args[0], ":")[1]
 		localPath := args[1]
-		s := FindServerByName(serverName)
+		s := findServerByName(serverName)
 		if s == nil {
 			return errors.New("server not found")
 		} else {
@@ -56,7 +56,7 @@ func runCopy(args []string, singleServer bool) error {
 
 		// single server copy
 		if singleServer {
-			s := FindServerByName(serverOrTag)
+			s := findServerByName(serverOrTag)
 			if s == nil {
 				return errors.New("server not found")
 			} else {
@@ -77,7 +77,7 @@ func runCopy(args []string, singleServer bool) error {
 			}
 		} else {
 			// multi server copy
-			servers := FindServersByTag(serverOrTag)
+			servers := findServersByTag(serverOrTag)
 			if len(servers) == 0 {
 				return errors.New("tagged server not found")
 			}

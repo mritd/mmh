@@ -18,7 +18,6 @@ type BasicServerConfig struct {
 	PrivateKey          string        `yaml:"privatekey"`
 	PrivateKeyPassword  string        `yaml:"privatekey_password"`
 	Port                int           `yaml:"port"`
-	Proxy               string        `yaml:"proxy"`
 	ServerAliveInterval time.Duration `yaml:"server_alive_interval"`
 }
 
@@ -195,7 +194,6 @@ func BasicServerExample() BasicServerConfig {
 		PrivateKey:          filepath.Join(home, ".ssh", "id_rsa"),
 		PrivateKeyPassword:  "",
 		Password:            "",
-		Proxy:               "",
 		ServerAliveInterval: 0,
 	}
 }

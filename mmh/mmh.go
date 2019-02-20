@@ -6,7 +6,7 @@ import (
 )
 
 func SingleLogin(name string) {
-	s := FindServerByName(name)
+	s := findServerByName(name)
 	if s == nil {
 		utils.Exit("server not found!", 1)
 	} else {

@@ -42,7 +42,7 @@ func Exec(tagOrName, cmd string, singleServer bool) {
 
 	// single server exec
 	if singleServer {
-		server := FindServerByName(tagOrName)
+		server := findServerByName(tagOrName)
 		if server == nil {
 			utils.Exit("server not found", 1)
 		} else {
@@ -57,7 +57,7 @@ func Exec(tagOrName, cmd string, singleServer bool) {
 		}
 	} else {
 		// multiple servers
-		servers := FindServersByTag(tagOrName)
+		servers := findServersByTag(tagOrName)
 		if len(servers) == 0 {
 			utils.Exit("tagged server not found", 1)
 		}

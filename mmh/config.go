@@ -45,38 +45,72 @@ func (cs Contexts) FindContextByName(name string) (Context, bool) {
 }
 
 // find server by name
-func FindServerByName(name string) *ServerConfig {
+func findServerByName(name string) *ServerConfig {
 
-	for _, s := range BasicContext.Servers {
+	for _, s := range getServers() {
 		if s.Name == name {
 			return s
 		}
 	}
-
-	for _, s := range CurrentContext.Servers {
-		if s.Name == name {
-			return s
-		}
-	}
-
 	return nil
 }
 
-// find servers by tag
-func FindServersByTag(tag string) Servers {
-
-	ss := Servers{}
-
+func getServers() Servers {
+	var servers Servers
+	//ss := append(BasicContext.Servers, CurrentContext.Servers...)
 	for _, s := range BasicContext.Servers {
-		tmpServer := s
-		for _, t := range tmpServer.Tags {
-			if tag == t {
-				ss = append(ss, tmpServer)
-			}
+		if s.User == "" {
+			s.User = BasicContext.Basic.User
 		}
+		if s.Password == "" {
+			s.Password = BasicContext.Basic.Password
+		}
+		if s.PrivateKey == "" {
+			s.PrivateKey = BasicContext.Basic.PrivateKey
+		}
+		if s.PrivateKeyPassword == "" {
+			s.PrivateKeyPassword = BasicContext.Basic.PrivateKeyPassword
+		}
+		if s.Port == 0 {
+			s.Port = BasicContext.Basic.Port
+		}
+		if s.ServerAliveInterval == 0 {
+			s.ServerAliveInterval = BasicContext.Basic.ServerAliveInterval
+		}
+		servers = append(servers, s)
 	}
 
 	for _, s := range CurrentContext.Servers {
+		if s.User == "" {
+			s.User = CurrentContext.Basic.User
+		}
+		if s.Password == "" {
+			s.Password = CurrentContext.Basic.Password
+		}
+		if s.PrivateKey == "" {
+			s.PrivateKey = CurrentContext.Basic.PrivateKey
+		}
+		if s.PrivateKeyPassword == "" {
+			s.PrivateKeyPassword = CurrentContext.Basic.PrivateKeyPassword
+		}
+		if s.Port == 0 {
+			s.Port = CurrentContext.Basic.Port
+		}
+		if s.ServerAliveInterval == 0 {
+			s.ServerAliveInterval = CurrentContext.Basic.ServerAliveInterval
+		}
+		servers = append(servers, s)
+	}
+
+	return servers
+}
+
+// find servers by tag
+func findServersByTag(tag string) Servers {
+
+	ss := Servers{}
+
+	for _, s := range getServers() {
 		tmpServer := s
 		for _, t := range tmpServer.Tags {
 			if tag == t {
@@ -84,7 +118,6 @@ func FindServersByTag(tag string) Servers {
 			}
 		}
 	}
-
 	return ss
 }
 
@@ -99,7 +132,7 @@ func AddServer() {
 			return inputTooLongErr
 		}
 
-		if s := FindServerByName(string(line)); s != nil {
+		if s := findServerByName(string(line)); s != nil {
 			return serverExistErr
 		}
 		return nil
@@ -115,7 +148,7 @@ func AddServer() {
 	}, "Tags:")
 
 	// if it is a new tag, write the configuration file
-	inputTags := strings.Split(p.Run(), ",")
+	inputTags := strings.Fields(p.Run())
 	for _, tag := range inputTags {
 		tagExist := false
 		for _, extTag := range CurrentContext.Tags {
@@ -231,7 +264,7 @@ func AddServer() {
 	// server proxy
 	p = promptx.NewDefaultPrompt(func(line []rune) error {
 		if strings.TrimSpace(string(line)) != "" {
-			if FindServerByName(string(line)) == nil {
+			if findServerByName(string(line)) == nil {
 				return proxyNotFoundErr
 			}
 		}
@@ -240,9 +273,6 @@ func AddServer() {
 	}, "Proxy:")
 
 	proxy := p.Run()
-	if strings.TrimSpace(proxy) == "" {
-		proxy = CurrentContext.Basic.Proxy
-	}
 
 	// create server
 	server := ServerConfig{
@@ -317,13 +347,13 @@ func ListServers() {
 
 	_, _ = t.Parse(tpl)
 	var buf bytes.Buffer
-	utils.CheckAndExit(t.Execute(&buf, CurrentContext.Servers))
+	utils.CheckAndExit(t.Execute(&buf, getServers()))
 	fmt.Println(buf.String())
 }
 
 // print single server detail
-func ServerDetail(serverName string) {
-	s := FindServerByName(serverName)
+func PrintServerDetail(serverName string) {
+	s := findServerByName(serverName)
 	if s == nil {
 		utils.Exit("server not found!", 1)
 	}

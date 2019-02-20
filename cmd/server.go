@@ -8,7 +8,7 @@ import (
 var serverCmd = &cobra.Command{
 	Use:     "server",
 	Short:   "Server command",
-	Aliases: []string{"mms"},
+	Aliases: []string{"mcs"},
 	Long: `
 Server command.`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -47,7 +47,7 @@ var serverListCmd = &cobra.Command{
 List ssh server.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 1 {
-			mmh.ServerDetail(args[0])
+			mmh.PrintServerDetail(args[0])
 		} else {
 			mmh.ListServers()
 		}
