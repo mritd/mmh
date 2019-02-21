@@ -35,8 +35,8 @@ var (
 )
 
 // find context by name
-func (cs Contexts) FindContextByName(name string) (Context, bool) {
-	for _, ctx := range cs {
+func FindContextByName(name string) (Context, bool) {
+	for _, ctx := range Main.Contexts {
 		if name == ctx.Name {
 			return ctx, true
 		}
@@ -406,7 +406,7 @@ func ListContexts() {
 
 // set current context
 func UseContext(ctxName string) {
-	_, ok := Main.Contexts.FindContextByName(ctxName)
+	_, ok := FindContextByName(ctxName)
 	if !ok {
 		utils.Exit(fmt.Sprintf("context [%s] not found", ctxName), 1)
 	}

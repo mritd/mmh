@@ -66,7 +66,7 @@ func initConfig() {
 	}
 
 	// get current use context
-	ctx, ok := mmh.Main.Contexts.FindContextByName(mmh.Main.Current)
+	ctx, ok := mmh.FindContextByName(mmh.Main.Current)
 	if !ok {
 		utils.Exit(fmt.Sprintf("could not found current context: %s\n", mmh.Main.Current), 1)
 	}
@@ -87,7 +87,7 @@ func initConfig() {
 	utils.CheckAndExit(mmh.CurrentContext.LoadFrom(ctxConfigFile))
 
 	// get current use context
-	basicCtx, ok := mmh.Main.Contexts.FindContextByName(mmh.Main.Basic)
+	basicCtx, ok := mmh.FindContextByName(mmh.Main.Basic)
 	if ok {
 		if filepath.IsAbs(basicCtx.ConfigPath) {
 			ctxConfigFile = basicCtx.ConfigPath
