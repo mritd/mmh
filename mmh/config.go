@@ -79,26 +79,28 @@ func getServers() Servers {
 		servers = append(servers, s)
 	}
 
-	for _, s := range CurrentContext.Servers {
-		if s.User == "" {
-			s.User = CurrentContext.Basic.User
-		}
-		if s.Password == "" {
-			s.Password = CurrentContext.Basic.Password
-			if s.PrivateKey == "" {
-				s.PrivateKey = CurrentContext.Basic.PrivateKey
+	if CurrentContext.configPath != BasicContext.configPath {
+		for _, s := range CurrentContext.Servers {
+			if s.User == "" {
+				s.User = CurrentContext.Basic.User
 			}
-			if s.PrivateKeyPassword == "" {
-				s.PrivateKeyPassword = CurrentContext.Basic.PrivateKeyPassword
+			if s.Password == "" {
+				s.Password = CurrentContext.Basic.Password
+				if s.PrivateKey == "" {
+					s.PrivateKey = CurrentContext.Basic.PrivateKey
+				}
+				if s.PrivateKeyPassword == "" {
+					s.PrivateKeyPassword = CurrentContext.Basic.PrivateKeyPassword
+				}
 			}
+			if s.Port == 0 {
+				s.Port = CurrentContext.Basic.Port
+			}
+			if s.ServerAliveInterval == 0 {
+				s.ServerAliveInterval = CurrentContext.Basic.ServerAliveInterval
+			}
+			servers = append(servers, s)
 		}
-		if s.Port == 0 {
-			s.Port = CurrentContext.Basic.Port
-		}
-		if s.ServerAliveInterval == 0 {
-			s.ServerAliveInterval = CurrentContext.Basic.ServerAliveInterval
-		}
-		servers = append(servers, s)
 	}
 
 	return servers
