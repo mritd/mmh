@@ -36,6 +36,14 @@ Flags:
 Use "mmh [command] --help" for more information about a command.
 ```
 
+**部分命令被重命名为快捷命令方便操作(安装后自动软连接)**
+
+- `mmh go` ==> `mgo`
+- `mmh exec` ==> `mec`
+- `mmh cp` ==> `mcp`
+- `mmh server` ==> `mcs`
+- `mmh ctx` ==> `mcx`
+
 ### 配置文件
 
 从 `v1.3.0` 版本开始，支持多配置文件切换功能；安装完成后将会自动在 `$HOME/.mmh` 下创建样例配置，默认配置文件结构如下
@@ -52,16 +60,16 @@ Use "mmh [command] --help" for more information about a command.
 主配置文件结构如下
 
 ``` yaml
-context:
-  default:
-    config_path: ./default.yaml
-context_auto_downgrade: default
-context_timeout: 30m
-context_use: default
-context_use_time: 2018-12-02T19:50:44.681871+08:00
+basic: default
+contexts:
+- name: default
+  config_path: ./default.yaml
+- name: dohko
+  config_path: ./dohko.yaml
+current: dohko
 ```
 
-主配置文件中可以配置多个 `context`，由 `context_use` 字段指明当前使用哪个 `context`，**在每个 `context` 下执行完命令都会刷新 `context_use_time` 时间戳**；如果同时配置了 `context_timeout` 和 `context_auto_downgrade` 字段，**每次执行命令前都会检查上次使用时间距今是否超过了 `context_timeout`，如果超过则将会自动回退到 `context_auto_downgrade` 指定的 `context`**；这样可以避免长时间停留在某个重要的 `context` 上从而造成误操作(比如线上环境)
+主配置文件中可以配置多个 `context`，由 `current` 字段指明当前使用哪个 `context`, `basic` 设置的 `context` 会作为额外补充服务器加入 `current` 指明的 `context` 中；**`basic` 适用于存放一些常规服务器，比如个人的 vps 等，以保证在任何 `context` 都可以访问这些服务器。**
 
 #### default.yaml
 
@@ -74,8 +82,7 @@ basic:
   privatekey: /Users/mritd/.ssh/id_rsa
   privatekey_password: ""
   port: 22
-  proxy: ""
-maxproxy: 5
+  server_alive_interval: 0s
 servers:
 - name: prod11
   tags:
@@ -84,10 +91,10 @@ servers:
   password: password
   privatekey: ""
   privatekey_password: ""
-  server_alive_interval: 20s
   address: 10.10.4.11
   port: 22
   proxy: prod12
+  server_alive_interval: 20s
 - name: prod12
   tags:
   - prod
@@ -95,16 +102,15 @@ servers:
   password: ""
   privatekey: /Users/mritd/.ssh/id_rsa
   privatekey_password: password
-  server_alive_interval: 10s
   address: 10.10.4.12
   port: 22
   proxy: ""
+  server_alive_interval: 10s
 tags:
 - prod
-- test
 ```
 
-`basic` 段为默认配置，用于在 `servers` 段中某项配置不存在时进行填充；`servers` 段中可以配置 N 多个服务器(`server`)；每个 `server` 除了常规的 SSH 相关配置外还增加了 `proxy` 字段用于支持无限跳板(具体见下文)；`tag` 字段必须存在于在下面的 `tags` 段中，该配置主要是为了给服务器打 `tag` 方便批量复制与执行；`maxproxy` 是一个数字，用于处理当出现配置错误导致 "真·无限跳板" 情况时自动断开链接
+`basic` 段为默认配置，用于在 `servers` 段中某项配置不存在时进行填充；`servers` 段中可以配置 N 多个服务器(`server`)；每个 `server` 除了常规的 SSH 相关配置外还增加了 `proxy` 字段用于支持无限跳板(具体见下文)；`tag` 字段必须存在于在下面的 `tags` 段中，该配置主要是为了给服务器打 `tag` 方便批量复制与执行；`maxproxy` 是一个数字，用于处理当出现配置错误导致 "真·无限跳板" 情况时自动断开链接；`server_alive_interval` 用于实现保持链接。
 
 
 ### 自动登录 
@@ -204,5 +210,3 @@ Flags:
 
 Use "ctx [command] --help" for more information about a command.
 ```
-
-同时又增加了 `context` 自动回退功能，即给定一个超时时间，当在给定的超时时间内无操作(不会强行断开任何命令)，下次操作将会自动回退到指定的 `context`，具体请参考上文配置段
