@@ -12,7 +12,11 @@ var ctxCmd = &cobra.Command{
 	Long: `
 Change current context.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		_ = cmd.Help()
+		if len(args) == 0 {
+			mmh.InteractiveSetContext()
+		} else {
+			_ = cmd.Help()
+		}
 	},
 }
 

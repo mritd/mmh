@@ -36,3 +36,24 @@ func InteractiveLogin() {
 	idx := s.Run()
 	SingleLogin(CurrentContext.Servers[idx].Name)
 }
+
+func InteractiveSetContext() {
+	cfg := &promptx.SelectConfig{
+		ActiveTpl:    `»  {{ .Name | cyan }}`,
+		InactiveTpl:  `  {{ .Name | white }}`,
+		SelectPrompt: "Context",
+		SelectedTpl:  `{{ "» " | green }}{{ .Name | green }}`,
+		DisPlaySize:  9,
+		DetailsTpl: `
+--------- Context ----------
+{{ "Name:" | faint }} {{ .Name | faint }}
+{{ "ConfigPath:" | faint }} {{ .ConfigPath | faint }}`,
+	}
+
+	s := &promptx.Select{
+		Items:  Main.Contexts,
+		Config: cfg,
+	}
+	idx := s.Run()
+	UseContext(Main.Contexts[idx].Name)
+}
