@@ -30,21 +30,21 @@ List context`,
 	},
 }
 
-var ctxUseCmd = &cobra.Command{
-	Use:   "use",
-	Short: "Use context",
+var ctxSetCmd = &cobra.Command{
+	Use:   "set",
+	Short: "Set context",
 	Long: `
-Use context`,
+Set context`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) != 1 {
 			_ = cmd.Help()
 			return
 		}
-		mmh.UseContext(args[0])
+		mmh.SetContext(args[0])
 	},
 }
 
 func init() {
-	ctxCmd.AddCommand(ctxListCmd, ctxUseCmd)
+	ctxCmd.AddCommand(ctxListCmd, ctxSetCmd)
 	RootCmd.AddCommand(ctxCmd)
 }

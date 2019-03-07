@@ -1,48 +1,17 @@
 package mmh
 
 import (
-	"errors"
+	"bytes"
+	"fmt"
+	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
-
-	"path/filepath"
-
-	"fmt"
-
-	"bytes"
 	"text/template"
-
-	"sort"
 
 	"github.com/mritd/mmh/utils"
 	"github.com/mritd/promptx"
 )
-
-var (
-	Main           MainConfig
-	BasicContext   ContextConfig
-	CurrentContext ContextConfig
-	MaxProxy       int
-)
-
-// error def
-var (
-	inputEmptyErr    = errors.New("input is empty")
-	inputTooLongErr  = errors.New("input length must be <= 12")
-	serverExistErr   = errors.New("server name exist")
-	notNumberErr     = errors.New("only number support")
-	proxyNotFoundErr = errors.New("proxy server not found")
-)
-
-// find context by name
-func FindContextByName(name string) (Context, bool) {
-	for _, ctx := range Main.Contexts {
-		if name == ctx.Name {
-			return ctx, true
-		}
-	}
-	return Context{}, false
-}
 
 // find server by name
 func findServerByName(name string) *ServerConfig {
@@ -53,6 +22,22 @@ func findServerByName(name string) *ServerConfig {
 		}
 	}
 	return nil
+}
+
+// find servers by tag
+func findServersByTag(tag string) Servers {
+
+	ss := Servers{}
+
+	for _, s := range getServers() {
+		tmpServer := s
+		for _, t := range tmpServer.Tags {
+			if tag == t {
+				ss = append(ss, tmpServer)
+			}
+		}
+	}
+	return ss
 }
 
 func getServers() Servers {
@@ -104,22 +89,6 @@ func getServers() Servers {
 	}
 
 	return servers
-}
-
-// find servers by tag
-func findServersByTag(tag string) Servers {
-
-	ss := Servers{}
-
-	for _, s := range getServers() {
-		tmpServer := s
-		for _, t := range tmpServer.Tags {
-			if tag == t {
-				ss = append(ss, tmpServer)
-			}
-		}
-	}
-	return ss
 }
 
 // add server
@@ -370,60 +339,34 @@ Proxy: {{ .Proxy }}`
 	fmt.Println(buf.String())
 }
 
-// list contexts
-func ListContexts() {
-
-	tpl := `  Name          Path
----------------------------------
-{{ range . }}{{ if .IsContext }}» {{ .Name | ListLayout }}{{ else }}  {{ .Name | ListLayout }}{{ end }}  {{ .ConfigPath }}
-{{ end }}`
-
-	t := template.New("").Funcs(map[string]interface{}{
-		"ListLayout": listLayout,
-		"MergeTag":   mergeTags,
-	})
-	_, _ = t.Parse(tpl)
-
-	var ctxList []struct {
-		Context
-		IsContext bool
-	}
-
-	sort.Sort(Main.Contexts)
-	for _, c := range Main.Contexts {
-		ctxList = append(ctxList, struct {
-			Context
-			IsContext bool
-		}{
-			Context:   c,
-			IsContext: c.Name == Main.Current})
-	}
-
-	var buf bytes.Buffer
-	utils.CheckAndExit(t.Execute(&buf, ctxList))
-	fmt.Println(buf.String())
-}
-
-// set current context
-func UseContext(ctxName string) {
-	_, ok := FindContextByName(ctxName)
-	if !ok {
-		utils.Exit(fmt.Sprintf("context [%s] not found", ctxName), 1)
-	}
-	Main.Current = ctxName
-	utils.CheckAndExit(Main.Write())
-}
-
-// print layout func
-func listLayout(name string) string {
-	if len(name) < 12 {
-		return fmt.Sprintf("%-12s", name)
+func SingleLogin(name string) {
+	s := findServerByName(name)
+	if s == nil {
+		utils.Exit("server not found!", 1)
 	} else {
-		return fmt.Sprintf("%-12s", utils.ShortenString(name, 12))
+		utils.CheckAndExit(s.Terminal())
 	}
 }
 
-// merge tags
-func mergeTags(tags []string) string {
-	return strings.Join(tags, ",")
+func InteractiveLogin() {
+
+	cfg := &promptx.SelectConfig{
+		ActiveTpl:    `»  {{ .Name | cyan }}: {{ .User | cyan }}{{ "@" | cyan }}{{ .Address | cyan }}`,
+		InactiveTpl:  `  {{ .Name | white }}: {{ .User | white }}{{ "@" | white }}{{ .Address | white }}`,
+		SelectPrompt: "Login Server",
+		SelectedTpl:  `{{ "» " | green }}{{ .Name | green }}: {{ .User | green }}{{ "@" | green }}{{ .Address | green }}`,
+		DisPlaySize:  9,
+		DetailsTpl: `
+--------- Login Server ----------
+{{ "Name:" | faint }} {{ .Name | faint }}
+{{ "User:" | faint }} {{ .User | faint }}
+{{ "Address:" | faint }} {{ .Address | faint }}{{ ":" | faint }}{{ .Port | faint }}`,
+	}
+
+	s := &promptx.Select{
+		Items:  CurrentContext.Servers,
+		Config: cfg,
+	}
+	idx := s.Run()
+	SingleLogin(CurrentContext.Servers[idx].Name)
 }
