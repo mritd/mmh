@@ -186,7 +186,7 @@ Flags:
 
 ### 多环境切换
 
-考虑到同时将多个环境的配置放在同一个配置文件中会有混乱，同时也可能出现误操作的情况，`v1.3.0` 版本增加了 `context` 的概念；每个 `context` 被认为是一种环境，比如 `prod`、`test`、`uat` 等，每个环境的机器配置被分成了独立的文件以方便单独修改与加载；控制使用哪个 `context` 可以使用 `mcx use CONTEXT_NAME` 命令
+考虑到同时将多个环境的配置放在同一个配置文件中会有混乱，同时也可能出现误操作的情况，`v1.3.0` 版本增加了 `context` 的概念；每个 `context` 被认为是一种环境，比如 `prod`、`test`、`uat` 等，每个环境的机器配置被分成了独立的文件以方便单独修改与加载；控制使用哪个 `context` 可以使用 `mcx set CONTEXT_NAME` 命令
 
 ``` sh
 ➜  ~ mcx --help
@@ -203,7 +203,7 @@ Aliases:
 Available Commands:
   help        Help about any command
   ls          List context
-  use         Use context
+  set         Set context
 
 Flags:
   -h, --help   help for ctx
