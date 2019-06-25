@@ -7,8 +7,6 @@ import (
 
 	"github.com/mritd/sshutils"
 
-	"strings"
-
 	"fmt"
 
 	"golang.org/x/crypto/ssh"
@@ -18,16 +16,11 @@ import (
 func (s *ServerConfig) sshClient() (*ssh.Client, error) {
 
 	var client *ssh.Client
-	auth, err := s.authMethod()
-	if err != nil {
-		return nil, err
-	}
+	var err error
 
 	sshConfig := &ssh.ClientConfig{
-		User: s.User,
-		Auth: []ssh.AuthMethod{
-			auth,
-		},
+		User:            s.User,
+		Auth:            s.authMethod(),
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 		Timeout:         5 * time.Second,
 	}
@@ -79,9 +72,7 @@ func (s *ServerConfig) Terminal() error {
 	if err != nil {
 		return err
 	}
-	defer func() {
-		_ = sshClient.Close()
-	}()
+	defer func() { _ = sshClient.Close() }()
 
 	session, err := sshClient.NewSession()
 	if err != nil {
@@ -95,9 +86,7 @@ func (s *ServerConfig) Terminal() error {
 		sshSession = sshutils.NewSSHSession(session)
 	}
 
-	defer func() {
-		_ = sshSession.Close()
-	}()
+	defer func() { _ = sshSession.Close() }()
 
 	// keep alive
 	if s.ServerAliveInterval > 0 {
@@ -108,13 +97,24 @@ func (s *ServerConfig) Terminal() error {
 }
 
 // get auth method
-// priority use privateKey method
-func (s *ServerConfig) authMethod() (ssh.AuthMethod, error) {
-	if strings.TrimSpace(s.PrivateKey) != "" {
-		return privateKeyFile(s.PrivateKey, s.PrivateKeyPassword)
-	} else {
-		return password(s.Password), nil
+func (s *ServerConfig) authMethod() []ssh.AuthMethod {
+
+	var ams []ssh.AuthMethod
+
+	if s.Password != "" {
+		ams = append(ams, password(s.Password))
 	}
+
+	if s.PrivateKey != "" {
+		pkAuth, err := privateKeyFile(s.PrivateKey, s.PrivateKeyPassword)
+		if err != nil {
+			fmt.Println(err)
+		} else {
+			ams = append(ams, pkAuth)
+		}
+	}
+
+	return ams
 }
 
 // use private key to return ssh auth method
