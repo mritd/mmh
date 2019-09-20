@@ -90,7 +90,7 @@ func Exec(tagOrName, cmd string, singleServer bool) {
 func exec(ctx context.Context, s *ServerConfig, singleServer bool, cmd string, errCh chan error) {
 
 	// get ssh client
-	sshClient, err := s.sshClient()
+	sshClient, err := s.sshClient(false)
 	if err != nil {
 		errCh <- err
 		return

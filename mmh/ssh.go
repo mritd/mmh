@@ -13,7 +13,7 @@ import (
 )
 
 // return a ssh client intense point
-func (s *ServerConfig) sshClient() (*ssh.Client, error) {
+func (s *ServerConfig) sshClient(useProxy bool) (*ssh.Client, error) {
 
 	var client *ssh.Client
 	var err error
@@ -43,10 +43,15 @@ func (s *ServerConfig) sshClient() (*ssh.Client, error) {
 		}
 
 		// recursive connect
-		proxyClient, err := proxyServer.sshClient()
+		proxyClient, err := proxyServer.sshClient(false)
 		if err != nil {
 			return nil, err
 		}
+
+		if useProxy {
+			return proxyClient, nil
+		}
+
 		conn, err := proxyClient.Dial("tcp", fmt.Sprint(s.Address, ":", s.Port))
 		if err != nil {
 			return nil, err
@@ -64,36 +69,6 @@ func (s *ServerConfig) sshClient() (*ssh.Client, error) {
 	}
 
 	return client, nil
-}
-
-// start a ssh terminal
-func (s *ServerConfig) Terminal() error {
-	sshClient, err := s.sshClient()
-	if err != nil {
-		return err
-	}
-	defer func() { _ = sshClient.Close() }()
-
-	session, err := sshClient.NewSession()
-	if err != nil {
-		return err
-	}
-
-	var sshSession *sshutils.SSHSession
-	if s.SuRoot {
-		sshSession = sshutils.NewSSHSessionWithRoot(session, s.UseSudo, s.NoPasswordSudo, s.RootPassword, s.Password)
-	} else {
-		sshSession = sshutils.NewSSHSession(session)
-	}
-
-	defer func() { _ = sshSession.Close() }()
-
-	// keep alive
-	if s.ServerAliveInterval > 0 {
-		return sshSession.TerminalWithKeepAlive(s.ServerAliveInterval)
-	}
-	return sshSession.Terminal()
-
 }
 
 // get auth method
@@ -140,4 +115,34 @@ func privateKeyFile(file, password string) (ssh.AuthMethod, error) {
 // use password to return ssh auth method
 func password(password string) ssh.AuthMethod {
 	return ssh.Password(password)
+}
+
+// start a ssh terminal
+func (s *ServerConfig) Terminal() error {
+	sshClient, err := s.sshClient(false)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = sshClient.Close() }()
+
+	session, err := sshClient.NewSession()
+	if err != nil {
+		return err
+	}
+
+	var sshSession *sshutils.SSHSession
+	if s.SuRoot {
+		sshSession = sshutils.NewSSHSessionWithRoot(session, s.UseSudo, s.NoPasswordSudo, s.RootPassword, s.Password)
+	} else {
+		sshSession = sshutils.NewSSHSession(session)
+	}
+
+	defer func() { _ = sshSession.Close() }()
+
+	// keep alive
+	if s.ServerAliveInterval > 0 {
+		return sshSession.TerminalWithKeepAlive(s.ServerAliveInterval)
+	}
+	return sshSession.Terminal()
+
 }
