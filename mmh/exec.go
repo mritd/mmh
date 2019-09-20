@@ -162,7 +162,7 @@ func exec(ctx context.Context, s *ServerConfig, singleServer bool, cmd string, e
 						Value string
 					}{
 						Name:  s.Name,
-						Value: string(line),
+						Value: line,
 					})
 					if err != nil {
 						errCh <- err
