@@ -5,7 +5,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var singleCPServer bool
+var groupCPServer bool
 var copyDir bool
 var cpCmd = &cobra.Command{
 	Use:     "cp [-r] FILE/DIR|SERVER_TAG:PATH SERVER_NAME:PATH|FILE/DIR",
@@ -17,13 +17,13 @@ Copies files between hosts on a network.`,
 		if len(args) < 2 {
 			_ = cmd.Help()
 		} else {
-			mmh.Copy(args, singleCPServer)
+			mmh.Copy(args, groupCPServer)
 		}
 	},
 }
 
 func init() {
 	RootCmd.AddCommand(cpCmd)
-	cpCmd.PersistentFlags().BoolVarP(&singleCPServer, "single", "s", false, "single server")
+	cpCmd.PersistentFlags().BoolVarP(&groupCPServer, "group", "g", false, "multi-server copy")
 	cpCmd.PersistentFlags().BoolVarP(&copyDir, "dir", "r", false, "useless flag")
 }

@@ -5,18 +5,17 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/mritd/mmh/utils"
-
 	"github.com/fatih/color"
+	"github.com/mritd/mmh/utils"
 
 	"github.com/mritd/sshutils"
 )
 
-func Copy(args []string, singleServer bool) {
-	utils.CheckAndExit(runCopy(args, singleServer))
+func Copy(args []string, multiServer bool) {
+	utils.CheckAndExit(runCopy(args, multiServer))
 }
 
-func runCopy(args []string, singleServer bool) error {
+func runCopy(args []string, multiServer bool) error {
 
 	if len(args) < 2 {
 		return errors.New("parameter invalid")
@@ -54,28 +53,8 @@ func runCopy(args []string, singleServer bool) error {
 		serverOrTag := strings.Split(args[len(args)-1], ":")[0]
 		remotePath := strings.Split(args[len(args)-1], ":")[1]
 
-		// single server copy
-		if singleServer {
-			s := findServerByName(serverOrTag)
-			if s == nil {
-				return errors.New("server not found")
-			} else {
-				client, err := s.sshClient()
-				if err != nil {
-					return err
-				}
-				defer func() {
-					_ = client.Close()
-				}()
-				scpClient, err := sshutils.NewSCPClient(client)
-				if err != nil {
-					return err
-				}
-				allArg := args[:len(args)-1]
-				allArg = append(allArg, remotePath)
-				return scpClient.CopyLocal2Remote(allArg...)
-			}
-		} else {
+		// multi server copy
+		if multiServer {
 			// multi server copy
 			servers := findServersByTag(serverOrTag)
 			if len(servers) == 0 {
@@ -114,6 +93,27 @@ func runCopy(args []string, singleServer bool) error {
 			}
 
 			wg.Wait()
+
+		} else {
+			s := findServerByName(serverOrTag)
+			if s == nil {
+				return errors.New("server not found")
+			} else {
+				client, err := s.sshClient()
+				if err != nil {
+					return err
+				}
+				defer func() {
+					_ = client.Close()
+				}()
+				scpClient, err := sshutils.NewSCPClient(client)
+				if err != nil {
+					return err
+				}
+				allArg := args[:len(args)-1]
+				allArg = append(allArg, remotePath)
+				return scpClient.CopyLocal2Remote(allArg...)
+			}
 		}
 
 	} else {
