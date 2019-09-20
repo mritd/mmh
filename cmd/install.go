@@ -17,6 +17,6 @@ Install mmh.`,
 }
 
 func init() {
-	installCmd.PersistentFlags().StringVar(&installDir, "dir", "/usr/bin", "install dir")
+	installCmd.PersistentFlags().StringVar(&installDir, "dir", "/usr/local/bin", "install dir")
 	RootCmd.AddCommand(installCmd)
 }
