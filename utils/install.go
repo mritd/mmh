@@ -16,6 +16,7 @@ func Install(dir string) {
 		filepath.Join(dir, "mgo"),
 		filepath.Join(dir, "mcs"),
 		filepath.Join(dir, "mcx"),
+		filepath.Join(dir, "mping"),
 	}
 
 	currentPath, err := exec.LookPath(os.Args[0])
