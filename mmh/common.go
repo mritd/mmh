@@ -14,7 +14,6 @@ var (
 	Main           MainConfig
 	BasicContext   ContextConfig
 	CurrentContext ContextConfig
-	MaxProxy       int
 )
 
 // error def

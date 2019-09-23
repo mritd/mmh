@@ -134,6 +134,7 @@ func (cfg *MainConfig) LoadFrom(filePath string) error {
 type ContextConfig struct {
 	configPath string
 	Basic      BasicServerConfig `yaml:"basic"`
+	MaxProxy   int               `yaml:"max_proxy"`
 	Servers    Servers           `yaml:"servers"`
 	Tags       Tags              `yaml:"tags"`
 }
@@ -256,8 +257,9 @@ func MainConfigExample() *MainConfig {
 // context config example
 func ContextConfigExample() *ContextConfig {
 	return &ContextConfig{
-		Basic:   BasicServerExample(),
-		Servers: ServersExample(),
-		Tags:    TagsExample(),
+		Basic:    BasicServerExample(),
+		Servers:  ServersExample(),
+		Tags:     TagsExample(),
+		MaxProxy: 5,
 	}
 }

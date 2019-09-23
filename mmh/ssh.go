@@ -13,10 +13,8 @@ import (
 )
 
 // return a ssh client intense point
-func (s *ServerConfig) sshClient(useProxy bool) (*ssh.Client, error) {
-
-	var client *ssh.Client
-	var err error
+// if secondLast is true, return the second last server
+func (s *ServerConfig) sshClient(secondLast bool) (*ssh.Client, error) {
 
 	sshConfig := &ssh.ClientConfig{
 		User:            s.User,
@@ -28,8 +26,8 @@ func (s *ServerConfig) sshClient(useProxy bool) (*ssh.Client, error) {
 	if s.Proxy != "" {
 
 		// check max proxy
-		if s.proxyCount > MaxProxy {
-			return nil, errors.New(fmt.Sprintf("too many proxy server, proxy server must be <= %d", MaxProxy))
+		if s.proxyCount > CurrentContext.MaxProxy {
+			return nil, errors.New(fmt.Sprintf("too many proxy server, proxy server must be <= %d", CurrentContext.MaxProxy))
 		} else {
 			s.proxyCount++
 		}
@@ -37,7 +35,7 @@ func (s *ServerConfig) sshClient(useProxy bool) (*ssh.Client, error) {
 		// find proxy server
 		proxyServer := findServerByName(s.Proxy)
 		if proxyServer == nil {
-			return nil, errors.New(fmt.Sprintf("cloud not found proxy server: %s", s.Proxy))
+			return nil, errors.New(fmt.Sprintf("could not found server: %s", s.Proxy))
 		} else {
 			fmt.Printf("🔑 using proxy [%s], connect to => %s\n", s.Proxy, s.Name)
 		}
@@ -48,7 +46,7 @@ func (s *ServerConfig) sshClient(useProxy bool) (*ssh.Client, error) {
 			return nil, err
 		}
 
-		if useProxy {
+		if secondLast {
 			return proxyClient, nil
 		}
 
@@ -60,15 +58,16 @@ func (s *ServerConfig) sshClient(useProxy bool) (*ssh.Client, error) {
 		if err != nil {
 			return nil, err
 		}
-		client = ssh.NewClient(ncc, channel, request)
+		return ssh.NewClient(ncc, channel, request), nil
+
 	} else {
-		client, err = ssh.Dial("tcp", fmt.Sprint(s.Address, ":", s.Port), sshConfig)
-		if err != nil {
-			return nil, err
+
+		if secondLast {
+			return nil, nil
+		} else {
+			return ssh.Dial("tcp", fmt.Sprint(s.Address, ":", s.Port), sshConfig)
 		}
 	}
-
-	return client, nil
 }
 
 // get auth method

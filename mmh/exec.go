@@ -24,7 +24,7 @@ import (
 )
 
 // batch execution of commands
-func Exec(tagOrName, cmd string, singleServer bool) {
+func Exec(tagOrName, cmd string, singleServer, pingClient bool) {
 
 	// use context to manage goroutine
 	ctx, cancel := context.WithCancel(context.Background())
@@ -47,7 +47,7 @@ func Exec(tagOrName, cmd string, singleServer bool) {
 			utils.Exit("server not found", 1)
 		} else {
 			var errCh = make(chan error, 1)
-			exec(ctx, server, singleServer, cmd, errCh)
+			exec(ctx, server, singleServer, pingClient, cmd, errCh)
 			select {
 			case err := <-errCh:
 				_, _ = color.New(color.BgRed, color.FgHiWhite).Print(err)
@@ -72,7 +72,7 @@ func Exec(tagOrName, cmd string, singleServer bool) {
 			go func() {
 				defer serverWg.Done()
 				var errCh = make(chan error, 1)
-				exec(ctx, server, singleServer, cmd, errCh)
+				exec(ctx, server, singleServer, false, cmd, errCh)
 				select {
 				case err := <-errCh:
 					_, _ = color.New(color.BgRed, color.FgHiWhite).Printf("%s:  %s", server.Name, err)
@@ -87,10 +87,10 @@ func Exec(tagOrName, cmd string, singleServer bool) {
 
 // single server execution command
 // since multiple tasks are executed async, the error is returned using channel
-func exec(ctx context.Context, s *ServerConfig, singleServer bool, cmd string, errCh chan error) {
+func exec(ctx context.Context, s *ServerConfig, singleServer, pingClient bool, cmd string, errCh chan error) {
 
 	// get ssh client
-	sshClient, err := s.sshClient(false)
+	sshClient, err := s.sshClient(pingClient)
 	if err != nil {
 		errCh <- err
 		return

@@ -1,33 +1,25 @@
 package mmh
 
 import (
-	"context"
 	"os"
-	"os/signal"
-	"syscall"
+	osexec "os/exec"
 
 	"github.com/mritd/mmh/utils"
 )
 
 func Ping(tagOrName string) {
-	// use context to manage goroutine
-	ctx, cancel := context.WithCancel(context.Background())
-
-	// monitor os signal
-	cancelChannel := make(chan os.Signal)
-	signal.Notify(cancelChannel, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
-	go func() {
-		switch <-cancelChannel {
-		case syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT:
-			// exit all goroutine
-			cancel()
-		}
-	}()
 
 	server := findServerByName(tagOrName)
 	if server == nil {
 		utils.Exit("server not found", 1)
-	} else {
+	}
 
+	if server.Proxy == "" {
+		cmd := osexec.Command("ping", server.Address)
+		cmd.Stderr = os.Stderr
+		cmd.Stdout = os.Stdout
+		utils.CheckAndExit(cmd.Run())
+	} else {
+		Exec(tagOrName, "ping "+server.Address, true, true)
 	}
 }
