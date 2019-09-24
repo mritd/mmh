@@ -10,7 +10,6 @@ import (
 )
 
 func commandFor(basename string, rootCommand *cobra.Command) *cobra.Command {
-
 	c, _, _ := rootCommand.Find([]string{basename})
 	if c != nil {
 		rootCommand.RemoveCommand(c)

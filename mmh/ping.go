@@ -7,6 +7,8 @@ import (
 	"github.com/mritd/mmh/utils"
 )
 
+// Ping execute the ping target server
+// if the target server requires a proxy, ping on the last proxy server
 func Ping(tagOrName string) {
 
 	server, err := findServerByName(tagOrName)

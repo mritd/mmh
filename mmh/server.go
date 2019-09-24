@@ -10,7 +10,7 @@ import (
 	"github.com/mritd/promptx"
 )
 
-// find server by name
+// findServerByName find server from config by server name
 func findServerByName(name string) (*ServerConfig, error) {
 
 	for _, s := range getServers() {
@@ -21,7 +21,7 @@ func findServerByName(name string) (*ServerConfig, error) {
 	return nil, errors.New("server not found")
 }
 
-// find servers by tag
+// findServersByTag find servers from config by server tag
 func findServersByTag(tag string) Servers {
 
 	ss := Servers{}
@@ -89,7 +89,7 @@ func getServers() Servers {
 	return servers
 }
 
-// list servers
+// ListServers print server list
 func ListServers() {
 
 	tpl := `Name          User          Tags          Address
@@ -107,7 +107,7 @@ func ListServers() {
 	fmt.Println(buf.String())
 }
 
-// print single server detail
+// PrintServerDetail print single server detail
 func PrintServerDetail(serverName string) {
 	s, err := findServerByName(serverName)
 	utils.CheckAndExit(err)
@@ -130,6 +130,7 @@ func SingleLogin(name string) {
 	utils.CheckAndExit(s.Terminal())
 }
 
+// InteractiveLogin interactive login server
 func InteractiveLogin() {
 
 	cfg := &promptx.SelectConfig{

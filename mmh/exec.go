@@ -23,7 +23,7 @@ import (
 	"github.com/mritd/sshutils"
 )
 
-// batch execution of commands
+// Exec batch execution of commands
 func Exec(tagOrName, cmd string, singleServer, pingClient bool) {
 
 	// use context to manage goroutine

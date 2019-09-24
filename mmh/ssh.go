@@ -70,7 +70,7 @@ func (s *ServerConfig) sshClient(secondLast bool) (*ssh.Client, error) {
 	}
 }
 
-// get auth method
+// authMethod return ssh auth method
 func (s *ServerConfig) authMethod() []ssh.AuthMethod {
 
 	var ams []ssh.AuthMethod
@@ -91,7 +91,7 @@ func (s *ServerConfig) authMethod() []ssh.AuthMethod {
 	return ams
 }
 
-// use private key to return ssh auth method
+// privateKeyFile return private key auth method
 func privateKeyFile(file, password string) (ssh.AuthMethod, error) {
 	buffer, err := ioutil.ReadFile(file)
 	if err != nil {
@@ -111,12 +111,12 @@ func privateKeyFile(file, password string) (ssh.AuthMethod, error) {
 	return ssh.PublicKeys(signer), nil
 }
 
-// use password to return ssh auth method
+// password return password auth method
 func password(password string) ssh.AuthMethod {
 	return ssh.Password(password)
 }
 
-// start a ssh terminal
+// Terminal start a ssh terminal
 func (s *ServerConfig) Terminal() error {
 	sshClient, err := s.sshClient(false)
 	if err != nil {
