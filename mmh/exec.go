@@ -42,18 +42,16 @@ func Exec(tagOrName, cmd string, singleServer, pingClient bool) {
 
 	// single server exec
 	if singleServer {
-		server := findServerByName(tagOrName)
-		if server == nil {
-			utils.Exit("server not found", 1)
-		} else {
-			var errCh = make(chan error, 1)
-			exec(ctx, server, singleServer, pingClient, cmd, errCh)
-			select {
-			case err := <-errCh:
-				_, _ = color.New(color.BgRed, color.FgHiWhite).Print(err)
-				fmt.Println()
-			default:
-			}
+		server, err := findServerByName(tagOrName)
+		utils.CheckAndExit(err)
+
+		var errCh = make(chan error, 1)
+		exec(ctx, server, singleServer, pingClient, cmd, errCh)
+		select {
+		case err := <-errCh:
+			_, _ = color.New(color.BgRed, color.FgHiWhite).Print(err)
+			fmt.Println()
+		default:
 		}
 	} else {
 		// multiple servers

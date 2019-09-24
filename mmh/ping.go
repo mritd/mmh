@@ -9,10 +9,8 @@ import (
 
 func Ping(tagOrName string) {
 
-	server := findServerByName(tagOrName)
-	if server == nil {
-		utils.Exit("server not found", 1)
-	}
+	server, err := findServerByName(tagOrName)
+	utils.CheckAndExit(err)
 
 	if server.Proxy == "" {
 		cmd := osexec.Command("ping", server.Address)

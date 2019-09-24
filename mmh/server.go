@@ -2,6 +2,7 @@ package mmh
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"text/template"
 
@@ -10,14 +11,14 @@ import (
 )
 
 // find server by name
-func findServerByName(name string) *ServerConfig {
+func findServerByName(name string) (*ServerConfig, error) {
 
 	for _, s := range getServers() {
 		if s.Name == name {
-			return s
+			return s, nil
 		}
 	}
-	return nil
+	return nil, errors.New("server not found")
 }
 
 // find servers by tag
@@ -36,6 +37,7 @@ func findServersByTag(tag string) Servers {
 	return ss
 }
 
+// getServers merge basic context servers and current context servers
 func getServers() Servers {
 	var servers Servers
 	for _, s := range BasicContext.Servers {
@@ -107,10 +109,9 @@ func ListServers() {
 
 // print single server detail
 func PrintServerDetail(serverName string) {
-	s := findServerByName(serverName)
-	if s == nil {
-		utils.Exit("server not found!", 1)
-	}
+	s, err := findServerByName(serverName)
+	utils.CheckAndExit(err)
+
 	tpl := `Name: {{ .Name }}
 User: {{ .User }}
 Address: {{ .Address }}:{{ .Port }}
@@ -124,12 +125,9 @@ Proxy: {{ .Proxy }}`
 }
 
 func SingleLogin(name string) {
-	s := findServerByName(name)
-	if s == nil {
-		utils.Exit("server not found!", 1)
-	} else {
-		utils.CheckAndExit(s.Terminal())
-	}
+	s, err := findServerByName(name)
+	utils.CheckAndExit(err)
+	utils.CheckAndExit(s.Terminal())
 }
 
 func InteractiveLogin() {

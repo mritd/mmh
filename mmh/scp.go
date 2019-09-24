@@ -29,23 +29,21 @@ func runCopy(args []string, multiServer bool) error {
 		serverName := strings.Split(args[0], ":")[0]
 		remotePath := strings.Split(args[0], ":")[1]
 		localPath := args[1]
-		s := findServerByName(serverName)
-		if s == nil {
-			return errors.New("server not found")
-		} else {
-			client, err := s.sshClient(false)
-			if err != nil {
-				return err
-			}
-			defer func() {
-				_ = client.Close()
-			}()
-			scpClient, err := sshutils.NewSCPClient(client)
-			if err != nil {
-				return err
-			}
-			return scpClient.CopyRemote2Local(remotePath, localPath)
+		s, err := findServerByName(serverName)
+		utils.CheckAndExit(err)
+
+		client, err := s.sshClient(false)
+		if err != nil {
+			return err
 		}
+		defer func() {
+			_ = client.Close()
+		}()
+		scpClient, err := sshutils.NewSCPClient(client)
+		if err != nil {
+			return err
+		}
+		return scpClient.CopyRemote2Local(remotePath, localPath)
 
 		// upload, eg: mcp localFile1 localFile2 localDir test:~
 	} else if len(strings.Split(args[len(args)-1], ":")) == 2 {
@@ -95,25 +93,23 @@ func runCopy(args []string, multiServer bool) error {
 			wg.Wait()
 
 		} else {
-			s := findServerByName(serverOrTag)
-			if s == nil {
-				return errors.New("server not found")
-			} else {
-				client, err := s.sshClient(false)
-				if err != nil {
-					return err
-				}
-				defer func() {
-					_ = client.Close()
-				}()
-				scpClient, err := sshutils.NewSCPClient(client)
-				if err != nil {
-					return err
-				}
-				allArg := args[:len(args)-1]
-				allArg = append(allArg, remotePath)
-				return scpClient.CopyLocal2Remote(allArg...)
+
+			s, err := findServerByName(serverOrTag)
+			utils.CheckAndExit(err)
+			client, err := s.sshClient(false)
+			if err != nil {
+				return err
 			}
+			defer func() {
+				_ = client.Close()
+			}()
+			scpClient, err := sshutils.NewSCPClient(client)
+			if err != nil {
+				return err
+			}
+			allArg := args[:len(args)-1]
+			allArg = append(allArg, remotePath)
+			return scpClient.CopyLocal2Remote(allArg...)
 		}
 
 	} else {

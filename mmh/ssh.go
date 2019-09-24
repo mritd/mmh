@@ -5,6 +5,8 @@ import (
 	"io/ioutil"
 	"time"
 
+	"github.com/mritd/mmh/utils"
+
 	"github.com/mritd/sshutils"
 
 	"fmt"
@@ -33,12 +35,10 @@ func (s *ServerConfig) sshClient(secondLast bool) (*ssh.Client, error) {
 		}
 
 		// find proxy server
-		proxyServer := findServerByName(s.Proxy)
-		if proxyServer == nil {
-			return nil, errors.New(fmt.Sprintf("could not found server: %s", s.Proxy))
-		} else {
-			fmt.Printf("🔑 using proxy [%s], connect to => %s\n", s.Proxy, s.Name)
-		}
+		proxyServer, err := findServerByName(s.Proxy)
+		utils.CheckAndExit(err)
+
+		fmt.Printf("🔑 using proxy [%s], connect to => %s\n", s.Proxy, s.Name)
 
 		// recursive connect
 		proxyClient, err := proxyServer.sshClient(false)
