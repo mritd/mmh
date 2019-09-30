@@ -9,9 +9,9 @@ import (
 
 // Ping execute the ping target server
 // if the target server requires a proxy, ping on the last proxy server
-func Ping(tagOrName string) {
+func Ping(name string) {
 
-	server, err := findServerByName(tagOrName)
+	server, err := findServerByName(name)
 	utils.CheckAndExit(err)
 
 	if server.Proxy == "" {
@@ -20,6 +20,6 @@ func Ping(tagOrName string) {
 		cmd.Stdout = os.Stdout
 		utils.CheckAndExit(cmd.Run())
 	} else {
-		Exec(tagOrName, "ping "+server.Address, true, true)
+		Exec(name, "ping "+server.Address, true, true)
 	}
 }
