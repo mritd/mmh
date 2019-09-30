@@ -11,7 +11,7 @@ import (
 	"github.com/mritd/mmh/utils"
 )
 
-// find context by name
+// FindContextByName find context from config by context name
 func FindContextByName(name string) (Context, bool) {
 	for _, ctx := range Main.Contexts {
 		if name == ctx.Name {
@@ -21,7 +21,7 @@ func FindContextByName(name string) (Context, bool) {
 	return Context{}, false
 }
 
-// list contexts
+// ListContexts print contexts
 func ListContexts() {
 
 	tpl := `  Name          Path
@@ -55,7 +55,7 @@ func ListContexts() {
 	fmt.Println(buf.String())
 }
 
-// set current context
+// SetContext set current context to config
 func SetContext(ctxName string) {
 	_, ok := FindContextByName(ctxName)
 	if !ok {
@@ -65,6 +65,7 @@ func SetContext(ctxName string) {
 	utils.CheckAndExit(Main.Write())
 }
 
+// InteractiveSetContext set the context by selecting the menu
 func InteractiveSetContext() {
 	cfg := &promptx.SelectConfig{
 		ActiveTpl:    `»  {{ .Name | cyan }}`,

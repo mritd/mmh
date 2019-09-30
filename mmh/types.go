@@ -15,8 +15,8 @@ import (
 type BasicServerConfig struct {
 	User                string        `yaml:"user"`
 	Password            string        `yaml:"password"`
-	PrivateKey          string        `yaml:"privatekey"`
-	PrivateKeyPassword  string        `yaml:"privatekey_password"`
+	PrivateKey          string        `yaml:"private_key"`
+	PrivateKeyPassword  string        `yaml:"private_key_password"`
 	Port                int           `yaml:"port"`
 	ServerAliveInterval time.Duration `yaml:"server_alive_interval"`
 }
@@ -31,8 +31,8 @@ type ServerConfig struct {
 	UseSudo             bool          `yaml:"use_sudo"`
 	NoPasswordSudo      bool          `yaml:"no_password_sudo"`
 	RootPassword        string        `yaml:"root_password"`
-	PrivateKey          string        `yaml:"privatekey"`
-	PrivateKeyPassword  string        `yaml:"privatekey_password"`
+	PrivateKey          string        `yaml:"private_key"`
+	PrivateKeyPassword  string        `yaml:"private_key_password"`
 	Address             string        `yaml:"address"`
 	Port                int           `yaml:"port"`
 	Proxy               string        `yaml:"proxy"`
@@ -134,6 +134,7 @@ func (cfg *MainConfig) LoadFrom(filePath string) error {
 type ContextConfig struct {
 	configPath string
 	Basic      BasicServerConfig `yaml:"basic"`
+	MaxProxy   int               `yaml:"max_proxy"`
 	Servers    Servers           `yaml:"servers"`
 	Tags       Tags              `yaml:"tags"`
 }
@@ -256,8 +257,9 @@ func MainConfigExample() *MainConfig {
 // context config example
 func ContextConfigExample() *ContextConfig {
 	return &ContextConfig{
-		Basic:   BasicServerExample(),
-		Servers: ServersExample(),
-		Tags:    TagsExample(),
+		Basic:    BasicServerExample(),
+		Servers:  ServersExample(),
+		Tags:     TagsExample(),
+		MaxProxy: 5,
 	}
 }

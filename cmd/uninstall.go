@@ -17,6 +17,6 @@ Uninstall mmh.`,
 }
 
 func init() {
-	uninstallCmd.PersistentFlags().StringVar(&uninstallDir, "dir", "/usr/bin", "uninstall dir")
+	uninstallCmd.PersistentFlags().StringVar(&uninstallDir, "dir", "/usr/local/bin", "uninstall dir")
 	RootCmd.AddCommand(uninstallCmd)
 }

@@ -15,6 +15,8 @@ func Uninstall(dir string) {
 		filepath.Join(dir, "mgo"),
 		filepath.Join(dir, "mcs"),
 		filepath.Join(dir, "mcx"),
+		filepath.Join(dir, "mping"),
+		filepath.Join(dir, "mtun"),
 	}
 
 	currentPath, err := exec.LookPath(os.Args[0])

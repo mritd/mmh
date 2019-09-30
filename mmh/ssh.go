@@ -5,6 +5,8 @@ import (
 	"io/ioutil"
 	"time"
 
+	"github.com/mritd/mmh/utils"
+
 	"github.com/mritd/sshutils"
 
 	"fmt"
@@ -13,10 +15,8 @@ import (
 )
 
 // return a ssh client intense point
-func (s *ServerConfig) sshClient() (*ssh.Client, error) {
-
-	var client *ssh.Client
-	var err error
+// if secondLast is true, return the second last server
+func (s *ServerConfig) sshClient(secondLast bool) (*ssh.Client, error) {
 
 	sshConfig := &ssh.ClientConfig{
 		User:            s.User,
@@ -28,25 +28,28 @@ func (s *ServerConfig) sshClient() (*ssh.Client, error) {
 	if s.Proxy != "" {
 
 		// check max proxy
-		if s.proxyCount > MaxProxy {
-			return nil, errors.New(fmt.Sprintf("too many proxy server, proxy server must be <= %d", MaxProxy))
+		if s.proxyCount > CurrentContext.MaxProxy {
+			return nil, errors.New(fmt.Sprintf("too many proxy server, proxy server must be <= %d", CurrentContext.MaxProxy))
 		} else {
 			s.proxyCount++
 		}
 
 		// find proxy server
-		proxyServer := findServerByName(s.Proxy)
-		if proxyServer == nil {
-			return nil, errors.New(fmt.Sprintf("cloud not found proxy server: %s", s.Proxy))
-		} else {
-			fmt.Printf("🔑 using proxy [%s], connect to => %s\n", s.Proxy, s.Name)
-		}
+		proxyServer, err := findServerByName(s.Proxy)
+		utils.CheckAndExit(err)
+
+		fmt.Printf("🔑 using proxy [%s], connect to => %s\n", s.Proxy, s.Name)
 
 		// recursive connect
-		proxyClient, err := proxyServer.sshClient()
+		proxyClient, err := proxyServer.sshClient(false)
 		if err != nil {
 			return nil, err
 		}
+
+		if secondLast {
+			return proxyClient, nil
+		}
+
 		conn, err := proxyClient.Dial("tcp", fmt.Sprint(s.Address, ":", s.Port))
 		if err != nil {
 			return nil, err
@@ -55,20 +58,67 @@ func (s *ServerConfig) sshClient() (*ssh.Client, error) {
 		if err != nil {
 			return nil, err
 		}
-		client = ssh.NewClient(ncc, channel, request)
+		return ssh.NewClient(ncc, channel, request), nil
+
 	} else {
-		client, err = ssh.Dial("tcp", fmt.Sprint(s.Address, ":", s.Port), sshConfig)
+
+		if secondLast {
+			return nil, nil
+		} else {
+			return ssh.Dial("tcp", fmt.Sprint(s.Address, ":", s.Port), sshConfig)
+		}
+	}
+}
+
+// authMethod return ssh auth method
+func (s *ServerConfig) authMethod() []ssh.AuthMethod {
+
+	var ams []ssh.AuthMethod
+
+	if s.Password != "" {
+		ams = append(ams, password(s.Password))
+	}
+
+	if s.PrivateKey != "" {
+		pkAuth, err := privateKeyFile(s.PrivateKey, s.PrivateKeyPassword)
 		if err != nil {
-			return nil, err
+			fmt.Println(err)
+		} else {
+			ams = append(ams, pkAuth)
 		}
 	}
 
-	return client, nil
+	return ams
 }
 
-// start a ssh terminal
+// privateKeyFile return private key auth method
+func privateKeyFile(file, password string) (ssh.AuthMethod, error) {
+	buffer, err := ioutil.ReadFile(file)
+	if err != nil {
+		return nil, err
+	}
+	var signer ssh.Signer
+
+	if password == "" {
+		signer, err = ssh.ParsePrivateKey(buffer)
+	} else {
+		signer, err = ssh.ParsePrivateKeyWithPassphrase(buffer, []byte(password))
+	}
+
+	if err != nil {
+		return nil, err
+	}
+	return ssh.PublicKeys(signer), nil
+}
+
+// password return password auth method
+func password(password string) ssh.AuthMethod {
+	return ssh.Password(password)
+}
+
+// Terminal start a ssh terminal
 func (s *ServerConfig) Terminal() error {
-	sshClient, err := s.sshClient()
+	sshClient, err := s.sshClient(false)
 	if err != nil {
 		return err
 	}
@@ -94,50 +144,4 @@ func (s *ServerConfig) Terminal() error {
 	}
 	return sshSession.Terminal()
 
-}
-
-// get auth method
-func (s *ServerConfig) authMethod() []ssh.AuthMethod {
-
-	var ams []ssh.AuthMethod
-
-	if s.Password != "" {
-		ams = append(ams, password(s.Password))
-	}
-
-	if s.PrivateKey != "" {
-		pkAuth, err := privateKeyFile(s.PrivateKey, s.PrivateKeyPassword)
-		if err != nil {
-			fmt.Println(err)
-		} else {
-			ams = append(ams, pkAuth)
-		}
-	}
-
-	return ams
-}
-
-// use private key to return ssh auth method
-func privateKeyFile(file, password string) (ssh.AuthMethod, error) {
-	buffer, err := ioutil.ReadFile(file)
-	if err != nil {
-		return nil, err
-	}
-	var signer ssh.Signer
-
-	if password == "" {
-		signer, err = ssh.ParsePrivateKey(buffer)
-	} else {
-		signer, err = ssh.ParsePrivateKeyWithPassphrase(buffer, []byte(password))
-	}
-
-	if err != nil {
-		return nil, err
-	}
-	return ssh.PublicKeys(signer), nil
-}
-
-// use password to return ssh auth method
-func password(password string) ssh.AuthMethod {
-	return ssh.Password(password)
 }

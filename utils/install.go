@@ -16,6 +16,8 @@ func Install(dir string) {
 		filepath.Join(dir, "mgo"),
 		filepath.Join(dir, "mcs"),
 		filepath.Join(dir, "mcx"),
+		filepath.Join(dir, "mping"),
+		filepath.Join(dir, "mtun"),
 	}
 
 	currentPath, err := exec.LookPath(os.Args[0])
@@ -32,14 +34,11 @@ func Install(dir string) {
 
 		f, err := os.Open(currentPath)
 		CheckAndExit(err)
-		defer func() {
-			_ = f.Close()
-		}()
+		defer func() { _ = f.Close() }()
+
 		target, err := os.OpenFile(filepath.Join(dir, "mmh"), os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0755)
 		CheckAndExit(err)
-		defer func() {
-			_ = target.Close()
-		}()
+		defer func() { _ = target.Close() }()
 
 		fmt.Printf("📥 install %s\n", filepath.Join(dir, "mmh"))
 		_, err = io.Copy(target, f)
