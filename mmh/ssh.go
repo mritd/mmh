@@ -3,7 +3,10 @@ package mmh
 import (
 	"errors"
 	"io/ioutil"
+	"strings"
 	"time"
+
+	"github.com/mitchellh/go-homedir"
 
 	"github.com/mritd/mmh/utils"
 
@@ -93,6 +96,13 @@ func (s *ServerConfig) authMethod() []ssh.AuthMethod {
 
 // privateKeyFile return private key auth method
 func privateKeyFile(file, password string) (ssh.AuthMethod, error) {
+	if strings.HasPrefix(file, "~") {
+		home, err := homedir.Dir()
+		if err != nil {
+			return nil, err
+		}
+		file = strings.Replace(file, "~", home, 1)
+	}
 	buffer, err := ioutil.ReadFile(file)
 	if err != nil {
 		return nil, err
