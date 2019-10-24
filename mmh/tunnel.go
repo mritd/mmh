@@ -24,7 +24,7 @@ func Tunnel(name, localAddr, remoteAddr string) {
 
 		server, err := findServerByName(name)
 		utils.CheckAndExit(err)
-		client, err := server.sshClient(false)
+		client, err := server.sshClient(false, true)
 		utils.CheckAndExit(err)
 		remoteConn, err := client.Dial("tcp", remoteAddr)
 		utils.CheckAndExit(err)

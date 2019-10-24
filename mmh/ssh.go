@@ -19,7 +19,7 @@ import (
 
 // return a ssh client intense point
 // if secondLast is true, return the second last server
-func (s *ServerConfig) sshClient(secondLast bool) (*ssh.Client, error) {
+func (s *ServerConfig) sshClient(secondLast bool, ignoreProxyCheck bool) (*ssh.Client, error) {
 
 	sshConfig := &ssh.ClientConfig{
 		User:            s.User,
@@ -31,10 +31,12 @@ func (s *ServerConfig) sshClient(secondLast bool) (*ssh.Client, error) {
 	if s.Proxy != "" {
 
 		// check max proxy
-		if s.proxyCount > CurrentContext.MaxProxy {
-			return nil, errors.New(fmt.Sprintf("too many proxy server, proxy server must be <= %d", CurrentContext.MaxProxy))
-		} else {
-			s.proxyCount++
+		if !ignoreProxyCheck {
+			if s.proxyCount > CurrentContext.MaxProxy {
+				return nil, errors.New(fmt.Sprintf("too many proxy server, proxy server must be <= %d", CurrentContext.MaxProxy))
+			} else {
+				s.proxyCount++
+			}
 		}
 
 		// find proxy server
@@ -44,7 +46,7 @@ func (s *ServerConfig) sshClient(secondLast bool) (*ssh.Client, error) {
 		fmt.Printf("🔑 using proxy [%s], connect to => %s\n", s.Proxy, s.Name)
 
 		// recursive connect
-		proxyClient, err := proxyServer.sshClient(false)
+		proxyClient, err := proxyServer.sshClient(false, ignoreProxyCheck)
 		if err != nil {
 			return nil, err
 		}
@@ -128,7 +130,7 @@ func password(password string) ssh.AuthMethod {
 
 // Terminal start a ssh terminal
 func (s *ServerConfig) Terminal() error {
-	sshClient, err := s.sshClient(false)
+	sshClient, err := s.sshClient(false, false)
 	if err != nil {
 		return err
 	}

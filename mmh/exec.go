@@ -88,7 +88,7 @@ func Exec(tagOrName, cmd string, singleServer, pingClient bool) {
 func exec(ctx context.Context, s *ServerConfig, singleServer, pingClient bool, cmd string, errCh chan error) {
 
 	// get ssh client
-	sshClient, err := s.sshClient(pingClient)
+	sshClient, err := s.sshClient(pingClient, false)
 	if err != nil {
 		errCh <- err
 		return
