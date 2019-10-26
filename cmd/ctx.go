@@ -7,10 +7,10 @@ import (
 
 var ctxCmd = &cobra.Command{
 	Use:     "ctx",
-	Short:   "Change current context",
+	Short:   "change current context",
 	Aliases: []string{"mcx"},
 	Long: `
-Change current context.`,
+change current context.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
 			mmh.InteractiveSetContext()
@@ -22,9 +22,9 @@ Change current context.`,
 
 var ctxListCmd = &cobra.Command{
 	Use:   "ls",
-	Short: "List context",
+	Short: "list context",
 	Long: `
-List context`,
+list context`,
 	Run: func(cmd *cobra.Command, args []string) {
 		mmh.ListContexts()
 	},
@@ -32,9 +32,9 @@ List context`,
 
 var ctxSetCmd = &cobra.Command{
 	Use:   "set",
-	Short: "Set context",
+	Short: "set context",
 	Long: `
-Set context`,
+set context`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) != 1 {
 			_ = cmd.Help()

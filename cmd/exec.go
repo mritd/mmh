@@ -11,9 +11,9 @@ var singleServer bool
 var execCmd = &cobra.Command{
 	Use:     "exec SERVER_TAG CMD",
 	Aliases: []string{"mec"},
-	Short:   "Batch exec command",
+	Short:   "batch exec command",
 	Long: `
-Batch exec command.`,
+batch exec command.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) < 2 {
 			_ = cmd.Help()

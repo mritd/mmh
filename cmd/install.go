@@ -8,9 +8,9 @@ import (
 var installDir string
 var installCmd = &cobra.Command{
 	Use:   "install",
-	Short: "Install mmh",
+	Short: "install",
 	Long: `
-Install mmh.`,
+install.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Install(installDir)
 	},

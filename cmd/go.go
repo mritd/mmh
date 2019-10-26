@@ -8,9 +8,9 @@ import (
 var goCmd = &cobra.Command{
 	Use:     "go SERVER_NAME",
 	Aliases: []string{"mgo"},
-	Short:   "Login single server",
+	Short:   "login server",
 	Long: `
-Login single server.`,
+login server.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 1 {
 			mmh.SingleLogin(args[0])

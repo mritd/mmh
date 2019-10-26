@@ -10,9 +10,9 @@ var copyDir bool
 var cpCmd = &cobra.Command{
 	Use:     "cp [-r] FILE/DIR|SERVER_TAG:PATH SERVER_NAME:PATH|FILE/DIR",
 	Aliases: []string{"mcp"},
-	Short:   "Copies files between hosts on a network",
+	Short:   "copies files between hosts on a network",
 	Long: `
-Copies files between hosts on a network.`,
+copies files between hosts on a network.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) < 2 {
 			_ = cmd.Help()

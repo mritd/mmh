@@ -8,9 +8,9 @@ import (
 var uninstallDir string
 var uninstallCmd = &cobra.Command{
 	Use:   "uninstall",
-	Short: "Uninstall mmh",
+	Short: "uninstall",
 	Long: `
-Uninstall mmh.`,
+uninstall.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.Uninstall(uninstallDir)
 	},

@@ -8,9 +8,9 @@ import (
 var pingCmd = &cobra.Command{
 	Use:     "ping SERVER_NAME",
 	Aliases: []string{"mping"},
-	Short:   "Ping server",
+	Short:   "ping server",
 	Long: `
-Ping server.`,
+ping server.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 1 {
 			mmh.Ping(args[0])

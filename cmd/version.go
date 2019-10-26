@@ -27,9 +27,9 @@ var (
 
 var versionCmd = &cobra.Command{
 	Use:   "version",
-	Short: "Print version",
+	Short: "show version",
 	Long: `
-Print version.`,
+show version.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		banner, _ := base64.StdEncoding.DecodeString(bannerBase64)
 		fmt.Printf(versionTpl, banner, Version, runtime.GOOS+"/"+runtime.GOARCH, BuildDate, CommitID)
