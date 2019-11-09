@@ -44,7 +44,7 @@ func Tunnel(name, leftAddr, rightAddr string, reverse bool) {
 				continue
 			}
 
-			connCopy(rightConn, leftConn)
+			go connCopy(rightConn, leftConn)
 		}
 	} else {
 		fmt.Printf("mmh reverse tunnel at [%s] %s\n", name, rightAddr)
@@ -68,13 +68,19 @@ func Tunnel(name, leftAddr, rightAddr string, reverse bool) {
 				fmt.Println("😱 " + err.Error())
 				continue
 			}
-			connCopy(leftConn, rightConn)
+			go connCopy(leftConn, rightConn)
 		}
 	}
 
 }
 
 func connCopy(rc, lc net.Conn) {
+
+	defer func() {
+		_ = rc.Close()
+		_ = lc.Close()
+	}()
+
 	go func() {
 		_, err := io.Copy(rc, lc)
 		if err != nil {
@@ -82,10 +88,8 @@ func connCopy(rc, lc net.Conn) {
 		}
 	}()
 
-	go func() {
-		_, err := io.Copy(lc, rc)
-		if err != nil {
-			fmt.Println(err)
-		}
-	}()
+	_, err := io.Copy(lc, rc)
+	if err != nil {
+		fmt.Println(err)
+	}
 }
