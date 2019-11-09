@@ -14,6 +14,12 @@ func CheckAndExit(err error) {
 	}
 }
 
+func CheckError(err error) {
+	if err != nil {
+		fmt.Println("😱 " + err.Error())
+	}
+}
+
 func ShortenString(str string, n int) string {
 	if len(str) <= n {
 		return str

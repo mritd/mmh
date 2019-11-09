@@ -5,7 +5,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var tunLocalAddr, tunRemoteAddr string
+var tunLeftAddr, tunRightAddr string
+var tunReverse bool
 
 var tunCmd = &cobra.Command{
 	Use:     "tun SERVER_NAME",
@@ -15,7 +16,7 @@ var tunCmd = &cobra.Command{
 ssh tunnel.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 1 {
-			mmh.Tunnel(args[0], tunLocalAddr, tunRemoteAddr)
+			mmh.Tunnel(args[0], tunLeftAddr, tunRightAddr, tunReverse)
 		} else {
 			_ = cmd.Help()
 		}
@@ -23,9 +24,10 @@ ssh tunnel.`,
 }
 
 func init() {
-	tunCmd.Flags().StringVarP(&tunLocalAddr, "local", "l", "", "local address")
-	tunCmd.Flags().StringVarP(&tunRemoteAddr, "remote", "r", "", "local address")
-	_ = tunCmd.MarkFlagRequired("local")
-	_ = tunCmd.MarkFlagRequired("remote")
+	tunCmd.Flags().StringVarP(&tunLeftAddr, "left", "l", "", "left address")
+	tunCmd.Flags().StringVarP(&tunRightAddr, "right", "r", "", "right address")
+	tunCmd.PersistentFlags().BoolVar(&tunReverse, "reverse", false, "reverse tcp tunnel(right to left)")
+	_ = tunCmd.MarkFlagRequired("left")
+	_ = tunCmd.MarkFlagRequired("right")
 	RootCmd.AddCommand(tunCmd)
 }
