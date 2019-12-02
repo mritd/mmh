@@ -11,6 +11,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const MainConfigPath = "MMH_MAIN_CONFIG_PATH"
+
 var RootCmd = &cobra.Command{
 	Use:   "mmh",
 	Short: "a simple multi-server ssh tool",
@@ -41,24 +43,27 @@ func initConfig() {
 	// get config dir
 	cfgDir := filepath.Join(home, ".mmh")
 
-	// set main config file
-	mainConfigFile := filepath.Join(cfgDir, "main.yaml")
-
-	if _, err = os.Stat(cfgDir); os.IsNotExist(err) {
-		// create config dir
-		utils.CheckAndExit(os.MkdirAll(cfgDir, 0755))
-		// create default context config file
-		defaultCtxCfg := filepath.Join(cfgDir, "default.yaml")
-		// write main config
-		utils.CheckAndExit(mmh.MainConfigExample().WriteTo(mainConfigFile))
-		// write context config
-		utils.CheckAndExit(mmh.ContextConfigExample().WriteTo(defaultCtxCfg))
-	} else if err != nil {
-		utils.CheckAndExit(err)
+	// load main config from env
+	mainConfigPath := os.Getenv(MainConfigPath)
+	if mainConfigPath == "" {
+		// default to $HOME/.mmh/main.yaml
+		mainConfigPath = filepath.Join(cfgDir, "main.yaml")
+		if _, err = os.Stat(cfgDir); os.IsNotExist(err) {
+			// create config dir
+			utils.CheckAndExit(os.MkdirAll(cfgDir, 0755))
+			// create default context config file
+			defaultCtxCfg := filepath.Join(cfgDir, "default.yaml")
+			// write example main config
+			utils.CheckAndExit(mmh.MainConfigExample().WriteTo(mainConfigPath))
+			// write example context config
+			utils.CheckAndExit(mmh.ContextConfigExample().WriteTo(defaultCtxCfg))
+		} else if err != nil {
+			utils.CheckAndExit(err)
+		}
 	}
 
 	// load main config
-	utils.CheckAndExit(mmh.Main.LoadFrom(mainConfigFile))
+	utils.CheckAndExit(mmh.Main.LoadFrom(mainConfigPath))
 
 	// check context
 	if len(mmh.Main.Contexts) == 0 {
