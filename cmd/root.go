@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/mritd/mmh/mmh"
@@ -60,6 +61,8 @@ func initConfig() {
 		} else if err != nil {
 			utils.CheckAndExit(err)
 		}
+	} else {
+		mainConfigPath = strings.Replace(mainConfigPath, "~", home, 1)
 	}
 
 	// load main config
