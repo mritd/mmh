@@ -23,7 +23,9 @@ func Uninstall(dir string) {
 	CheckAndExit(err)
 
 	if !Root() {
-		cmd := exec.Command("sudo", currentPath, "uninstall", "--dir", dir)
+		cmds := append(os.Environ(), currentPath, "uninstall", "--dir", dir)
+		cmd := exec.Command("sudo", cmds...)
+		cmd.Env = os.Environ()
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
 		CheckAndExit(cmd.Run())

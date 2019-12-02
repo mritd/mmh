@@ -24,9 +24,11 @@ func Install(dir string) {
 	CheckAndExit(err)
 
 	if !Root() {
-		cmd := exec.Command("sudo", currentPath, "install", "--dir", dir)
+		cmds := append(os.Environ(), currentPath, "install", "--dir", dir)
+		cmd := exec.Command("sudo", cmds...)
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
+		fmt.Println(cmd.String())
 		CheckAndExit(cmd.Run())
 	} else {
 
