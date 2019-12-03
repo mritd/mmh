@@ -28,7 +28,6 @@ func Install(dir string) {
 		cmd := exec.Command("sudo", cmds...)
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
-		fmt.Println(cmd.String())
 		CheckAndExit(cmd.Run())
 	} else {
 
