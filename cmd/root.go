@@ -41,12 +41,11 @@ func initConfig() {
 	home, err := homedir.Dir()
 	utils.CheckAndExit(err)
 
-	// get config dir
-	cfgDir := filepath.Join(home, ".mmh")
-
 	// load main config from env
 	mainConfigPath := os.Getenv(MainConfigPath)
 	if mainConfigPath == "" {
+		// get config dir
+		cfgDir := filepath.Join(home, ".mmh")
 		// default to $HOME/.mmh/main.yaml
 		mainConfigPath = filepath.Join(cfgDir, "main.yaml")
 		if _, err = os.Stat(cfgDir); os.IsNotExist(err) {
@@ -83,7 +82,7 @@ func initConfig() {
 	if filepath.IsAbs(ctx.ConfigPath) {
 		ctxConfigFile = ctx.ConfigPath
 	} else {
-		ctxConfigFile = filepath.Join(cfgDir, ctx.ConfigPath)
+		ctxConfigFile = filepath.Join(filepath.Dir(mainConfigPath), ctx.ConfigPath)
 	}
 	if _, err = os.Stat(ctxConfigFile); os.IsNotExist(err) {
 		utils.Exit(fmt.Sprintf("current context [%s] config file %s not found\n", mmh.Main.Current, ctx.ConfigPath), 1)
@@ -100,7 +99,7 @@ func initConfig() {
 		if filepath.IsAbs(basicCtx.ConfigPath) {
 			ctxConfigFile = basicCtx.ConfigPath
 		} else {
-			ctxConfigFile = filepath.Join(cfgDir, basicCtx.ConfigPath)
+			ctxConfigFile = filepath.Join(filepath.Dir(mainConfigPath), basicCtx.ConfigPath)
 		}
 		if _, err = os.Stat(ctxConfigFile); os.IsNotExist(err) {
 			utils.Exit(fmt.Sprintf("basic context [%s] config file %s not found\n", mmh.Main.Current, ctx.ConfigPath), 1)
