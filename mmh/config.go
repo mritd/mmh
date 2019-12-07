@@ -79,19 +79,19 @@ func LoadConfig() {
 		currentCfgStoreFile := filepath.Join(ConfigDir, CurrentConfigStoreFile)
 		bs, err := ioutil.ReadFile(currentCfgStoreFile)
 		if err != nil || len(bs) < 1 {
-			fmt.Printf("failed to get current config, use [default.yaml]")
+			fmt.Printf("failed to get current config, use default config\n")
 			CurrentConfigName = "default.yaml"
 		} else {
 			CurrentConfigName = string(bs)
 		}
 		// load current config
 		CurrentConfigPath = filepath.Join(ConfigDir, CurrentConfigName)
-		utils.CheckAndExit(CurrentConfig.LoadFrom(CurrentConfigPath))
+		utils.CheckError(CurrentConfig.LoadFrom(CurrentConfigPath))
 		// load basic config if it exist
 		BasicConfigName = "basic.yaml"
 		BasicConfigPath = filepath.Join(ConfigDir, BasicConfigName)
 		if _, err = os.Stat(BasicConfigPath); err == nil {
-			utils.CheckAndExit(BasicConfig.LoadFrom(BasicConfigPath))
+			utils.CheckError(BasicConfig.LoadFrom(BasicConfigPath))
 		}
 
 		// load all config info
