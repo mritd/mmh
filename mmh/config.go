@@ -117,12 +117,11 @@ func LoadConfig() {
 func ListConfig() {
 	tpl := `  Name          Path
 ---------------------------------
-{{ range . }}{{ if .IsCurrent }}{{ "» " | cyan }}{{ .Name | ListLayout | cyan }}{{ else }}  {{ .Name | ListLayout }}{{ end }}{{ if .IsCurrent }}{{ .Path | cyan }}{{ else }}{{ .Path }}{{ end }}
+{{ range . }}{{ if .IsCurrent }}{{ "» " | cyan }}{{ .Name | listLayout | cyan }}{{ else }}  {{ .Name | listLayout }}{{ end }}{{ if .IsCurrent }}{{ .Path | cyan }}{{ else }}{{ .Path }}{{ end }}
 {{ end }}`
 
 	funcMap := promptx.FuncMap
-	funcMap["ListLayout"] = listLayout
-	funcMap["MergeTag"] = mergeTags
+	funcMap["listLayout"] = listLayout
 
 	t := template.New("").Funcs(funcMap)
 	_, _ = t.Parse(tpl)

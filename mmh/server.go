@@ -306,13 +306,13 @@ func DeleteServer(serverNames []string) {
 // ListServers print server list
 func ListServers() {
 
-	tpl := `Name          User          Tags          Address
--------------------------------------------------------------
-{{range . }}{{ .Name | ListLayout }}  {{ .User | ListLayout }}  {{ .Tags | MergeTag | ListLayout }}  {{ .Address }}:{{ .Port }}
+	tpl := `Name            User            Tags            Address
+-----------------------------------------------------------------
+{{range . }}{{ .Name | listLayout }}  {{ .User | listLayout }}  {{ .Tags | mergeTags | listLayout }}  {{ .Address }}:{{ .Port }}
 {{end}}`
 	t := template.New("").Funcs(map[string]interface{}{
-		"ListLayout": listLayout,
-		"MergeTag":   mergeTags,
+		"listLayout": listLayout,
+		"mergeTags":  mergeTags,
 	})
 
 	_, _ = t.Parse(tpl)
