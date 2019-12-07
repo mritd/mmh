@@ -19,6 +19,7 @@ batch exec command.`,
 			_ = cmd.Help()
 		} else {
 			cmd := strings.Join(args[1:], " ")
+			mmh.LoadConfig()
 			mmh.Exec(args[0], cmd, singleServer, false)
 		}
 	},

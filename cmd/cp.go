@@ -17,6 +17,7 @@ copies files between hosts on a network.`,
 		if len(args) < 2 {
 			_ = cmd.Help()
 		} else {
+			mmh.LoadConfig()
 			mmh.Copy(args, groupServer)
 		}
 	},

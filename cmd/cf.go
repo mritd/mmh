@@ -5,7 +5,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var ctxCmd = &cobra.Command{
+var cfCmd = &cobra.Command{
 	Use:     "ctx",
 	Short:   "change current context",
 	Aliases: []string{"mcx"},
@@ -13,20 +13,22 @@ var ctxCmd = &cobra.Command{
 change current context.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
-			mmh.InteractiveSetContext()
+			mmh.LoadConfig()
+			mmh.InteractiveSetConfig()
 		} else {
 			_ = cmd.Help()
 		}
 	},
 }
 
-var ctxListCmd = &cobra.Command{
+var cfListCmd = &cobra.Command{
 	Use:   "ls",
 	Short: "list context",
 	Long: `
 list context`,
 	Run: func(cmd *cobra.Command, args []string) {
-		mmh.ListContexts()
+		mmh.LoadConfig()
+		mmh.ListConfig()
 	},
 }
 
@@ -40,11 +42,12 @@ set context`,
 			_ = cmd.Help()
 			return
 		}
-		mmh.SetContext(args[0])
+		mmh.LoadConfig()
+		mmh.SetConfig(args[0])
 	},
 }
 
 func init() {
-	ctxCmd.AddCommand(ctxListCmd, ctxSetCmd)
-	RootCmd.AddCommand(ctxCmd)
+	cfCmd.AddCommand(cfListCmd, ctxSetCmd)
+	RootCmd.AddCommand(cfCmd)
 }

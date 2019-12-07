@@ -16,6 +16,7 @@ var tunCmd = &cobra.Command{
 ssh tunnel.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 1 {
+			mmh.LoadConfig()
 			mmh.Tunnel(args[0], tunLeftAddr, tunRightAddr, tunReverse)
 		} else {
 			_ = cmd.Help()

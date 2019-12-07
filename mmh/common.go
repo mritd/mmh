@@ -8,13 +8,6 @@ import (
 	"github.com/mritd/mmh/utils"
 )
 
-// config
-var (
-	Main           MainConfig
-	BasicContext   ContextConfig
-	CurrentContext ContextConfig
-)
-
 // print layout func
 func listLayout(name string) string {
 	if len(name) < 12 {

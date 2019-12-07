@@ -32,8 +32,8 @@ func (s *ServerConfig) sshClient(secondLast bool, ignoreProxyCheck bool) (*ssh.C
 
 		// check max proxy
 		if !ignoreProxyCheck {
-			if s.proxyCount > CurrentContext.MaxProxy {
-				return nil, errors.New(fmt.Sprintf("too many proxy server, proxy server must be <= %d", CurrentContext.MaxProxy))
+			if s.proxyCount > CurrentConfig.MaxProxy {
+				return nil, errors.New(fmt.Sprintf("too many proxy server, proxy server must be <= %d", CurrentConfig.MaxProxy))
 			} else {
 				s.proxyCount++
 			}

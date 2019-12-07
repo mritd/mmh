@@ -42,47 +42,47 @@ func findServersByTag(tag string) Servers {
 // getServers merge basic context servers and current context servers
 func getServers() Servers {
 	var servers Servers
-	for _, s := range BasicContext.Servers {
+	for _, s := range BasicConfig.Servers {
 		if s.User == "" {
-			s.User = BasicContext.Basic.User
+			s.User = BasicConfig.Basic.User
 		}
 		if s.Password == "" {
-			s.Password = BasicContext.Basic.Password
+			s.Password = BasicConfig.Basic.Password
 			if s.PrivateKey == "" {
-				s.PrivateKey = BasicContext.Basic.PrivateKey
+				s.PrivateKey = BasicConfig.Basic.PrivateKey
 			}
 			if s.PrivateKeyPassword == "" {
-				s.PrivateKeyPassword = BasicContext.Basic.PrivateKeyPassword
+				s.PrivateKeyPassword = BasicConfig.Basic.PrivateKeyPassword
 			}
 		}
 		if s.Port == 0 {
-			s.Port = BasicContext.Basic.Port
+			s.Port = BasicConfig.Basic.Port
 		}
 		if s.ServerAliveInterval == 0 {
-			s.ServerAliveInterval = BasicContext.Basic.ServerAliveInterval
+			s.ServerAliveInterval = BasicConfig.Basic.ServerAliveInterval
 		}
 		servers = append(servers, s)
 	}
 
-	if CurrentContext.configPath != BasicContext.configPath {
-		for _, s := range CurrentContext.Servers {
+	if CurrentConfig.configPath != BasicConfig.configPath {
+		for _, s := range CurrentConfig.Servers {
 			if s.User == "" {
-				s.User = CurrentContext.Basic.User
+				s.User = CurrentConfig.Basic.User
 			}
 			if s.Password == "" {
-				s.Password = CurrentContext.Basic.Password
+				s.Password = CurrentConfig.Basic.Password
 				if s.PrivateKey == "" {
-					s.PrivateKey = CurrentContext.Basic.PrivateKey
+					s.PrivateKey = CurrentConfig.Basic.PrivateKey
 				}
 				if s.PrivateKeyPassword == "" {
-					s.PrivateKeyPassword = CurrentContext.Basic.PrivateKeyPassword
+					s.PrivateKeyPassword = CurrentConfig.Basic.PrivateKeyPassword
 				}
 			}
 			if s.Port == 0 {
-				s.Port = CurrentContext.Basic.Port
+				s.Port = CurrentConfig.Basic.Port
 			}
 			if s.ServerAliveInterval == 0 {
-				s.ServerAliveInterval = CurrentContext.Basic.ServerAliveInterval
+				s.ServerAliveInterval = CurrentConfig.Basic.ServerAliveInterval
 			}
 			servers = append(servers, s)
 		}
@@ -121,13 +121,13 @@ func AddServer() {
 	inputTags := strings.Fields(p.Run())
 	for _, tag := range inputTags {
 		tagExist := false
-		for _, extTag := range CurrentContext.Tags {
+		for _, extTag := range CurrentConfig.Tags {
 			if tag == extTag {
 				tagExist = true
 			}
 		}
 		if !tagExist {
-			CurrentContext.Tags = append(CurrentContext.Tags, tag)
+			CurrentConfig.Tags = append(CurrentConfig.Tags, tag)
 		}
 	}
 
@@ -140,7 +140,7 @@ func AddServer() {
 
 	user := p.Run()
 	if strings.TrimSpace(user) == "" {
-		user = CurrentContext.Basic.User
+		user = CurrentConfig.Basic.User
 	}
 
 	// server address
@@ -168,7 +168,7 @@ func AddServer() {
 
 	portStr := p.Run()
 	if strings.TrimSpace(portStr) == "" {
-		port = CurrentContext.Basic.Port
+		port = CurrentConfig.Basic.Port
 	} else {
 		port, _ = strconv.Atoi(portStr)
 	}
@@ -206,7 +206,7 @@ func AddServer() {
 
 		privateKey = p.Run()
 		if strings.TrimSpace(privateKey) == "" {
-			privateKey = CurrentContext.Basic.PrivateKey
+			privateKey = CurrentConfig.Basic.PrivateKey
 		}
 
 		p = promptx.NewDefaultPrompt(func(line []rune) error {
@@ -216,7 +216,7 @@ func AddServer() {
 		}, "PrivateKey Password:")
 		privateKeyPassword = p.Run()
 		if strings.TrimSpace(privateKeyPassword) == "" {
-			privateKeyPassword = CurrentContext.Basic.PrivateKeyPassword
+			privateKeyPassword = CurrentConfig.Basic.PrivateKeyPassword
 		}
 	} else {
 		// use password
@@ -227,7 +227,7 @@ func AddServer() {
 		}, "Password:")
 		password = p.Run()
 		if strings.TrimSpace(password) == "" {
-			password = CurrentContext.Basic.Password
+			password = CurrentConfig.Basic.Password
 		}
 	}
 
@@ -258,9 +258,9 @@ func AddServer() {
 	}
 
 	// Save
-	CurrentContext.Servers = append(CurrentContext.Servers, &server)
-	sort.Sort(CurrentContext.Servers)
-	utils.CheckAndExit(CurrentContext.Write())
+	CurrentConfig.Servers = append(CurrentConfig.Servers, &server)
+	sort.Sort(CurrentConfig.Servers)
+	utils.CheckAndExit(CurrentConfig.Write())
 }
 
 // delete server
@@ -269,7 +269,7 @@ func DeleteServer(serverNames []string) {
 	var deletesIdx []int
 
 	for _, serverName := range serverNames {
-		for i, s := range CurrentContext.Servers {
+		for i, s := range CurrentConfig.Servers {
 			matched, err := filepath.Match(serverName, s.Name)
 			// server name may contain special characters
 			if err != nil {
@@ -294,12 +294,12 @@ func DeleteServer(serverNames []string) {
 	// sort and delete
 	sort.Ints(deletesIdx)
 	for i, del := range deletesIdx {
-		CurrentContext.Servers = append(CurrentContext.Servers[:del-i], CurrentContext.Servers[del-i+1:]...)
+		CurrentConfig.Servers = append(CurrentConfig.Servers[:del-i], CurrentConfig.Servers[del-i+1:]...)
 	}
 
 	// save config
-	sort.Sort(CurrentContext.Servers)
-	utils.CheckAndExit(CurrentContext.Write())
+	sort.Sort(CurrentConfig.Servers)
+	utils.CheckAndExit(CurrentConfig.Write())
 
 }
 
@@ -361,9 +361,9 @@ func InteractiveLogin() {
 	}
 
 	s := &promptx.Select{
-		Items:  CurrentContext.Servers,
+		Items:  CurrentConfig.Servers,
 		Config: cfg,
 	}
 	idx := s.Run()
-	SingleLogin(CurrentContext.Servers[idx].Name)
+	SingleLogin(CurrentConfig.Servers[idx].Name)
 }

@@ -22,6 +22,7 @@ var serverListCmd = &cobra.Command{
 	Long: `
 list ssh server.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		mmh.LoadConfig()
 		if len(args) == 1 {
 			mmh.PrintServerDetail(args[0])
 		} else {
@@ -37,6 +38,7 @@ var serverAddCmd = &cobra.Command{
 add ssh server.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
+			mmh.LoadConfig()
 			mmh.AddServer()
 		} else {
 			_ = cmd.Help()
@@ -51,6 +53,7 @@ var serverDelCmd = &cobra.Command{
 delete ssh server.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) > 0 {
+			mmh.LoadConfig()
 			mmh.DeleteServer(args)
 		} else {
 			_ = cmd.Help()

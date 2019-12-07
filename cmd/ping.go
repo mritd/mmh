@@ -13,6 +13,7 @@ var pingCmd = &cobra.Command{
 ping server.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 1 {
+			mmh.LoadConfig()
 			mmh.Ping(args[0])
 		} else {
 			_ = cmd.Help()

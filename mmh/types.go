@@ -56,82 +56,8 @@ func (servers Servers) Swap(i, j int) {
 	servers[i], servers[j] = servers[j], servers[i]
 }
 
-// mmh context
-type Context struct {
-	Name       string `yaml:"name"`
-	ConfigPath string `yaml:"config_path"`
-}
-
-// mmh contexts
-type Contexts []Context
-
-func (cs Contexts) Len() int {
-	return len(cs)
-}
-func (cs Contexts) Less(i, j int) bool {
-	return cs[i].Name < cs[j].Name
-}
-func (cs Contexts) Swap(i, j int) {
-	cs[i], cs[j] = cs[j], cs[i]
-}
-
-// main config struct
-type MainConfig struct {
-	configPath string
-	Basic      string   `yaml:"basic"`
-	Contexts   Contexts `yaml:"contexts"`
-	Current    string   `yaml:"current"`
-}
-
-// set config file path
-func (cfg *MainConfig) SetConfigPath(configPath string) {
-	cfg.configPath = configPath
-}
-
-// write config
-func (cfg *MainConfig) Write() error {
-	if cfg.configPath == "" {
-		return errors.New("config path not set")
-	}
-	out, err := yaml.Marshal(cfg)
-	if err != nil {
-		return err
-	}
-	return ioutil.WriteFile(cfg.configPath, out, 0644)
-}
-
-// write config to yaml file
-func (cfg *MainConfig) WriteTo(filePath string) error {
-	if filePath == "" {
-		return errors.New("file path is empty")
-	}
-	cfg.configPath = filePath
-	return cfg.Write()
-}
-
-// load config
-func (cfg *MainConfig) Load() error {
-	if cfg.configPath == "" {
-		return errors.New("config path not set")
-	}
-	buf, err := ioutil.ReadFile(cfg.configPath)
-	if err != nil {
-		return err
-	}
-	return yaml.Unmarshal(buf, cfg)
-}
-
-// load config from yaml file
-func (cfg *MainConfig) LoadFrom(filePath string) error {
-	if filePath == "" {
-		return errors.New("file path is empty")
-	}
-	cfg.configPath = filePath
-	return cfg.Load()
-}
-
 // context config(eg: default.yaml)
-type ContextConfig struct {
+type Config struct {
 	configPath string
 	Basic      BasicServerConfig `yaml:"basic"`
 	MaxProxy   int               `yaml:"max_proxy"`
@@ -140,12 +66,12 @@ type ContextConfig struct {
 }
 
 // set config file path
-func (cfg *ContextConfig) SetConfigPath(configPath string) {
+func (cfg *Config) SetConfigPath(configPath string) {
 	cfg.configPath = configPath
 }
 
 // write config
-func (cfg *ContextConfig) Write() error {
+func (cfg *Config) Write() error {
 	if cfg.configPath == "" {
 		return errors.New("config path not set")
 	}
@@ -157,7 +83,7 @@ func (cfg *ContextConfig) Write() error {
 }
 
 // write config to yaml file
-func (cfg *ContextConfig) WriteTo(filePath string) error {
+func (cfg *Config) WriteTo(filePath string) error {
 	if filePath == "" {
 		return errors.New("file path is empty")
 	}
@@ -166,7 +92,7 @@ func (cfg *ContextConfig) WriteTo(filePath string) error {
 }
 
 // load config
-func (cfg *ContextConfig) Load() error {
+func (cfg *Config) Load() error {
 	if cfg.configPath == "" {
 		return errors.New("config path not set")
 	}
@@ -178,12 +104,28 @@ func (cfg *ContextConfig) Load() error {
 }
 
 // load config from yaml file
-func (cfg *ContextConfig) LoadFrom(filePath string) error {
+func (cfg *Config) LoadFrom(filePath string) error {
 	if filePath == "" {
 		return errors.New("file path is empty")
 	}
 	cfg.configPath = filePath
 	return cfg.Load()
+}
+
+type ConfigInfo []struct {
+	Name      string
+	Path      string
+	IsCurrent bool
+}
+
+func (info ConfigInfo) Len() int {
+	return len(info)
+}
+func (info ConfigInfo) Less(i, j int) bool {
+	return info[i].Name < info[j].Name
+}
+func (info ConfigInfo) Swap(i, j int) {
+	info[i], info[j] = info[j], info[i]
 }
 
 // basic config example
@@ -236,27 +178,9 @@ func TagsExample() Tags {
 	}
 }
 
-// main config example
-func MainConfigExample() *MainConfig {
-	return &MainConfig{
-		Basic: "default",
-		Contexts: []Context{
-			{
-				Name:       "default",
-				ConfigPath: "./default.yaml",
-			},
-			{
-				Name:       "test",
-				ConfigPath: "./test.yaml",
-			},
-		},
-		Current: "default",
-	}
-}
-
 // context config example
-func ContextConfigExample() *ContextConfig {
-	return &ContextConfig{
+func ConfigExample() *Config {
+	return &Config{
 		Basic:    BasicServerExample(),
 		Servers:  ServersExample(),
 		Tags:     TagsExample(),
