@@ -10,10 +10,10 @@ import (
 
 // print layout func
 func listLayout(name string) string {
-	if len(name) < 12 {
-		return fmt.Sprintf("%-12s", name)
+	if len(name) < 14 {
+		return fmt.Sprintf("%-14s", name)
 	} else {
-		return fmt.Sprintf("%-12s", utils.ShortenString(name, 12))
+		return fmt.Sprintf("%-14s", utils.ShortenString(name, 14))
 	}
 }
 

@@ -6,9 +6,9 @@ import (
 )
 
 var cfCmd = &cobra.Command{
-	Use:     "ctx",
+	Use:     "cf",
 	Short:   "change current context",
-	Aliases: []string{"mcx"},
+	Aliases: []string{"mcf"},
 	Long: `
 change current context.`,
 	Run: func(cmd *cobra.Command, args []string) {
