@@ -14,7 +14,6 @@ import (
 	"github.com/mritd/promptx"
 
 	"github.com/mitchellh/go-homedir"
-	"github.com/mritd/mmh/utils"
 )
 
 const (
@@ -32,13 +31,14 @@ var (
 	CurrentConfig     Config
 	CurrentConfigName string
 	CurrentConfigPath string
+	Aliases           []string
 )
 
 func LoadConfig() {
 	configOnce.Do(func() {
 		// get user home dir
 		home, err := homedir.Dir()
-		utils.CheckAndExit(err)
+		checkAndExit(err)
 		// load config dir from env
 		ConfigDir = os.Getenv(ConfigDirEnvName)
 		if ConfigDir == "" {
@@ -48,20 +48,20 @@ func LoadConfig() {
 			if err != nil {
 				if os.IsNotExist(err) {
 					// create config dir
-					utils.CheckAndExit(os.MkdirAll(ConfigDir, 0755))
+					checkAndExit(os.MkdirAll(ConfigDir, 0755))
 					// create default config file
 					CurrentConfigName = "default.yaml"
 					CurrentConfigPath = filepath.Join(ConfigDir, CurrentConfigName)
-					utils.CheckAndExit(ConfigExample().WriteTo(CurrentConfigPath))
+					checkAndExit(ConfigExample().WriteTo(CurrentConfigPath))
 					// create basic config file
 					BasicConfigName = "basic.yaml"
 					BasicConfigPath = filepath.Join(ConfigDir, BasicConfigName)
-					utils.CheckAndExit(ConfigExample().WriteTo(BasicConfigPath))
+					checkAndExit(ConfigExample().WriteTo(BasicConfigPath))
 					// set current config to default
 					currentCfgStoreFile := filepath.Join(ConfigDir, CurrentConfigStoreFile)
-					utils.CheckAndExit(ioutil.WriteFile(currentCfgStoreFile, []byte(CurrentConfigName), 0644))
+					checkAndExit(ioutil.WriteFile(currentCfgStoreFile, []byte(CurrentConfigName), 0644))
 				} else if err != nil {
-					utils.CheckAndExit(err)
+					checkAndExit(err)
 				}
 			}
 
@@ -69,7 +69,7 @@ func LoadConfig() {
 
 		// config dir path only support absolute path or start with homedir(~)
 		if !filepath.IsAbs(ConfigDir) && !strings.HasPrefix(ConfigDir, "~") {
-			utils.Exit("the config dir path must be a absolute path or start with homedir(~)", 1)
+			Exit("the config dir path must be a absolute path or start with homedir(~)", 1)
 		}
 		// convert config dir path with homedir(~) prefix to absolute path
 		if strings.HasPrefix(ConfigDir, "~") {
@@ -86,12 +86,12 @@ func LoadConfig() {
 		}
 		// load current config
 		CurrentConfigPath = filepath.Join(ConfigDir, CurrentConfigName)
-		utils.CheckError(CurrentConfig.LoadFrom(CurrentConfigPath))
+		checkErr(CurrentConfig.LoadFrom(CurrentConfigPath))
 		// load basic config if it exist
 		BasicConfigName = "basic.yaml"
 		BasicConfigPath = filepath.Join(ConfigDir, BasicConfigName)
 		if _, err = os.Stat(BasicConfigPath); err == nil {
-			utils.CheckError(BasicConfig.LoadFrom(BasicConfigPath))
+			checkErr(BasicConfig.LoadFrom(BasicConfigPath))
 		}
 
 		// load all config info
@@ -127,7 +127,7 @@ func ListConfig() {
 	_, _ = t.Parse(tpl)
 
 	var buf bytes.Buffer
-	utils.CheckAndExit(t.Execute(&buf, ConfigList))
+	checkAndExit(t.Execute(&buf, ConfigList))
 	fmt.Println(buf.String())
 }
 
@@ -140,10 +140,10 @@ func SetConfig(name string) {
 		}
 	}
 	if !hasConfig {
-		utils.Exit(fmt.Sprintf("config [%s] not exist", name), 1)
+		Exit(fmt.Sprintf("config [%s] not exist", name), 1)
 	}
 	// write
-	utils.CheckAndExit(ioutil.WriteFile(filepath.Join(ConfigDir, CurrentConfigStoreFile), []byte(name+".yaml"), 0644))
+	checkAndExit(ioutil.WriteFile(filepath.Join(ConfigDir, CurrentConfigStoreFile), []byte(name+".yaml"), 0644))
 }
 
 func InteractiveSetConfig() {

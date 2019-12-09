@@ -9,11 +9,9 @@ var pingCmd = &cobra.Command{
 	Use:     "ping SERVER_NAME",
 	Aliases: []string{"mping"},
 	Short:   "ping server",
-	Long: `
-ping server.`,
+	Long:    "ping server.",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 1 {
-			mmh.LoadConfig()
 			mmh.Ping(args[0])
 		} else {
 			_ = cmd.Help()
@@ -22,5 +20,5 @@ ping server.`,
 }
 
 func init() {
-	RootCmd.AddCommand(pingCmd)
+	rootCmd.AddCommand(pingCmd)
 }

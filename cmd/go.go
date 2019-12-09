@@ -9,11 +9,9 @@ var goCmd = &cobra.Command{
 	Use:     "go SERVER_NAME",
 	Aliases: []string{"mgo"},
 	Short:   "login server",
-	Long: `
-login server.`,
+	Long:    "login server.",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 1 {
-			mmh.LoadConfig()
 			mmh.SingleLogin(args[0])
 		} else {
 			_ = cmd.Help()
@@ -22,5 +20,5 @@ login server.`,
 }
 
 func init() {
-	RootCmd.AddCommand(goCmd)
+	rootCmd.AddCommand(goCmd)
 }

@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"io"
 	"net"
-
-	"github.com/mritd/mmh/utils"
 )
 
 // Tunnel will open an ssh tcp tunnel between the left address and the right address
@@ -14,7 +12,7 @@ func Tunnel(name, leftAddr, rightAddr string, reverse bool) {
 	if !reverse {
 		fmt.Printf("mmh tunnel listen at %s\n", leftAddr)
 		listener, err := net.Listen("tcp", leftAddr)
-		utils.CheckAndExit(err)
+		checkAndExit(err)
 		defer func() { _ = listener.Close() }()
 
 		for {
@@ -49,10 +47,10 @@ func Tunnel(name, leftAddr, rightAddr string, reverse bool) {
 	} else {
 		fmt.Printf("mmh reverse tunnel at [%s] %s\n", name, rightAddr)
 		server, err := findServerByName(name)
-		utils.CheckAndExit(err)
+		checkAndExit(err)
 		client, err := server.sshClient(false, true)
 		listener, err := client.Listen("tcp", rightAddr)
-		utils.CheckAndExit(err)
+		checkAndExit(err)
 
 		for {
 			rightConn, err := listener.Accept()

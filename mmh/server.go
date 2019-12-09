@@ -10,7 +10,6 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/mritd/mmh/utils"
 	"github.com/mritd/promptx"
 )
 
@@ -260,7 +259,7 @@ func AddServer() {
 	// Save
 	CurrentConfig.Servers = append(CurrentConfig.Servers, &server)
 	sort.Sort(CurrentConfig.Servers)
-	utils.CheckAndExit(CurrentConfig.Write())
+	checkAndExit(CurrentConfig.Write())
 }
 
 // delete server
@@ -288,7 +287,7 @@ func DeleteServer(serverNames []string) {
 	}
 
 	if len(deletesIdx) == 0 {
-		utils.Exit("server not found", 1)
+		Exit("server not found", 1)
 	}
 
 	// sort and delete
@@ -299,7 +298,7 @@ func DeleteServer(serverNames []string) {
 
 	// save config
 	sort.Sort(CurrentConfig.Servers)
-	utils.CheckAndExit(CurrentConfig.Write())
+	checkAndExit(CurrentConfig.Write())
 
 }
 
@@ -317,14 +316,14 @@ func ListServers() {
 
 	_, _ = t.Parse(tpl)
 	var buf bytes.Buffer
-	utils.CheckAndExit(t.Execute(&buf, getServers()))
+	checkAndExit(t.Execute(&buf, getServers()))
 	fmt.Println(buf.String())
 }
 
 // PrintServerDetail print single server detail
 func PrintServerDetail(serverName string) {
 	s, err := findServerByName(serverName)
-	utils.CheckAndExit(err)
+	checkAndExit(err)
 
 	tpl := `Name: {{ .Name }}
 User: {{ .User }}
@@ -334,14 +333,14 @@ Proxy: {{ .Proxy }}`
 	t := template.New("").Funcs(map[string]interface{}{"MergeTag": mergeTags})
 	_, _ = t.Parse(tpl)
 	var buf bytes.Buffer
-	utils.CheckAndExit(t.Execute(&buf, s))
+	checkAndExit(t.Execute(&buf, s))
 	fmt.Println(buf.String())
 }
 
 func SingleLogin(name string) {
 	s, err := findServerByName(name)
-	utils.CheckAndExit(err)
-	utils.CheckAndExit(s.Terminal())
+	checkAndExit(err)
+	checkAndExit(s.Terminal())
 }
 
 // InteractiveLogin interactive login server

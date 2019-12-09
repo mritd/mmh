@@ -8,8 +8,6 @@ import (
 
 	"github.com/mitchellh/go-homedir"
 
-	"github.com/mritd/mmh/utils"
-
 	"github.com/mritd/sshutils"
 
 	"fmt"
@@ -41,7 +39,7 @@ func (s *ServerConfig) sshClient(secondLast bool, ignoreProxyCheck bool) (*ssh.C
 
 		// find proxy server
 		proxyServer, err := findServerByName(s.Proxy)
-		utils.CheckAndExit(err)
+		checkAndExit(err)
 
 		fmt.Printf("🔑 using proxy [%s], connect to => %s\n", s.Proxy, s.Name)
 

@@ -19,7 +19,6 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/mritd/mmh/utils"
 	"github.com/mritd/sshutils"
 )
 
@@ -43,7 +42,7 @@ func Exec(tagOrName, cmd string, singleServer, pingClient bool) {
 	// single server exec
 	if singleServer {
 		server, err := findServerByName(tagOrName)
-		utils.CheckAndExit(err)
+		checkAndExit(err)
 
 		var errCh = make(chan error, 1)
 		exec(ctx, server, singleServer, pingClient, cmd, errCh)
@@ -57,7 +56,7 @@ func Exec(tagOrName, cmd string, singleServer, pingClient bool) {
 		// multiple servers
 		servers := findServersByTag(tagOrName)
 		if len(servers) == 0 {
-			utils.Exit("tagged server not found", 1)
+			Exit("tagged server not found", 1)
 		}
 
 		// create goroutine
@@ -135,8 +134,8 @@ func exec(ctx context.Context, s *ServerConfig, singleServer, pingClient bool, c
 			if singleServer {
 				_, _ = io.Copy(os.Stdout, sshSession.Stdout)
 			} else {
-				f := utils.GetColorFuncName()
-				t, err := template.New("").Funcs(utils.ColorsFuncMap).Parse(fmt.Sprintf(`{{ .Name | %s}}{{ ":" | %s}}  {{ .Value }}`, f, f))
+				f := GetColorFuncName()
+				t, err := template.New("").Funcs(ColorsFuncMap).Parse(fmt.Sprintf(`{{ .Name | %s}}{{ ":" | %s}}  {{ .Value }}`, f, f))
 				if err != nil {
 					errCh <- err
 					return

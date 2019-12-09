@@ -12,11 +12,9 @@ var tunCmd = &cobra.Command{
 	Use:     "tun SERVER_NAME",
 	Aliases: []string{"mtun"},
 	Short:   "ssh tunnel",
-	Long: `
-ssh tunnel.`,
+	Long:    "ssh tunnel.",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 1 {
-			mmh.LoadConfig()
 			mmh.Tunnel(args[0], tunLeftAddr, tunRightAddr, tunReverse)
 		} else {
 			_ = cmd.Help()
@@ -30,5 +28,5 @@ func init() {
 	tunCmd.PersistentFlags().BoolVar(&tunReverse, "reverse", false, "reverse tcp tunnel(right to left)")
 	_ = tunCmd.MarkFlagRequired("left")
 	_ = tunCmd.MarkFlagRequired("right")
-	RootCmd.AddCommand(tunCmd)
+	rootCmd.AddCommand(tunCmd)
 }
