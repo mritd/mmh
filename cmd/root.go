@@ -17,10 +17,12 @@ var rootCmd = &cobra.Command{
 }
 
 func Execute() {
-	runCmd := rootCmd
 
-	subCmd, _, _ := rootCmd.Find([]string{filepath.Base(os.Args[0])})
-	if subCmd != nil {
+	runCmd := rootCmd
+	mmh.Aliases = findAllAliases(rootCmd)
+
+	subCmd, _, err := rootCmd.Find([]string{filepath.Base(os.Args[0])})
+	if err == nil && subCmd.Name() != rootCmd.Name() {
 		runCmd = subCmd
 		rootCmd.SetArgs(append([]string{subCmd.Name()}, os.Args[1:]...))
 	}
@@ -32,4 +34,28 @@ func Execute() {
 	if err := runCmd.Execute(); err != nil {
 		mmh.Exit(err.Error(), -1)
 	}
+}
+
+func findAllAliases(cmd *cobra.Command) []string {
+	var aliases []string
+	if cmd.HasSubCommands() {
+		cmds := cmd.Commands()
+		for _, c := range cmds {
+			if len(c.Aliases) > 0 {
+				aliases = append(aliases, c.Aliases...)
+			}
+			if c.HasSubCommands() {
+				as := findAllAliases(c)
+				if len(as) > 0 {
+					aliases = append(aliases, as...)
+				}
+			}
+		}
+	} else {
+		if len(cmd.Aliases) > 0 {
+			aliases = append(aliases, cmd.Aliases...)
+		}
+	}
+
+	return aliases
 }
