@@ -150,6 +150,10 @@ func (s *ServerConfig) Terminal() error {
 
 	// keep alive
 	if s.ServerAliveInterval > 0 {
+		if s.ServerAliveInterval < 10*time.Second {
+			fmt.Println("WARN: ServerAliveInterval set too small heartbeat time, use the default value of 10s(please set a larger value, such as \"30s\", \"5m\")")
+			s.ServerAliveInterval = 10 * time.Second
+		}
 		return sshSession.TerminalWithKeepAlive(s.ServerAliveInterval)
 	}
 	return sshSession.Terminal()
