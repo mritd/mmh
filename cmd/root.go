@@ -18,20 +18,15 @@ var rootCmd = &cobra.Command{
 
 func Execute() {
 
-	runCmd := rootCmd
 	mmh.Aliases = findAllAliases(rootCmd)
+	mmh.LoadConfig()
 
 	subCmd, _, err := rootCmd.Find([]string{filepath.Base(os.Args[0])})
 	if err == nil && subCmd.Name() != rootCmd.Name() {
-		runCmd = subCmd
 		rootCmd.SetArgs(append([]string{subCmd.Name()}, os.Args[1:]...))
 	}
 
-	if runCmd.Name() != "install" && runCmd.Name() != "uninstall" {
-		mmh.LoadConfig()
-	}
-
-	if err := runCmd.Execute(); err != nil {
+	if err := rootCmd.Execute(); err != nil {
 		mmh.Exit(err.Error(), -1)
 	}
 }
