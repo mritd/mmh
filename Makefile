@@ -23,7 +23,7 @@ install:
                          -X 'github.com/mritd/mmh/cmd.BuildDate=${BUILD_DATE}' \
                          -X 'github.com/mritd/mmh/cmd.CommitID=${COMMIT_SHA1}'"
 
-.PHONY : all release clean install
+.PHONY : all release pre-release clean install
 
 .EXPORT_ALL_VARIABLES:
 
