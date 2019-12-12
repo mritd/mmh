@@ -66,9 +66,6 @@ func LoadConfig() {
 			}
 		}
 
-		// check config dir if it not exist
-		_, err = os.Stat(ConfigDir)
-		checkErr(err)
 		// config dir path only support absolute path or start with homedir(~)
 		if !filepath.IsAbs(ConfigDir) && !strings.HasPrefix(ConfigDir, "~") {
 			Exit("the config dir path must be a absolute path or start with homedir(~)", 1)
@@ -76,6 +73,10 @@ func LoadConfig() {
 		// convert config dir path with homedir(~) prefix to absolute path
 		if strings.HasPrefix(ConfigDir, "~") {
 			ConfigDir = strings.Replace(ConfigDir, "~", home, 1)
+		}
+		// check config dir if it not exist
+		if _, err := os.Stat(ConfigDir); !checkErr(err) {
+			return
 		}
 		// get current config
 		currentCfgStoreFile := filepath.Join(ConfigDir, CurrentConfigStoreFile)
