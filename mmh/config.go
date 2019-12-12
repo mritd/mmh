@@ -68,7 +68,7 @@ func LoadConfig() {
 
 		// check config dir if it not exist
 		_, err = os.Stat(ConfigDir)
-		checkAndExit(err)
+		checkErr(err)
 		// config dir path only support absolute path or start with homedir(~)
 		if !filepath.IsAbs(ConfigDir) && !strings.HasPrefix(ConfigDir, "~") {
 			Exit("the config dir path must be a absolute path or start with homedir(~)", 1)
@@ -98,6 +98,9 @@ func LoadConfig() {
 
 		// load all config info
 		_ = filepath.Walk(ConfigDir, func(path string, f os.FileInfo, err error) error {
+			if !checkErr(err) {
+				return err
+			}
 			if f.IsDir() || !strings.HasSuffix(f.Name(), ".yaml") {
 				return nil
 			}

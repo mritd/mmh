@@ -23,7 +23,11 @@ func Execute() {
 
 	subCmd, _, err := rootCmd.Find([]string{filepath.Base(os.Args[0])})
 	if err == nil && subCmd.Name() != rootCmd.Name() {
-		rootCmd.SetArgs(append([]string{subCmd.Name()}, os.Args[1:]...))
+		if len(os.Args) > 1 {
+			rootCmd.SetArgs(append([]string{subCmd.Name()}, os.Args[1:]...))
+		} else {
+			rootCmd.SetArgs([]string{subCmd.Name()})
+		}
 	}
 
 	if err := rootCmd.Execute(); err != nil {
