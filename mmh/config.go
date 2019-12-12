@@ -96,7 +96,7 @@ func LoadConfig() {
 
 		// load all config info
 		_ = filepath.Walk(ConfigDir, func(path string, f os.FileInfo, err error) error {
-			if f.IsDir() || f.Name() == ".current" {
+			if f.IsDir() || !strings.HasSuffix(f.Name(),".yaml") {
 				return nil
 			}
 			ConfigList = append(ConfigList, struct {
