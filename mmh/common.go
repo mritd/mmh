@@ -5,8 +5,6 @@ import (
 	"os/user"
 	"strings"
 
-	"github.com/spf13/cobra"
-
 	"fmt"
 )
 
@@ -60,28 +58,4 @@ func isRoot() bool {
 	u, err := user.Current()
 	checkAndExit(err)
 	return u.Uid == "0" || u.Gid == "0"
-}
-
-func FindAllAliases(cmd *cobra.Command) []string {
-	var aliases []string
-	if cmd.HasSubCommands() {
-		cmds := cmd.Commands()
-		for _, c := range cmds {
-			if len(c.Aliases) > 0 {
-				aliases = append(aliases, c.Aliases...)
-			}
-			if c.HasSubCommands() {
-				as := FindAllAliases(c)
-				if len(as) > 0 {
-					aliases = append(aliases, as...)
-				}
-			}
-		}
-	} else {
-		if len(cmd.Aliases) > 0 {
-			aliases = append(aliases, cmd.Aliases...)
-		}
-	}
-
-	return aliases
 }
