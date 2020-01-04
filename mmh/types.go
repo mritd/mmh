@@ -19,6 +19,8 @@ type BasicServerConfig struct {
 	PrivateKeyPassword  string        `yaml:"private_key_password"`
 	Port                int           `yaml:"port"`
 	ServerAliveInterval time.Duration `yaml:"server_alive_interval"`
+	TmuxSupport         string        `yaml:"tmux_support"`
+	TmuxAutoRename      string        `yaml:"tmux_auto_rename"`
 }
 
 // server config
@@ -37,6 +39,8 @@ type ServerConfig struct {
 	Port                int           `yaml:"port"`
 	Proxy               string        `yaml:"proxy"`
 	ServerAliveInterval time.Duration `yaml:"server_alive_interval"`
+	TmuxSupport         string        `yaml:"tmux_support"`
+	TmuxAutoRename      string        `yaml:"tmux_auto_rename"`
 	proxyCount          int
 }
 

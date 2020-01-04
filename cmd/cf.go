@@ -23,9 +23,7 @@ var cfListCmd = &cobra.Command{
 	Use:   "ls",
 	Short: "list context",
 	Long:  "list context",
-	Run: func(cmd *cobra.Command, args []string) {
-		mmh.ListConfig()
-	},
+	Run:   func(cmd *cobra.Command, args []string) { mmh.ListConfig() },
 }
 
 var cfSetCmd = &cobra.Command{
@@ -33,11 +31,11 @@ var cfSetCmd = &cobra.Command{
 	Short: "set context",
 	Long:  "set context",
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) != 1 {
+		if len(args) == 1 {
+			mmh.SetConfig(args[0])
+		} else {
 			_ = cmd.Help()
-			return
 		}
-		mmh.SetConfig(args[0])
 	},
 }
 

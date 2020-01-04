@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	osexec "os/exec"
 	"path/filepath"
 	"sort"
 	"strconv"
@@ -59,6 +60,12 @@ func getServers() Servers {
 		}
 		if s.ServerAliveInterval == 0 {
 			s.ServerAliveInterval = BasicConfig.Basic.ServerAliveInterval
+		}
+		if s.TmuxSupport == "" {
+			s.TmuxSupport = BasicConfig.Basic.TmuxSupport
+		}
+		if s.TmuxAutoRename == "" {
+			s.TmuxAutoRename = BasicConfig.Basic.TmuxAutoRename
 		}
 		servers = append(servers, s)
 	}
@@ -340,6 +347,12 @@ Proxy: {{ .Proxy }}`
 func SingleLogin(name string) {
 	s, err := findServerByName(name)
 	checkAndExit(err)
+	var winName string
+	if s.TmuxSupport == "true" {
+		winName = getTmuxWindowName()
+		setTmuxWindowName(s.Name, "false")
+		defer setTmuxWindowName(winName, s.TmuxAutoRename)
+	}
 	checkAndExit(s.Terminal())
 }
 
@@ -365,4 +378,20 @@ func InteractiveLogin() {
 	}
 	idx := s.Run()
 	SingleLogin(CurrentConfig.Servers[idx].Name)
+}
+
+func setTmuxWindowName(name, autoRename string) {
+	cmd := osexec.Command("tmux", "rename-window", name)
+	checkAndExit(cmd.Run())
+	if autoRename != "false" && autoRename != "off" {
+		cmd = osexec.Command("tmux", "set-window", "automatic-rename", "on")
+		checkAndExit(cmd.Run())
+	}
+}
+
+func getTmuxWindowName() string {
+	cmd := osexec.Command("tmux", "display-message", "-p", "#W")
+	bs, err := cmd.CombinedOutput()
+	checkAndExit(err)
+	return strings.TrimSpace(string(bs))
 }
