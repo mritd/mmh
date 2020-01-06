@@ -90,6 +90,12 @@ func getServers() Servers {
 			if s.ServerAliveInterval == 0 {
 				s.ServerAliveInterval = CurrentConfig.Basic.ServerAliveInterval
 			}
+			if s.TmuxSupport == "" {
+				s.TmuxSupport = BasicConfig.Basic.TmuxSupport
+			}
+			if s.TmuxAutoRename == "" {
+				s.TmuxAutoRename = BasicConfig.Basic.TmuxAutoRename
+			}
 			servers = append(servers, s)
 		}
 	}
