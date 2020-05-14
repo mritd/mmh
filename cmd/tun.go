@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/mritd/mmh/mmh"
+	"github.com/mritd/mmh/core"
 	"github.com/spf13/cobra"
 )
 
@@ -15,7 +15,7 @@ var tunCmd = &cobra.Command{
 	Long:    "ssh tunnel.",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 1 {
-			mmh.Tunnel(args[0], tunLeftAddr, tunRightAddr, tunReverse)
+			core.Tunnel(args[0], tunLeftAddr, tunRightAddr, tunReverse)
 		} else {
 			_ = cmd.Help()
 		}

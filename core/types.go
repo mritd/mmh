@@ -1,4 +1,4 @@
-package mmh
+package core
 
 import (
 	"errors"
@@ -139,9 +139,6 @@ func BasicServerExample() BasicServerConfig {
 		User:                "root",
 		Port:                22,
 		PrivateKey:          filepath.Join(home, ".ssh", "id_rsa"),
-		PrivateKeyPassword:  "",
-		Password:            "",
-		ServerAliveInterval: 0,
 	}
 }
 

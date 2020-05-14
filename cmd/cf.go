@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/mritd/mmh/mmh"
+	"github.com/mritd/mmh/core"
 	"github.com/spf13/cobra"
 )
 
@@ -12,7 +12,7 @@ var cfCmd = &cobra.Command{
 	Long:    "change current context.",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
-			mmh.InteractiveSetConfig()
+			core.InteractiveSetConfig()
 		} else {
 			_ = cmd.Help()
 		}
@@ -23,7 +23,7 @@ var cfListCmd = &cobra.Command{
 	Use:   "ls",
 	Short: "list context",
 	Long:  "list context",
-	Run:   func(cmd *cobra.Command, args []string) { mmh.ListConfig() },
+	Run:   func(cmd *cobra.Command, args []string) { core.ListConfig() },
 }
 
 var cfSetCmd = &cobra.Command{
@@ -32,7 +32,7 @@ var cfSetCmd = &cobra.Command{
 	Long:  "set context",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 1 {
-			mmh.SetConfig(args[0])
+			core.SetConfig(args[0])
 		} else {
 			_ = cmd.Help()
 		}

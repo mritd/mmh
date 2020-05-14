@@ -3,14 +3,14 @@ package cmd
 import (
 	"strings"
 
-	"github.com/mritd/mmh/mmh"
+	"github.com/mritd/mmh/core"
 	"github.com/spf13/cobra"
 )
 
 var singleServer bool
 
 var execCmd = &cobra.Command{
-	Use:     "exec SERVER_TAG CMD",
+	Use:     "exec SERVER COMMAND",
 	Aliases: []string{"mec"},
 	Short:   "batch exec command",
 	Long:    "batch exec command.",
@@ -19,7 +19,7 @@ var execCmd = &cobra.Command{
 			_ = cmd.Help()
 		} else {
 			cmd := strings.Join(args[1:], " ")
-			mmh.Exec(args[0], cmd, singleServer, false)
+			core.Exec(args[0], cmd, singleServer, false)
 		}
 	},
 }

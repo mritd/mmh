@@ -1,4 +1,4 @@
-package mmh
+package core
 
 import (
 	"errors"
@@ -18,7 +18,6 @@ import (
 // return a ssh client intense point
 // if secondLast is true, return the second last server
 func (s *ServerConfig) sshClient(secondLast bool, ignoreProxyCheck bool) (*ssh.Client, error) {
-
 	sshConfig := &ssh.ClientConfig{
 		User:            s.User,
 		Auth:            s.authMethod(),
@@ -27,11 +26,10 @@ func (s *ServerConfig) sshClient(secondLast bool, ignoreProxyCheck bool) (*ssh.C
 	}
 
 	if s.Proxy != "" {
-
 		// check max proxy
 		if !ignoreProxyCheck {
-			if s.proxyCount > CurrentConfig.MaxProxy {
-				return nil, errors.New(fmt.Sprintf("too many proxy server, proxy server must be <= %d", CurrentConfig.MaxProxy))
+			if s.proxyCount > currentConfig.MaxProxy {
+				return nil, errors.New(fmt.Sprintf("too many proxy server, proxy server must be <= %d", currentConfig.MaxProxy))
 			} else {
 				s.proxyCount++
 			}
@@ -42,7 +40,6 @@ func (s *ServerConfig) sshClient(secondLast bool, ignoreProxyCheck bool) (*ssh.C
 		checkAndExit(err)
 
 		fmt.Printf("🔑 using proxy [%s], connect to => %s\n", s.Proxy, s.Name)
-
 		// recursive connect
 		proxyClient, err := proxyServer.sshClient(false, ignoreProxyCheck)
 		if err != nil {
@@ -75,7 +72,6 @@ func (s *ServerConfig) sshClient(secondLast bool, ignoreProxyCheck bool) (*ssh.C
 
 // authMethod return ssh auth method
 func (s *ServerConfig) authMethod() []ssh.AuthMethod {
-
 	var ams []ssh.AuthMethod
 
 	if s.Password != "" {
@@ -107,17 +103,17 @@ func privateKeyFile(file, password string) (ssh.AuthMethod, error) {
 	if err != nil {
 		return nil, err
 	}
-	var signer ssh.Signer
 
+	var signer ssh.Signer
 	if password == "" {
 		signer, err = ssh.ParsePrivateKey(buffer)
 	} else {
 		signer, err = ssh.ParsePrivateKeyWithPassphrase(buffer, []byte(password))
 	}
-
 	if err != nil {
 		return nil, err
 	}
+
 	return ssh.PublicKeys(signer), nil
 }
 

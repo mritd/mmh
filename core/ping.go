@@ -1,4 +1,4 @@
-package mmh
+package core
 
 import (
 	"os"
@@ -8,7 +8,6 @@ import (
 // Ping execute the ping target server
 // if the target server requires a proxy, ping on the last proxy server
 func Ping(name string) {
-
 	server, err := findServerByName(name)
 	checkAndExit(err)
 

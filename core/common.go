@@ -1,4 +1,4 @@
-package mmh
+package core
 
 import (
 	"os"
@@ -13,7 +13,7 @@ func listLayout(name string) string {
 	if len(name) < 14 {
 		return fmt.Sprintf("%-14s", name)
 	} else {
-		return fmt.Sprintf("%-14s", ShortenString(name, 14))
+		return fmt.Sprintf("%-14s", shortenString(name, 14))
 	}
 }
 
@@ -38,12 +38,18 @@ func checkErr(err error) bool {
 	return true
 }
 
-func ShortenString(str string, n int) string {
+func shortenString(str string, n int) string {
 	if len(str) <= n {
 		return str
 	} else {
 		return str[:n]
 	}
+}
+
+func isRoot() bool {
+	u, err := user.Current()
+	checkAndExit(err)
+	return u.Uid == "0" || u.Gid == "0"
 }
 
 func Exit(message string, code int) {
@@ -52,10 +58,4 @@ func Exit(message string, code int) {
 	}
 	fmt.Println("😱 " + message)
 	os.Exit(code)
-}
-
-func isRoot() bool {
-	u, err := user.Current()
-	checkAndExit(err)
-	return u.Uid == "0" || u.Gid == "0"
 }

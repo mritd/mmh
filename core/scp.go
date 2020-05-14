@@ -1,4 +1,4 @@
-package mmh
+package core
 
 import (
 	"errors"
@@ -15,7 +15,6 @@ func Copy(args []string, multiServer bool) {
 }
 
 func runCopy(args []string, multiServer bool) error {
-
 	if len(args) < 2 {
 		return errors.New("parameter invalid")
 	}
@@ -23,7 +22,6 @@ func runCopy(args []string, multiServer bool) error {
 	// download, eg: mcp test:~/file localPath
 	// only single file/directory download is supported
 	if len(strings.Split(args[0], ":")) == 2 && len(args) == 2 {
-
 		// only single server is supported
 		serverName := strings.Split(args[0], ":")[0]
 		remotePath := strings.Split(args[0], ":")[1]
@@ -35,9 +33,8 @@ func runCopy(args []string, multiServer bool) error {
 		if err != nil {
 			return err
 		}
-		defer func() {
-			_ = client.Close()
-		}()
+		defer func() { _ = client.Close() }()
+
 		scpClient, err := sshutils.NewSCPClient(client)
 		if err != nil {
 			return err
@@ -46,7 +43,6 @@ func runCopy(args []string, multiServer bool) error {
 
 		// upload, eg: mcp localFile1 localFile2 localDir test:~
 	} else if len(strings.Split(args[len(args)-1], ":")) == 2 {
-
 		serverOrTag := strings.Split(args[len(args)-1], ":")[0]
 		remotePath := strings.Split(args[len(args)-1], ":")[1]
 
@@ -60,55 +56,46 @@ func runCopy(args []string, multiServer bool) error {
 
 			var wg sync.WaitGroup
 			wg.Add(len(servers))
-
 			for _, s := range servers {
-				tmpServer := s
-				go func() {
+				go func(s *ServerConfig, args []string) {
 					defer wg.Done()
-					client, err := tmpServer.sshClient(false, false)
+
+					client, err := s.sshClient(false, false)
 					if err != nil {
-						_, _ = color.New(color.BgRed, color.FgHiWhite).Printf("%s:  %s", tmpServer.Name, err)
+						_, _ = color.New(color.BgRed, color.FgHiWhite).Printf("%s:  %s", s.Name, err)
 						return
 					}
-					defer func() {
-						_ = client.Close()
-					}()
+					defer func() { _ = client.Close() }()
+
 					scpClient, err := sshutils.NewSCPClient(client)
 					if err != nil {
-						_, _ = color.New(color.BgRed, color.FgHiWhite).Printf("%s:  %s", tmpServer.Name, err)
+						_, _ = color.New(color.BgRed, color.FgHiWhite).Printf("%s:  %s", s.Name, err)
 						return
 					}
 
-					allArg := args[:len(args)-1]
-					allArg = append(allArg, remotePath)
-					err = scpClient.CopyLocal2Remote(allArg...)
+					args[len(args)-1] = remotePath
+					err = scpClient.CopyLocal2Remote(args...)
 					if err != nil {
-						_, _ = color.New(color.BgRed, color.FgHiWhite).Printf("%s:  %s", tmpServer.Name, err)
+						_, _ = color.New(color.BgRed, color.FgHiWhite).Printf("%s:  %s", s.Name, err)
 						return
 					}
-				}()
+				}(s, args)
 			}
-
 			wg.Wait()
-
 		} else {
-
 			s, err := findServerByName(serverOrTag)
 			checkAndExit(err)
 			client, err := s.sshClient(false, false)
 			if err != nil {
 				return err
 			}
-			defer func() {
-				_ = client.Close()
-			}()
+			defer func() { _ = client.Close() }()
 			scpClient, err := sshutils.NewSCPClient(client)
 			if err != nil {
 				return err
 			}
-			allArg := args[:len(args)-1]
-			allArg = append(allArg, remotePath)
-			return scpClient.CopyLocal2Remote(allArg...)
+			args[len(args)-1] = remotePath
+			return scpClient.CopyLocal2Remote(args...)
 		}
 
 	} else {

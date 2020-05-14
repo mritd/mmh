@@ -1,10 +1,9 @@
-package mmh
+package core
 
 import (
 	"bufio"
 	"bytes"
 	"io"
-	"text/template"
 
 	"github.com/fatih/color"
 
@@ -24,15 +23,15 @@ import (
 
 // Exec batch execution of commands
 func Exec(tagOrName, cmd string, singleServer, pingClient bool) {
-
 	// use context to manage goroutine
 	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
 	// monitor os signal
-	cancelChannel := make(chan os.Signal)
-	signal.Notify(cancelChannel, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+	sigs := make(chan os.Signal)
+	signal.Notify(sigs, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	go func() {
-		switch <-cancelChannel {
+		switch <-sigs {
 		case syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT:
 			// exit all goroutine
 			cancel()
@@ -47,10 +46,10 @@ func Exec(tagOrName, cmd string, singleServer, pingClient bool) {
 		var errCh = make(chan error, 1)
 		exec(ctx, server, singleServer, pingClient, cmd, errCh)
 		select {
-		case err := <-errCh:
-			_, _ = color.New(color.BgRed, color.FgHiWhite).Print(err)
-			fmt.Println()
-		default:
+		case err, ok := <-errCh:
+			if ok {
+				_, _ = color.New(color.BgRed, color.FgHiWhite).Print(err.Error() + "\n")
+			}
 		}
 	} else {
 		// multiple servers
@@ -62,21 +61,20 @@ func Exec(tagOrName, cmd string, singleServer, pingClient bool) {
 		// create goroutine
 		var serverWg sync.WaitGroup
 		serverWg.Add(len(servers))
-		for _, tmpServer := range servers {
-			server := tmpServer
+		for _, s := range servers {
 			// async exec
 			// because it takes time for ssh to establish a connection
-			go func() {
+			go func(s *ServerConfig) {
 				defer serverWg.Done()
 				var errCh = make(chan error, 1)
-				exec(ctx, server, singleServer, false, cmd, errCh)
+				exec(ctx, s, singleServer, false, cmd, errCh)
 				select {
-				case err := <-errCh:
-					_, _ = color.New(color.BgRed, color.FgHiWhite).Printf("%s:  %s", server.Name, err)
-					fmt.Println()
-				default:
+				case err, ok := <-errCh:
+					if ok {
+						_, _ = color.New(color.BgRed, color.FgHiWhite).Printf("%s:  %s\n", s.Name, err)
+					}
 				}
-			}()
+			}(s)
 		}
 		serverWg.Wait()
 	}
@@ -85,16 +83,13 @@ func Exec(tagOrName, cmd string, singleServer, pingClient bool) {
 // single server execution command
 // since multiple tasks are executed async, the error is returned using channel
 func exec(ctx context.Context, s *ServerConfig, singleServer, pingClient bool, cmd string, errCh chan error) {
-
 	// get ssh client
 	sshClient, err := s.sshClient(pingClient, false)
 	if err != nil {
 		errCh <- err
 		return
 	}
-	defer func() {
-		_ = sshClient.Close()
-	}()
+	defer func() { _ = sshClient.Close() }()
 
 	// get ssh session
 	session, err := sshClient.NewSession()
@@ -105,9 +100,7 @@ func exec(ctx context.Context, s *ServerConfig, singleServer, pingClient bool, c
 
 	// ssh utils session
 	sshSession := sshutils.NewSSHSession(session)
-	defer func() {
-		_ = sshSession.Close()
-	}()
+	defer func() { _ = sshSession.Close() }()
 
 	// exec cmd
 	go sshSession.PipeExec(cmd)
@@ -134,13 +127,6 @@ func exec(ctx context.Context, s *ServerConfig, singleServer, pingClient bool, c
 			if singleServer {
 				_, _ = io.Copy(os.Stdout, sshSession.Stdout)
 			} else {
-				f := GetColorFuncName()
-				t, err := template.New("").Funcs(ColorsFuncMap).Parse(fmt.Sprintf(`{{ .Name | %s}}{{ ":" | %s}}  {{ .Value }}`, f, f))
-				if err != nil {
-					errCh <- err
-					return
-				}
-
 				buf := bufio.NewReader(sshSession.Stdout)
 				for {
 					line, err := buf.ReadString('\n')
@@ -154,13 +140,7 @@ func exec(ctx context.Context, s *ServerConfig, singleServer, pingClient bool, c
 					}
 
 					var output bytes.Buffer
-					err = t.Execute(&output, struct {
-						Name  string
-						Value string
-					}{
-						Name:  s.Name,
-						Value: line,
-					})
+					err = colorOutExecute(&output, ColorLine{s.Name, line})
 					if err != nil {
 						errCh <- err
 						break
@@ -174,10 +154,11 @@ func exec(ctx context.Context, s *ServerConfig, singleServer, pingClient bool, c
 	select {
 	case <-ctx.Done():
 		_ = sshClient.Close()
+		close(errCh)
 	case <-sshSession.Done():
 		_ = sshClient.Close()
+		close(errCh)
 	}
 
 	errWg.Wait()
-
 }

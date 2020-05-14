@@ -1,4 +1,4 @@
-package mmh
+package core
 
 import (
 	"fmt"
@@ -24,9 +24,7 @@ func Install(dir string) {
 		cmd.Stdout = os.Stdout
 		checkAndExit(cmd.Run())
 	} else {
-
 		Uninstall(dir)
-
 		f, err := os.Open(currentPath)
 		checkAndExit(err)
 		defer func() { _ = f.Close() }()

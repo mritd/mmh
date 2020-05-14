@@ -1,4 +1,4 @@
-package mmh
+package core
 
 import (
 	"fmt"
@@ -8,7 +8,6 @@ import (
 
 // Tunnel will open an ssh tcp tunnel between the left address and the right address
 func Tunnel(name, leftAddr, rightAddr string, reverse bool) {
-
 	if !reverse {
 		fmt.Printf("mmh tunnel listen at %s\n", leftAddr)
 		listener, err := net.Listen("tcp", leftAddr)
@@ -23,7 +22,6 @@ func Tunnel(name, leftAddr, rightAddr string, reverse bool) {
 			}
 
 			fmt.Printf("new connection %s => [%s] => %s\n", leftConn.LocalAddr(), name, rightAddr)
-
 			server, err := findServerByName(name)
 			if err != nil {
 				fmt.Println("😱 " + err.Error())
@@ -60,7 +58,6 @@ func Tunnel(name, leftAddr, rightAddr string, reverse bool) {
 			}
 
 			fmt.Printf("new connection %s:%s => [local] => %s\n", name, rightConn.RemoteAddr(), leftAddr)
-
 			leftConn, err := net.Dial("tcp", leftAddr)
 			if err != nil {
 				fmt.Println("😱 " + err.Error())
