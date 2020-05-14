@@ -74,10 +74,19 @@ func LoadConfig() {
 		if strings.HasPrefix(ConfigDir, "~") {
 			ConfigDir = strings.Replace(ConfigDir, "~", home, 1)
 		}
+
 		// check config dir if it not exist
-		if _, err := os.Stat(ConfigDir); !checkErr(err) {
+		f, err := os.Lstat(ConfigDir)
+		if err != nil {
 			return
 		}
+
+		// check config dir is symlink. filepath Walk does not follow symbolic links
+		if f.Mode()&os.ModeSymlink != 0 {
+			ConfigDir, err = os.Readlink(ConfigDir)
+			checkAndExit(err)
+		}
+
 		// get current config
 		currentCfgStoreFile := filepath.Join(ConfigDir, CurrentConfigStoreFile)
 		bs, err := ioutil.ReadFile(currentCfgStoreFile)
