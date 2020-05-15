@@ -10,10 +10,10 @@ all:
                     -X 'github.com/mritd/mmh/cmd.CommitID=${COMMIT_SHA1}'"
 
 release: all
-	ghr -u mritd -t $(GITHUB_RELEASE_TOKEN) -replace -recreate --debug ${BUILD_VERSION} dist
+	ghr -u mritd -t $(GITHUB_TOKEN) -replace -recreate --debug ${BUILD_VERSION} dist
 
 pre-release: all
-	ghr -u mritd -t $(GITHUB_RELEASE_TOKEN) -replace -recreate -prerelease --debug ${BUILD_VERSION} dist
+	ghr -u mritd -t $(GITHUB_TOKEN) -replace -recreate -prerelease --debug ${BUILD_VERSION} dist
 
 clean:
 	rm -rf dist
@@ -23,10 +23,9 @@ install:
                          -X 'github.com/mritd/mmh/cmd.BuildDate=${BUILD_DATE}' \
                          -X 'github.com/mritd/mmh/cmd.CommitID=${COMMIT_SHA1}'"
 
-.PHONY : all release pre-release clean install
+.PHONY: all release pre-release clean install
 
 .EXPORT_ALL_VARIABLES:
 
 GO111MODULE = on
-GOPROXY = https://goproxy.io
-GOSUMDB = sum.golang.google.cn
+GOPROXY = https://goproxy.cn
