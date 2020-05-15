@@ -23,19 +23,21 @@ func mergeTags(tags []string) string {
 }
 
 func checkAndExit(err error) {
+	printErr(err)
 	if err != nil {
-		fmt.Println("😱 " + err.Error())
 		os.Exit(1)
 	}
 }
 
 func checkErr(err error) bool {
+	printErr(err)
+	return err == nil
+}
+
+func printErr(err error) {
 	if err != nil {
 		fmt.Println("😱 " + err.Error())
-		return false
 	}
-
-	return true
 }
 
 func shortenString(str string, n int) string {

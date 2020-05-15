@@ -143,7 +143,7 @@ func SingleLogin(name string) {
 		setTmuxWindowName(s.Name, "false")
 		defer setTmuxWindowName(winName, s.TmuxAutoRename)
 	}
-	checkAndExit(s.Terminal())
+	printErr(s.Terminal())
 }
 
 // InteractiveLogin interactive login server
