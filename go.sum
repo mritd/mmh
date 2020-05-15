@@ -73,8 +73,8 @@ github.com/mitchellh/go-homedir v1.0.0/go.mod h1:SfyaCUpYCn1Vlf4IUYiD9fPX4A5wJrk
 github.com/mitchellh/go-homedir v1.1.0 h1:lukF9ziXFxDFPkA1vsr5zpc1XuPDn/wFntq5mG+4E0Y=
 github.com/mitchellh/go-homedir v1.1.0/go.mod h1:SfyaCUpYCn1Vlf4IUYiD9fPX4A5wJrkLzIz1N1q0pr0=
 github.com/mitchellh/mapstructure v1.1.2/go.mod h1:FVVH3fgwuzCH5S8UJGiWEs2h04kUh9fWfEaFds41c1Y=
-github.com/mritd/promptx v0.0.0-20191026063319-27892afe8e3a h1:5qEj0ckRnAOSgou3G0cDTB/7YRUF5Uhkq26N6nMD7Fs=
-github.com/mritd/promptx v0.0.0-20191026063319-27892afe8e3a/go.mod h1:3fywjHX11nsf0f4lrmJ5zuwdxTEn6qh5v3LV2Nt8nVc=
+github.com/mritd/promptx v0.0.0-20200515061936-66e281bd3c15 h1:WFAv83HnY9yHpQWeDmGpZnuSiEVlCB4vBXSHvHteTOo=
+github.com/mritd/promptx v0.0.0-20200515061936-66e281bd3c15/go.mod h1:3fywjHX11nsf0f4lrmJ5zuwdxTEn6qh5v3LV2Nt8nVc=
 github.com/mritd/readline v0.0.0-20190919142632-e26f42a56c34 h1:BPeB6AxncRXhTouiFcv++Gso1IOki6rCVhkEE36DI6I=
 github.com/mritd/readline v0.0.0-20190919142632-e26f42a56c34/go.mod h1:RCmOeHfgzDd3ofo+QDJZ4tjCOv3SWN8WPk3piOfjqiU=
 github.com/mritd/sshutils v0.0.0-20190114085520-a41b046f5b5c h1:FdhxmHv/wNJX707nfJA3W3mjJGX6/KVyiFH77OHC8qY=
