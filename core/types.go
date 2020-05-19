@@ -41,7 +41,6 @@ type ServerConfig struct {
 	ServerAliveInterval time.Duration `yaml:"server_alive_interval"`
 	TmuxSupport         string        `yaml:"tmux_support"`
 	TmuxAutoRename      string        `yaml:"tmux_auto_rename"`
-	proxyCount          int
 }
 
 // server tags
@@ -136,9 +135,9 @@ func (info ConfigInfo) Swap(i, j int) {
 func BasicServerExample() BasicServerConfig {
 	home, _ := homedir.Dir()
 	return BasicServerConfig{
-		User:                "root",
-		Port:                22,
-		PrivateKey:          filepath.Join(home, ".ssh", "id_rsa"),
+		User:       "root",
+		Port:       22,
+		PrivateKey: filepath.Join(home, ".ssh", "id_rsa"),
 	}
 }
 

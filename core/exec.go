@@ -84,7 +84,7 @@ func Exec(tagOrName, cmd string, singleServer, pingClient bool) {
 // since multiple tasks are executed async, the error is returned using channel
 func exec(ctx context.Context, s *ServerConfig, singleServer, pingClient bool, cmd string, errCh chan error) {
 	// get ssh client
-	sshClient, err := s.sshClient(pingClient, false)
+	sshClient, err := s.sshClient(pingClient)
 	if err != nil {
 		errCh <- err
 		return

@@ -13,30 +13,20 @@ func Tunnel(name, leftAddr, rightAddr string, reverse bool) {
 		listener, err := net.Listen("tcp", leftAddr)
 		checkAndExit(err)
 		defer func() { _ = listener.Close() }()
+		server, err := findServerByName(name)
+		checkAndExit(err)
+		client, err := server.sshClient(false)
+		checkAndExit(err)
 
 		for {
 			leftConn, err := listener.Accept()
-			if err != nil {
-				fmt.Println("😱 " + err.Error())
+			if !checkErr(err) {
 				continue
 			}
 
 			fmt.Printf("new connection %s => [%s] => %s\n", leftConn.LocalAddr(), name, rightAddr)
-			server, err := findServerByName(name)
-			if err != nil {
-				fmt.Println("😱 " + err.Error())
-				continue
-			}
-
-			client, err := server.sshClient(false, true)
-			if err != nil {
-				fmt.Println("😱 " + err.Error())
-				continue
-			}
-
 			rightConn, err := client.Dial("tcp", rightAddr)
-			if err != nil {
-				fmt.Println("😱 " + err.Error())
+			if !checkErr(err) {
 				continue
 			}
 
@@ -46,21 +36,20 @@ func Tunnel(name, leftAddr, rightAddr string, reverse bool) {
 		fmt.Printf("mmh reverse tunnel at [%s] %s\n", name, rightAddr)
 		server, err := findServerByName(name)
 		checkAndExit(err)
-		client, err := server.sshClient(false, true)
+		client, err := server.sshClient(false)
+		checkAndExit(err)
 		listener, err := client.Listen("tcp", rightAddr)
 		checkAndExit(err)
 
 		for {
 			rightConn, err := listener.Accept()
-			if err != nil {
-				fmt.Println("😱 " + err.Error())
+			if !checkErr(err) {
 				continue
 			}
 
 			fmt.Printf("new connection %s:%s => [local] => %s\n", name, rightConn.RemoteAddr(), leftAddr)
 			leftConn, err := net.Dial("tcp", leftAddr)
-			if err != nil {
-				fmt.Println("😱 " + err.Error())
+			if !checkErr(err) {
 				continue
 			}
 			go connCopy(leftConn, rightConn)
@@ -70,7 +59,6 @@ func Tunnel(name, leftAddr, rightAddr string, reverse bool) {
 }
 
 func connCopy(rc, lc net.Conn) {
-
 	defer func() {
 		_ = rc.Close()
 		_ = lc.Close()
@@ -78,13 +66,9 @@ func connCopy(rc, lc net.Conn) {
 
 	go func() {
 		_, err := io.Copy(rc, lc)
-		if err != nil {
-			fmt.Println(err)
-		}
+		printErr(err)
 	}()
 
 	_, err := io.Copy(lc, rc)
-	if err != nil {
-		fmt.Println(err)
-	}
+	printErr(err)
 }

@@ -15,9 +15,13 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
+func (s *ServerConfig) sshClient(secondLast bool) (*ssh.Client, error) {
+	return s.ssh(secondLast, 0)
+}
+
 // return a ssh client intense point
 // if secondLast is true, return the second last server
-func (s *ServerConfig) sshClient(secondLast bool, ignoreProxyCheck bool) (*ssh.Client, error) {
+func (s *ServerConfig) ssh(secondLast bool, proxyCount int) (*ssh.Client, error) {
 	sshConfig := &ssh.ClientConfig{
 		User:            s.User,
 		Auth:            s.authMethod(),
@@ -26,13 +30,10 @@ func (s *ServerConfig) sshClient(secondLast bool, ignoreProxyCheck bool) (*ssh.C
 	}
 
 	if s.Proxy != "" {
-		// check max proxy
-		if !ignoreProxyCheck {
-			if s.proxyCount > currentConfig.MaxProxy {
-				return nil, errors.New(fmt.Sprintf("too many proxy server, proxy server must be <= %d", currentConfig.MaxProxy))
-			} else {
-				s.proxyCount++
-			}
+		if proxyCount > currentConfig.MaxProxy {
+			return nil, errors.New(fmt.Sprintf("too many proxy server, proxy server must be <= %d", currentConfig.MaxProxy))
+		} else {
+			proxyCount++
 		}
 
 		// find proxy server
@@ -41,7 +42,7 @@ func (s *ServerConfig) sshClient(secondLast bool, ignoreProxyCheck bool) (*ssh.C
 
 		fmt.Printf("🔑 using proxy [%s], connect to => %s\n", s.Proxy, s.Name)
 		// recursive connect
-		proxyClient, err := proxyServer.sshClient(false, ignoreProxyCheck)
+		proxyClient, err := proxyServer.ssh(false, proxyCount)
 		if err != nil {
 			return nil, err
 		}
@@ -61,7 +62,6 @@ func (s *ServerConfig) sshClient(secondLast bool, ignoreProxyCheck bool) (*ssh.C
 		return ssh.NewClient(ncc, channel, request), nil
 
 	} else {
-
 		if secondLast {
 			return nil, nil
 		} else {
@@ -124,7 +124,7 @@ func password(password string) ssh.AuthMethod {
 
 // Terminal start a ssh terminal
 func (s *ServerConfig) Terminal() error {
-	sshClient, err := s.sshClient(false, false)
+	sshClient, err := s.sshClient(false)
 	if err != nil {
 		return err
 	}
