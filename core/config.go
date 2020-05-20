@@ -78,9 +78,7 @@ func LoadConfig() {
 
 		// check config dir if it not exist
 		f, err := os.Lstat(configDir)
-		if err != nil {
-			return
-		}
+		checkAndExit(err)
 
 		// check config dir is symlink. filepath Walk does not follow symbolic links
 		if f.Mode()&os.ModeSymlink != 0 {
