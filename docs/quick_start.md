@@ -1,8 +1,12 @@
 # 快速开始
 
+- [如何安装](#如何安装)
+- [如何使用](#如何使用)
+- [配置调整](#配置调整)
+
 ## 如何安装
 
-目前官方仓库提供了 mac、linux 的预编译二进制文件，用户可以直接下载并执行安装命令即可
+目前官方仓库提供了 mac、linux 的预编译二进制文件，你可以直接下载并安装
 
 ``` sh
 # 请自行查看仓库最新 Release 版本号并替换此版本号
@@ -11,7 +15,7 @@ export MMH_VERSION=v1.5.2
 wget https://github.com/mritd/mmh/releases/download/${MMH_VERSION}/mmh_darwin_amd64
 # 增加可执行权限
 chmod +x mmh_darwin_amd64
-# 安装(安装需要输入登录密码)
+# 安装(安装时需要输入 sudo 密码，安装完成后本文件可删除)
 ./mmh_darwin_amd64 install
 ```
 
