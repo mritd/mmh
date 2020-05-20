@@ -57,10 +57,10 @@ func getServers() Servers {
 		if s.ServerAliveInterval == 0 {
 			s.ServerAliveInterval = basicConfig.Basic.ServerAliveInterval
 		}
-		if s.TmuxSupport == "" {
+		if !s.TmuxSupport && basicConfig.Basic.TmuxSupport {
 			s.TmuxSupport = basicConfig.Basic.TmuxSupport
 		}
-		if s.TmuxAutoRename == "" {
+		if !s.TmuxAutoRename && basicConfig.Basic.TmuxAutoRename {
 			s.TmuxAutoRename = basicConfig.Basic.TmuxAutoRename
 		}
 		servers = append(servers, s)
@@ -86,10 +86,10 @@ func getServers() Servers {
 			if s.ServerAliveInterval == 0 {
 				s.ServerAliveInterval = currentConfig.Basic.ServerAliveInterval
 			}
-			if s.TmuxSupport == "" {
+			if !s.TmuxSupport && basicConfig.Basic.TmuxSupport {
 				s.TmuxSupport = basicConfig.Basic.TmuxSupport
 			}
-			if s.TmuxAutoRename == "" {
+			if !s.TmuxAutoRename && basicConfig.Basic.TmuxAutoRename {
 				s.TmuxAutoRename = basicConfig.Basic.TmuxAutoRename
 			}
 			servers = append(servers, s)
@@ -138,9 +138,9 @@ func SingleLogin(name string) {
 	s, err := findServerByName(name)
 	checkAndExit(err)
 	var winName string
-	if s.TmuxSupport == "true" {
+	if s.TmuxSupport {
 		winName = getTmuxWindowName()
-		setTmuxWindowName(s.Name, "false")
+		setTmuxWindowName(s.Name, false)
 		defer setTmuxWindowName(winName, s.TmuxAutoRename)
 	}
 	printErr(s.Terminal())
@@ -168,10 +168,10 @@ func InteractiveLogin() {
 	SingleLogin(currentConfig.Servers[s.Run()].Name)
 }
 
-func setTmuxWindowName(name, autoRename string) {
+func setTmuxWindowName(name string, autoRename bool) {
 	cmd := osexec.Command("tmux", "rename-window", name)
 	checkAndExit(cmd.Run())
-	if autoRename != "false" && autoRename != "off" {
+	if autoRename {
 		cmd = osexec.Command("tmux", "set-window", "automatic-rename", "on")
 		checkAndExit(cmd.Run())
 	}

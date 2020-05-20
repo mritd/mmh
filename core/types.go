@@ -19,14 +19,15 @@ type BasicServerConfig struct {
 	PrivateKeyPassword  string        `yaml:"private_key_password"`
 	Port                int           `yaml:"port"`
 	ServerAliveInterval time.Duration `yaml:"server_alive_interval"`
-	TmuxSupport         string        `yaml:"tmux_support"`
-	TmuxAutoRename      string        `yaml:"tmux_auto_rename"`
+	TmuxSupport         bool          `yaml:"tmux_support"`
+	TmuxAutoRename      bool          `yaml:"tmux_auto_rename"`
 }
 
 // server config
 type ServerConfig struct {
 	Name                string        `yaml:"name"`
-	Tags                []string      `yaml:"tags"`
+	Address             string        `yaml:"address"`
+	Port                int           `yaml:"port"`
 	User                string        `yaml:"user"`
 	Password            string        `yaml:"password"`
 	SuRoot              bool          `yaml:"su_root"`
@@ -35,12 +36,11 @@ type ServerConfig struct {
 	RootPassword        string        `yaml:"root_password"`
 	PrivateKey          string        `yaml:"private_key"`
 	PrivateKeyPassword  string        `yaml:"private_key_password"`
-	Address             string        `yaml:"address"`
-	Port                int           `yaml:"port"`
 	Proxy               string        `yaml:"proxy"`
 	ServerAliveInterval time.Duration `yaml:"server_alive_interval"`
-	TmuxSupport         string        `yaml:"tmux_support"`
-	TmuxAutoRename      string        `yaml:"tmux_auto_rename"`
+	TmuxSupport         bool          `yaml:"tmux_support"`
+	TmuxAutoRename      bool          `yaml:"tmux_auto_rename"`
+	Tags                []string      `yaml:"tags"`
 }
 
 // server tags
