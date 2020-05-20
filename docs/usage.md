@@ -13,13 +13,13 @@ mmh 目前只支持 mac 和 linux 平台，对于 windows 用户在 WSL2 ubuntu 
 仅会将原始二进制文件复制一份到安装目录(默认 `/usr/local/bin`)，然后会采用软链接的方式创建其他快捷命令。**
 目前 mmh 已包含命令列表以及软链接如下:
 
-- **`mmh cf` -> `mcf`: 用于切换 context，同时包含一个别名为 `mcx` 的命令**
-- **`mmh server` -> `mcs`: 列出当前 context 中的服务器**
-- **`mmh go` -> `mgo`: 直接登录某一台服务器**
-- **`mmh exec` -> `mec`: 在远端服务器(或一组服务器)上执行命令**
-- **`mmh cp` -> `mcp`: 用于本地与远端服务器(或一组服务器)之间复制文件**
-- **`mmh ping` -> `mping`: 针对远端服务器执行 ping 检测**
-- **`mmh tun` -> `mtun`: 在本地与远端服务器之间创建 tcp 隧道，支持反向创建**
+- **`mmh cf -> mcf`: 用于切换 context，同时包含一个别名为 `mcx` 的命令**
+- **`mmh server -> mcs`: 列出当前 context 中的服务器**
+- **`mmh go -> mgo`: 直接登录某一台服务器**
+- **`mmh exec -> mec`: 在远端服务器(或一组服务器)上执行命令**
+- **`mmh cp -> mcp`: 用于本地与远端服务器(或一组服务器)之间复制文件**
+- **`mmh ping -> mping`: 针对远端服务器执行 ping 检测**
+- **`mmh tun -> mtun`: 在本地与远端服务器之间创建 tcp 隧道，支持反向创建**
 
 其他 un/install 等命令为辅助命令，暂不做详细说明。
 
@@ -108,3 +108,5 @@ mtun -l 127.0.0.1:8080 -r baidu.com:80 prod11
 # prod11 -> 跳板机n -> 本地 -> baidu.com:80
 mtun -l baidu.com:80 -r 127.0.0.1:8080 --reverse prod11
 ```
+
+[首页](.) | [上一页](config) | [下一页](build)
