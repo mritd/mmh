@@ -12,7 +12,7 @@ import (
 )
 
 // findServerByName find server from config by server name
-func findServerByName(name string) (*ServerConfig, error) {
+func findServerByName(name string) (*Server, error) {
 	for _, s := range getServers() {
 		if s.Name == name {
 			return s, nil
@@ -22,7 +22,7 @@ func findServerByName(name string) (*ServerConfig, error) {
 }
 
 // findServersByTag find servers from config by server tag
-func findServersByTag(tag string) Servers {
+func findServersByTag(tag string) (Servers, error) {
 	var servers Servers
 	for _, s := range getServers() {
 		tmpServer := s
@@ -32,7 +32,10 @@ func findServersByTag(tag string) Servers {
 			}
 		}
 	}
-	return servers
+	if len(servers) == 0 {
+		return nil, errors.New("server not found")
+	}
+	return servers, nil
 }
 
 // getServers merge basic context servers and current context servers

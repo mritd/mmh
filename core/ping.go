@@ -17,6 +17,6 @@ func Ping(name string) {
 		cmd.Stdout = os.Stdout
 		checkAndExit(cmd.Run())
 	} else {
-		Exec(name, "ping "+server.Address, true, true)
+		Exec("ping "+server.Address, name, true, true)
 	}
 }

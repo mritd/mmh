@@ -19,7 +19,7 @@ var execCmd = &cobra.Command{
 			_ = cmd.Help()
 		} else {
 			cmd := strings.Join(args[1:], " ")
-			core.Exec(args[0], cmd, singleServer, false)
+			core.Exec(cmd, args[0], singleServer, false)
 		}
 	},
 }

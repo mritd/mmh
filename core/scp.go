@@ -49,15 +49,15 @@ func runCopy(args []string, multiServer bool) error {
 		// multi server copy
 		if multiServer {
 			// multi server copy
-			servers := findServersByTag(serverOrTag)
-			if len(servers) == 0 {
-				return errors.New("tagged server not found")
+			servers, err := findServersByTag(serverOrTag)
+			if err != nil {
+				return err
 			}
 
 			var wg sync.WaitGroup
 			wg.Add(len(servers))
 			for _, s := range servers {
-				go func(s *ServerConfig, args []string) {
+				go func(s *Server, args []string) {
 					defer wg.Done()
 
 					client, err := s.sshClient(false)

@@ -24,7 +24,7 @@ type BasicServerConfig struct {
 }
 
 // server config
-type ServerConfig struct {
+type Server struct {
 	Name                string        `yaml:"name"`
 	Address             string        `yaml:"address"`
 	Port                int           `yaml:"port"`
@@ -47,7 +47,7 @@ type ServerConfig struct {
 type Tags []string
 
 // mmh servers
-type Servers []*ServerConfig
+type Servers []*Server
 
 func (servers Servers) Len() int {
 	return len(servers)

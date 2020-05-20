@@ -3,11 +3,8 @@ package core
 import (
 	"bufio"
 	"bytes"
-	"io"
-
-	"github.com/fatih/color"
-
 	"fmt"
+	"io"
 
 	"sync"
 
@@ -22,7 +19,7 @@ import (
 )
 
 // Exec batch execution of commands
-func Exec(tagOrName, cmd string, singleServer, pingClient bool) {
+func Exec(cmd, tagOrName string, single, ping bool) {
 	// use context to manage goroutine
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -39,126 +36,91 @@ func Exec(tagOrName, cmd string, singleServer, pingClient bool) {
 	}()
 
 	// single server exec
-	if singleServer {
+	if single {
 		server, err := findServerByName(tagOrName)
 		checkAndExit(err)
-
-		var errCh = make(chan error, 1)
-		exec(ctx, server, singleServer, pingClient, cmd, errCh)
-		select {
-		case err, ok := <-errCh:
-			if ok {
-				_, _ = color.New(color.BgRed, color.FgHiWhite).Print(err.Error() + "\n")
-			}
-		}
+		err = exec(ctx, cmd, server, single, ping)
+		printErr(err)
 	} else {
 		// multiple servers
-		servers := findServersByTag(tagOrName)
-		if len(servers) == 0 {
-			Exit("tagged server not found", 1)
-		}
+		servers, err := findServersByTag(tagOrName)
+		checkAndExit(err)
 
 		// create goroutine
-		var serverWg sync.WaitGroup
-		serverWg.Add(len(servers))
+		var execWg sync.WaitGroup
+		execWg.Add(len(servers))
 		for _, s := range servers {
 			// async exec
 			// because it takes time for ssh to establish a connection
-			go func(s *ServerConfig) {
-				defer serverWg.Done()
-				var errCh = make(chan error, 1)
-				exec(ctx, s, singleServer, false, cmd, errCh)
-				select {
-				case err, ok := <-errCh:
-					if ok {
-						_, _ = color.New(color.BgRed, color.FgHiWhite).Printf("%s:  %s\n", s.Name, err)
-					}
-				}
+			go func(s *Server) {
+				defer execWg.Done()
+				err = exec(ctx, cmd, s, single, false)
+				printErrWithPrefix(s.Name, err)
 			}(s)
 		}
-		serverWg.Wait()
+		execWg.Wait()
 	}
 }
 
 // single server execution command
 // since multiple tasks are executed async, the error is returned using channel
-func exec(ctx context.Context, s *ServerConfig, singleServer, pingClient bool, cmd string, errCh chan error) {
+func exec(ctx context.Context, cmd string, s *Server, single, ping bool) error {
 	// get ssh client
-	sshClient, err := s.sshClient(pingClient)
+	sshClient, err := s.sshClient(ping)
 	if err != nil {
-		errCh <- err
-		return
+		return err
 	}
 	defer func() { _ = sshClient.Close() }()
 
 	// get ssh session
 	session, err := sshClient.NewSession()
 	if err != nil {
-		errCh <- err
-		return
+		return err
 	}
 
 	// ssh utils session
 	sshSession := sshutils.NewSSHSession(session)
 	defer func() { _ = sshSession.Close() }()
-
-	// exec cmd
-	go sshSession.PipeExec(cmd)
-
-	// copy error
-	var errWg sync.WaitGroup
-	errWg.Add(1)
 	go func() {
-		// ensure that the error message is successfully output
-		defer errWg.Done()
 		select {
-		case err, ok := <-sshSession.Error():
-			if ok {
-				errCh <- err
-			}
+		case <-ctx.Done():
+			_ = sshSession.Close()
+			_ = sshClient.Close()
 		}
 	}()
 
 	// print to stdout
 	go func() {
-		select {
-		case <-sshSession.Ready():
-			// read from sshSession.Stdout and print to os.stdout
-			if singleServer {
-				_, _ = io.Copy(os.Stdout, sshSession.Stdout)
-			} else {
-				buf := bufio.NewReader(sshSession.Stdout)
-				for {
-					line, err := buf.ReadString('\n')
-					if err != nil {
-						if err == io.EOF {
-							break
-						} else {
-							errCh <- err
-							break
-						}
-					}
+		// wait session ready
+		<-sshSession.Ready()
 
-					var output bytes.Buffer
-					err = colorOutExecute(&output, ColorLine{s.Name, line})
-					if err != nil {
-						errCh <- err
+		// read from sshSession.Stdout and print to os.stdout
+		if single {
+			_, _ = io.Copy(os.Stdout, sshSession.Stdout)
+		} else {
+			buf := bufio.NewReader(sshSession.Stdout)
+			var output bytes.Buffer
+			for {
+				line, err := buf.ReadString('\n')
+				if err != nil {
+					if err == io.EOF {
+						break
+					} else {
+						printErr(err)
 						break
 					}
+				}
+
+				err = colorOutput(&output, ColorLine{s.Name, line})
+				if err != nil {
+					printErr(err)
+				} else {
 					fmt.Print(output.String())
 				}
+				output.Reset()
 			}
 		}
 	}()
 
-	select {
-	case <-ctx.Done():
-		_ = sshClient.Close()
-		close(errCh)
-	case <-sshSession.Done():
-		_ = sshClient.Close()
-		close(errCh)
-	}
-
-	errWg.Wait()
+	return sshSession.PipeExec(cmd)
 }

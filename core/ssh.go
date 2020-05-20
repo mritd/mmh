@@ -15,13 +15,13 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-func (s *ServerConfig) sshClient(secondLast bool) (*ssh.Client, error) {
+func (s *Server) sshClient(secondLast bool) (*ssh.Client, error) {
 	return s.ssh(secondLast, 0)
 }
 
 // return a ssh client intense point
 // if secondLast is true, return the second last server
-func (s *ServerConfig) ssh(secondLast bool, proxyCount int) (*ssh.Client, error) {
+func (s *Server) ssh(secondLast bool, proxyCount int) (*ssh.Client, error) {
 	sshConfig := &ssh.ClientConfig{
 		User:            s.User,
 		Auth:            s.authMethod(),
@@ -71,7 +71,7 @@ func (s *ServerConfig) ssh(secondLast bool, proxyCount int) (*ssh.Client, error)
 }
 
 // authMethod return ssh auth method
-func (s *ServerConfig) authMethod() []ssh.AuthMethod {
+func (s *Server) authMethod() []ssh.AuthMethod {
 	var ams []ssh.AuthMethod
 
 	if s.Password != "" {
@@ -81,7 +81,7 @@ func (s *ServerConfig) authMethod() []ssh.AuthMethod {
 	if s.PrivateKey != "" {
 		pkAuth, err := privateKeyFile(s.PrivateKey, s.PrivateKeyPassword)
 		if err != nil {
-			fmt.Println(err)
+			printErr(err)
 		} else {
 			ams = append(ams, pkAuth)
 		}
@@ -123,7 +123,7 @@ func password(password string) ssh.AuthMethod {
 }
 
 // Terminal start a ssh terminal
-func (s *ServerConfig) Terminal() error {
+func (s *Server) Terminal() error {
 	sshClient, err := s.sshClient(false)
 	if err != nil {
 		return err

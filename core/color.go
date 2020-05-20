@@ -54,7 +54,7 @@ type ColorLine struct {
 	Value  string
 }
 
-func colorOutExecute(wr io.Writer, line ColorLine) error {
+func colorOutput(wr io.Writer, line ColorLine) error {
 	colorTpl, ok := colorOutMap[line.Prefix]
 	if !ok {
 		colorName := colorName()
