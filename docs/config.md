@@ -134,3 +134,5 @@ tags:
 
 以上配置中执行 `mec prod ls` 命令时，mmh 通过搜索配置文件得知 `prod11`、`prod12` 中存在 `prod` 这个 tag，
 然后 mmh 将会并发的在这两台服务器上执行 `ls` 命令。
+
+[首页](.) | [上一页](quick_start) | [下一页](usage)
