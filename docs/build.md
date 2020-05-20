@@ -15,3 +15,5 @@ make
 # 仅仅安装到 ${GOPATH}/bin
 make install
 ```
+
+[首页](.) | [上一页](usage)
