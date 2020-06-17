@@ -103,7 +103,7 @@ func exec(ctx context.Context, cmd string, s *Server, single, ping bool) error {
 			for {
 				line, err := buf.ReadString('\n')
 				if err != nil {
-					if err == io.EOF {
+					if err == io.EOF || err == io.ErrClosedPipe {
 						break
 					} else {
 						printErr(err)
