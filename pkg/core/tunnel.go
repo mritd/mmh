@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"io"
 	"net"
+
+	"github.com/mritd/mmh/pkg/common"
 )
 
 // Tunnel will open an ssh tcp tunnel between the left address and the right address
@@ -11,22 +13,22 @@ func Tunnel(name, leftAddr, rightAddr string, reverse bool) {
 	if !reverse {
 		fmt.Printf("mmh tunnel listen at %s\n", leftAddr)
 		listener, err := net.Listen("tcp", leftAddr)
-		checkAndExit(err)
+		common.CheckAndExit(err)
 		defer func() { _ = listener.Close() }()
 		server, err := findServerByName(name)
-		checkAndExit(err)
+		common.CheckAndExit(err)
 		client, err := server.sshClient(false)
-		checkAndExit(err)
+		common.CheckAndExit(err)
 
 		for {
 			leftConn, err := listener.Accept()
-			if !checkErr(err) {
+			if !common.CheckErr(err) {
 				continue
 			}
 
 			fmt.Printf("new connection %s => [%s] => %s\n", leftConn.LocalAddr(), name, rightAddr)
 			rightConn, err := client.Dial("tcp", rightAddr)
-			if !checkErr(err) {
+			if !common.CheckErr(err) {
 				continue
 			}
 
@@ -35,21 +37,21 @@ func Tunnel(name, leftAddr, rightAddr string, reverse bool) {
 	} else {
 		fmt.Printf("mmh reverse tunnel at [%s] %s\n", name, rightAddr)
 		server, err := findServerByName(name)
-		checkAndExit(err)
+		common.CheckAndExit(err)
 		client, err := server.sshClient(false)
-		checkAndExit(err)
+		common.CheckAndExit(err)
 		listener, err := client.Listen("tcp", rightAddr)
-		checkAndExit(err)
+		common.CheckAndExit(err)
 
 		for {
 			rightConn, err := listener.Accept()
-			if !checkErr(err) {
+			if !common.CheckErr(err) {
 				continue
 			}
 
 			fmt.Printf("new connection %s:%s => [local] => %s\n", name, rightConn.RemoteAddr(), leftAddr)
 			leftConn, err := net.Dial("tcp", leftAddr)
-			if !checkErr(err) {
+			if !common.CheckErr(err) {
 				continue
 			}
 			go connCopy(leftConn, rightConn)
@@ -66,9 +68,9 @@ func connCopy(rc, lc net.Conn) {
 
 	go func() {
 		_, err := io.Copy(rc, lc)
-		printErr(err)
+		common.PrintErr(err)
 	}()
 
 	_, err := io.Copy(lc, rc)
-	printErr(err)
+	common.PrintErr(err)
 }

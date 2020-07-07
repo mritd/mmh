@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/mritd/mmh/core"
+	"github.com/mritd/mmh/pkg/core"
 	"github.com/spf13/cobra"
 )
 
@@ -9,15 +9,13 @@ var installDir string
 
 var installCmd = &cobra.Command{
 	Use:   "install",
-	Short: "install",
-	Long:  "install mmh.",
+	Short: "install mmh",
 	Run:   func(cmd *cobra.Command, args []string) { core.Install(installDir) },
 }
 
 var uninstallCmd = &cobra.Command{
 	Use:   "uninstall",
-	Short: "uninstall",
-	Long:  "uninstall mmh.",
+	Short: "uninstall mmh",
 	Run:   func(cmd *cobra.Command, args []string) { core.Uninstall(installDir) },
 }
 

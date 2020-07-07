@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/mritd/mmh/core"
+	"github.com/mritd/mmh/pkg/core"
 	"github.com/spf13/cobra"
 )
 
@@ -11,8 +11,8 @@ var tunReverse bool
 var tunCmd = &cobra.Command{
 	Use:     "tun SERVER_NAME",
 	Aliases: []string{"mtun"},
-	Short:   "ssh tunnel",
-	Long:    "ssh tunnel.",
+	Short:   "sshutils tunnel",
+	Long:    "sshutils tunnel.",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 1 {
 			core.Tunnel(args[0], tunLeftAddr, tunRightAddr, tunReverse)

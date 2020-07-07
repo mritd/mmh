@@ -6,13 +6,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mitchellh/go-homedir"
-
-	"github.com/mritd/sshutils"
-
-	"fmt"
+	"github.com/mritd/mmh/pkg/sshutils"
 
 	"golang.org/x/crypto/ssh"
+
+	"github.com/mitchellh/go-homedir"
+
+	"github.com/mritd/mmh/pkg/common"
+
+	"fmt"
 )
 
 func (s *Server) sshClient(secondLast bool) (*ssh.Client, error) {
@@ -38,7 +40,7 @@ func (s *Server) ssh(secondLast bool, proxyCount int) (*ssh.Client, error) {
 
 		// find proxy server
 		proxyServer, err := findServerByName(s.Proxy)
-		checkAndExit(err)
+		common.CheckAndExit(err)
 
 		fmt.Printf("🔑 using proxy [%s], connect to => %s\n", s.Proxy, s.Name)
 		// recursive connect
@@ -81,7 +83,7 @@ func (s *Server) authMethod() []ssh.AuthMethod {
 	if s.PrivateKey != "" {
 		pkAuth, err := privateKeyFile(s.PrivateKey, s.PrivateKeyPassword)
 		if err != nil {
-			printErr(err)
+			common.PrintErr(err)
 		} else {
 			ams = append(ams, pkAuth)
 		}
@@ -152,6 +154,6 @@ func (s *Server) Terminal() error {
 		}
 		return sshSession.TerminalWithKeepAlive(s.ServerAliveInterval)
 	}
-	return sshSession.Terminal()
 
+	return sshSession.Terminal()
 }

@@ -1,4 +1,4 @@
-package core
+package common
 
 import (
 	"fmt"
@@ -54,7 +54,7 @@ type ColorLine struct {
 	Value  string
 }
 
-func colorOutput(wr io.Writer, line ColorLine) error {
+func ColorOutput(wr io.Writer, line ColorLine) error {
 	colorTpl, ok := colorOutMap[line.Prefix]
 	if !ok {
 		colorName := colorName()

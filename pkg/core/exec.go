@@ -6,7 +6,11 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/mritd/mmh/pkg/sshutils"
+
 	"sync"
+
+	"github.com/mritd/mmh/pkg/common"
 
 	"os"
 
@@ -14,8 +18,6 @@ import (
 
 	"os/signal"
 	"syscall"
-
-	"github.com/mritd/sshutils"
 )
 
 // Exec batch execution of commands
@@ -38,13 +40,13 @@ func Exec(cmd, tagOrName string, single, ping bool) {
 	// single server exec
 	if single {
 		server, err := findServerByName(tagOrName)
-		checkAndExit(err)
+		common.CheckAndExit(err)
 		err = exec(ctx, cmd, server, single, ping)
-		printErr(err)
+		common.PrintErr(err)
 	} else {
 		// multiple servers
 		servers, err := findServersByTag(tagOrName)
-		checkAndExit(err)
+		common.CheckAndExit(err)
 
 		// create goroutine
 		var execWg sync.WaitGroup
@@ -55,7 +57,7 @@ func Exec(cmd, tagOrName string, single, ping bool) {
 			go func(s *Server) {
 				defer execWg.Done()
 				err = exec(ctx, cmd, s, single, false)
-				printErrWithPrefix(s.Name, err)
+				common.PrintErrWithPrefix(s.Name, err)
 			}(s)
 		}
 		execWg.Wait()
@@ -78,7 +80,7 @@ func exec(ctx context.Context, cmd string, s *Server, single, ping bool) error {
 		return err
 	}
 
-	// ssh utils session
+	// sshutils utils session
 	sshSession := sshutils.NewSSHSession(session)
 	defer func() { _ = sshSession.Close() }()
 	go func() {
@@ -106,14 +108,14 @@ func exec(ctx context.Context, cmd string, s *Server, single, ping bool) error {
 					if err == io.EOF || err == io.ErrClosedPipe {
 						break
 					} else {
-						printErr(err)
+						common.PrintErr(err)
 						break
 					}
 				}
 
-				err = colorOutput(&output, ColorLine{s.Name, line})
+				err = common.ColorOutput(&output, common.ColorLine{Prefix: s.Name, Value: line})
 				if err != nil {
-					printErr(err)
+					common.PrintErr(err)
 				} else {
 					fmt.Print(output.String())
 				}

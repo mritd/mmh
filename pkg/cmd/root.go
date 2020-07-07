@@ -4,16 +4,18 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/mritd/mmh/core"
+	"github.com/mritd/mmh/pkg/common"
+	"github.com/mritd/mmh/pkg/core"
+
 	"github.com/spf13/cobra"
 )
 
 var rootCmd = &cobra.Command{
 	Use:              "mmh",
-	Short:            "a simple multi-server ssh tool",
-	Long:             "a simple multi-server ssh tool.",
+	Short:            "a simple multi-server sshutils tool",
+	Long:             "a simple multi-server sshutils tool.",
 	TraverseChildren: true,
-	Run:              func(cmd *cobra.Command, args []string) { core.InteractiveLogin() },
+	Run:              func(cmd *cobra.Command, args []string) { core.SingleInteractiveLogin() },
 }
 
 func Execute() {
@@ -30,7 +32,7 @@ func Execute() {
 	}
 
 	if err := rootCmd.Execute(); err != nil {
-		core.Exit(err.Error(), -1)
+		common.Exit(err.Error(), -1)
 	}
 }
 

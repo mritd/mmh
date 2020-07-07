@@ -7,11 +7,12 @@ import (
 
 	"github.com/fatih/color"
 
-	"github.com/mritd/sshutils"
+	"github.com/mritd/mmh/pkg/common"
+	"github.com/mritd/mmh/pkg/sshutils"
 )
 
 func Copy(args []string, multiServer bool) {
-	checkAndExit(runCopy(args, multiServer))
+	common.CheckAndExit(runCopy(args, multiServer))
 }
 
 func runCopy(args []string, multiServer bool) error {
@@ -27,7 +28,7 @@ func runCopy(args []string, multiServer bool) error {
 		remotePath := strings.Split(args[0], ":")[1]
 		localPath := args[1]
 		s, err := findServerByName(serverName)
-		checkAndExit(err)
+		common.CheckAndExit(err)
 
 		client, err := s.sshClient(false)
 		if err != nil {
@@ -84,7 +85,7 @@ func runCopy(args []string, multiServer bool) error {
 			wg.Wait()
 		} else {
 			s, err := findServerByName(serverOrTag)
-			checkAndExit(err)
+			common.CheckAndExit(err)
 			client, err := s.sshClient(false)
 			if err != nil {
 				return err
