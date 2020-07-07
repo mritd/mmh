@@ -11,7 +11,7 @@ var cfCmd = &cobra.Command{
 	Short:   "change current context",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
-
+			core.InteractiveSetConfig()
 		} else {
 			_ = cmd.Help()
 		}

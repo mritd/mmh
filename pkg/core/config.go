@@ -10,6 +10,8 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/mritd/promptx"
+
 	"github.com/mritd/mmh/pkg/common"
 
 	"github.com/mitchellh/go-homedir"
@@ -148,19 +150,19 @@ func SetConfig(name string) {
 	common.CheckAndExit(ioutil.WriteFile(filepath.Join(configDir, currentConfigStoreFile), []byte(name+".yaml"), 0644))
 }
 
-//func InteractiveSetConfig() {
-//	cfg := &promptx.SelectConfig{
-//		ActiveTpl:    `»  {{ .Name | cyan }}`,
-//		InactiveTpl:  `  {{ .Name | white }}`,
-//		SelectPrompt: "Config",
-//		SelectedTpl:  `{{ "» " | green }}{{ .Name | green }}`,
-//		DisPlaySize:  9,
-//		DetailsTpl: `
-//--------- Context ----------
-//{{ "Name:" | faint }} {{ .Name | faint }}
-//{{ "Path:" | faint }} {{ .Path | faint }}`,
-//	}
-//
-//	idx := (&promptx.Select{Items: configList, Config: cfg}).Run()
-//	SetConfig(strings.TrimSuffix(configList[idx].Name, ".yaml"))
-//}
+func InteractiveSetConfig() {
+	cfg := &promptx.SelectConfig{
+		ActiveTpl:    `»  {{ .Name | cyan }}`,
+		InactiveTpl:  `  {{ .Name | white }}`,
+		SelectPrompt: "Config",
+		SelectedTpl:  `{{ "» " | green }}{{ .Name | green }}`,
+		DisPlaySize:  9,
+		DetailsTpl: `
+--------- Context ----------
+{{ "Name:" | faint }} {{ .Name | faint }}
+{{ "Path:" | faint }} {{ .Path | faint }}`,
+	}
+
+	idx := (&promptx.Select{Items: configList, Config: cfg}).Run()
+	SetConfig(strings.TrimSuffix(configList[idx].Name, ".yaml"))
+}
