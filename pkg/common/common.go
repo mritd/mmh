@@ -82,3 +82,12 @@ func mergeTags(tags []string) string {
 func Template(tpl string) (*template.Template, error) {
 	return template.New("").Funcs(promptx.FuncMap).Parse(tpl)
 }
+
+func CMD(cmd string) (string, []string) {
+	cmds := strings.Fields(cmd)
+	if len(cmds) > 1 {
+		return cmds[0], cmds[1:]
+	} else {
+		return cmds[0], nil
+	}
+}

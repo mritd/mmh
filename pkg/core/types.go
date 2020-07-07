@@ -30,10 +30,7 @@ type Server struct {
 	Port                int           `yaml:"port"`
 	User                string        `yaml:"user"`
 	Password            string        `yaml:"password"`
-	SuRoot              bool          `yaml:"su_root"`
-	UseSudo             bool          `yaml:"use_sudo"`
-	NoPasswordSudo      bool          `yaml:"no_password_sudo"`
-	RootPassword        string        `yaml:"root_password"`
+	HookCmd             string        `yaml:"hook_cmd"`
 	PrivateKey          string        `yaml:"private_key"`
 	PrivateKeyPassword  string        `yaml:"private_key_password"`
 	Proxy               string        `yaml:"proxy"`
@@ -152,9 +149,6 @@ func ServersExample() Servers {
 			Address:             "10.10.4.11",
 			Port:                22,
 			Password:            "password",
-			SuRoot:              true,
-			UseSudo:             true,
-			RootPassword:        "root",
 			Proxy:               "prod12",
 			ServerAliveInterval: 20 * time.Second,
 		},

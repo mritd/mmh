@@ -7,6 +7,7 @@ import (
 	osexec "os/exec"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/mritd/mmh/pkg/common"
 	"github.com/mritd/promptx"
@@ -42,49 +43,52 @@ func findServersByTag(tag string) (Servers, error) {
 // getServers merge basic context servers and current context servers
 func getServers() Servers {
 	var servers Servers
-	bss := setDefaultValue(basicConfig.Servers)
+	bss := setDefaultValue(basicConfig.Servers, basicConfig.Basic)
 	sort.Sort(bss)
 	servers = append(servers, bss...)
 	if currentConfig.configPath != basicConfig.configPath {
-		css := setDefaultValue(currentConfig.Servers)
+		css := setDefaultValue(currentConfig.Servers, currentConfig.Basic)
 		sort.Sort(css)
 		servers = append(servers, css...)
 	}
 	return servers
 }
 
-func setDefaultValue(servers Servers) Servers {
+func setDefaultValue(servers Servers, basic BasicServerConfig) Servers {
 	var ss Servers
 	for _, s := range servers {
 		if s.User == "" {
-			s.User = basicConfig.Basic.User
+			s.User = basic.User
 			if s.User == "" {
 				s.User = "root"
 			}
 		}
 		if s.Password == "" {
-			s.Password = basicConfig.Basic.Password
+			s.Password = basic.Password
 		}
 		if s.PrivateKey == "" {
-			s.PrivateKey = basicConfig.Basic.PrivateKey
+			s.PrivateKey = basic.PrivateKey
 		}
 		if s.PrivateKeyPassword == "" {
-			s.PrivateKeyPassword = basicConfig.Basic.PrivateKeyPassword
+			s.PrivateKeyPassword = basic.PrivateKeyPassword
 		}
 		if s.Port == 0 {
-			s.Port = basicConfig.Basic.Port
+			s.Port = basic.Port
 			if s.Port == 0 {
 				s.Port = 22
 			}
 		}
 		if s.ServerAliveInterval == 0 {
-			s.ServerAliveInterval = basicConfig.Basic.ServerAliveInterval
+			s.ServerAliveInterval = basic.ServerAliveInterval
+			if s.ServerAliveInterval == 0 {
+				s.ServerAliveInterval = 10 * time.Second
+			}
 		}
-		if !s.TmuxSupport && basicConfig.Basic.TmuxSupport {
-			s.TmuxSupport = basicConfig.Basic.TmuxSupport
+		if !s.TmuxSupport && basic.TmuxSupport {
+			s.TmuxSupport = basic.TmuxSupport
 		}
-		if !s.TmuxAutoRename && basicConfig.Basic.TmuxAutoRename {
-			s.TmuxAutoRename = basicConfig.Basic.TmuxAutoRename
+		if !s.TmuxAutoRename && basic.TmuxAutoRename {
+			s.TmuxAutoRename = basic.TmuxAutoRename
 		}
 		ss = append(ss, s)
 	}

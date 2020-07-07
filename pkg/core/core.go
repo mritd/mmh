@@ -137,13 +137,7 @@ func (s *Server) Terminal() error {
 		return err
 	}
 
-	var sshSession *sshutils.SSHSession
-	if s.SuRoot {
-		sshSession = sshutils.NewSSHSessionWithRoot(session, s.UseSudo, s.NoPasswordSudo, s.RootPassword, s.Password)
-	} else {
-		sshSession = sshutils.NewSSHSession(session)
-	}
-
+	sshSession := sshutils.NewSSHSession(session, s.HookCmd)
 	defer func() { _ = sshSession.Close() }()
 
 	// keep alive
