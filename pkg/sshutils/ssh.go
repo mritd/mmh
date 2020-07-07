@@ -194,6 +194,7 @@ func (s *SSHSession) TerminalWithKeepAlive(serverAliveInterval time.Duration) er
 		go func() {
 			cs, args := common.CMD(s.hookCmd)
 			cmd := exec.Command(cs, args...)
+			cmd.Stdin = s.Stdout
 			cmd.Stdout = s.Stdin
 			common.PrintErr(cmd.Run())
 		}()
