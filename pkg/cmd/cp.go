@@ -22,7 +22,7 @@ var cpCmd = &cobra.Command{
 }
 
 func init() {
-	cpCmd.PersistentFlags().BoolVarP(&copy2Group, "group", "g", true, "multi-server copy")
+	cpCmd.PersistentFlags().BoolVarP(&copy2Group, "group", "g", false, "multi-server copy")
 	cpCmd.PersistentFlags().BoolVarP(&copyDir, "dir", "r", false, "useless flag")
 	rootCmd.AddCommand(cpCmd)
 }
