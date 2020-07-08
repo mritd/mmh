@@ -111,4 +111,4 @@ mtun -l 127.0.0.1:8080 -r baidu.com:80 prod11
 mtun -l baidu.com:80 -r 127.0.0.1:8080 --reverse prod11
 ```
 
-[首页](.) | [上一页](config) | [下一页](build)
+[首页](.) | [上一页](config) | [下一页](advanced)
