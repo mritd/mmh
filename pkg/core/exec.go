@@ -80,8 +80,8 @@ func exec(ctx context.Context, cmd string, s *Server, single, ping bool) error {
 		return err
 	}
 
-	// sshutils utils session
-	sshSession := sshutils.NewSSHSession(session, s.HookCmd)
+	// ssh utils session
+	sshSession := sshutils.NewSSHSession(session, "", false)
 	defer func() { _ = sshSession.Close() }()
 	go func() {
 		select {

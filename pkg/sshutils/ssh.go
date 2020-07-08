@@ -24,11 +24,12 @@ type SSHSession struct {
 	// for interactive shell, this channel will be read when shell ready
 	shellDoneCh chan int
 	// shell command exit message
-	exitMsg string
-	hookCmd string
-	Stdout  io.Reader
-	Stdin   io.Writer
-	Stderr  io.Reader
+	exitMsg    string
+	hookCmd    string
+	hookStdout bool
+	Stdout     io.Reader
+	Stdin      io.Writer
+	Stderr     io.Reader
 }
 
 func (s *SSHSession) Ready() <-chan int {
@@ -194,7 +195,9 @@ func (s *SSHSession) TerminalWithKeepAlive(serverAliveInterval time.Duration) er
 		go func() {
 			cs, args := common.CMD(s.hookCmd)
 			cmd := exec.Command(cs, args...)
-			cmd.Stdin = s.Stdout
+			if s.hookStdout {
+				cmd.Stdin = s.Stdout
+			}
 			cmd.Stdout = s.Stdin
 			common.PrintErr(cmd.Run())
 		}()
@@ -251,10 +254,11 @@ func (s *SSHSession) PipeExec(cmd string) error {
 }
 
 // New Session
-func NewSSHSession(session *ssh.Session, hookCmd string) *SSHSession {
+func NewSSHSession(session *ssh.Session, hookCmd string, hookStdout bool) *SSHSession {
 	return &SSHSession{
 		session:     session,
 		hookCmd:     hookCmd,
+		hookStdout:  hookStdout,
 		readyCh:     make(chan int, 1),
 		shellDoneCh: make(chan int, 1),
 	}

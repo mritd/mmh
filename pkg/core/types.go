@@ -31,6 +31,7 @@ type Server struct {
 	User                string        `yaml:"user"`
 	Password            string        `yaml:"password"`
 	HookCmd             string        `yaml:"hook_cmd"`
+	HookStdout          bool          `yaml:"hook_stdout"`
 	PrivateKey          string        `yaml:"private_key"`
 	PrivateKeyPassword  string        `yaml:"private_key_password"`
 	Proxy               string        `yaml:"proxy"`

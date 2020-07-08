@@ -137,7 +137,7 @@ func (s *Server) Terminal() error {
 		return err
 	}
 
-	sshSession := sshutils.NewSSHSession(session, s.HookCmd)
+	sshSession := sshutils.NewSSHSession(session, s.HookCmd, s.HookStdout)
 	defer func() { _ = sshSession.Close() }()
 
 	// keep alive
