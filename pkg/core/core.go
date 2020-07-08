@@ -1,10 +1,15 @@
 package core
 
 import (
+	"bytes"
 	"errors"
 	"io/ioutil"
 	"strings"
 	"time"
+
+	jsoniter "github.com/json-iterator/go"
+
+	osexec "os/exec"
 
 	"github.com/mritd/mmh/pkg/sshutils"
 
@@ -77,11 +82,11 @@ func (s *Server) authMethod() []ssh.AuthMethod {
 	var ams []ssh.AuthMethod
 
 	if s.Password != "" {
-		ams = append(ams, password(s.Password))
+		ams = append(ams, passwordAuth(s.Password))
 	}
 
 	if s.PrivateKey != "" {
-		pkAuth, err := privateKeyFile(s.PrivateKey, s.PrivateKeyPassword)
+		pkAuth, err := privateKeyFileAuth(s.PrivateKey, s.PrivateKeyPassword)
 		if err != nil {
 			common.PrintErr(err)
 		} else {
@@ -89,11 +94,15 @@ func (s *Server) authMethod() []ssh.AuthMethod {
 		}
 	}
 
+	if s.KeyboardAuthCmd != "" {
+		ams = append(ams, keyboardAuth(s.KeyboardAuthCmd))
+	}
+
 	return ams
 }
 
 // privateKeyFile return private key auth method
-func privateKeyFile(file, password string) (ssh.AuthMethod, error) {
+func privateKeyFileAuth(file, password string) (ssh.AuthMethod, error) {
 	if strings.HasPrefix(file, "~") {
 		home, err := homedir.Dir()
 		if err != nil {
@@ -120,8 +129,30 @@ func privateKeyFile(file, password string) (ssh.AuthMethod, error) {
 }
 
 // password return password auth method
-func password(password string) ssh.AuthMethod {
+func passwordAuth(password string) ssh.AuthMethod {
 	return ssh.Password(password)
+}
+
+func keyboardAuth(authCmd string) ssh.AuthMethod {
+	return ssh.KeyboardInteractive(func(user, instruction string, questions []string, echos []bool) (answers []string, err error) {
+		cs, args := common.CMD(authCmd)
+		cmd := osexec.Command(cs, args...)
+		reqBs, err := jsoniter.Marshal(KeyBoardRequest{
+			User:        user,
+			Instruction: instruction,
+			Questions:   questions,
+			Echos:       echos,
+		})
+		if err != nil {
+			return nil, err
+		}
+		cmd.Stdin = bytes.NewReader(reqBs)
+		respBs, err := cmd.CombinedOutput()
+		if err != nil {
+			return nil, err
+		}
+		return strings.Split(strings.TrimSpace(string(respBs)), "\n"), nil
+	})
 }
 
 // Terminal start a ssh terminal

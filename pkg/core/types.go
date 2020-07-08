@@ -17,6 +17,7 @@ type BasicServerConfig struct {
 	Password            string        `yaml:"password"`
 	PrivateKey          string        `yaml:"private_key"`
 	PrivateKeyPassword  string        `yaml:"private_key_password"`
+	KeyboardAuthCmd     string        `yaml:"keyboard_auth_cmd"`
 	Port                int           `yaml:"port"`
 	ServerAliveInterval time.Duration `yaml:"server_alive_interval"`
 	TmuxSupport         bool          `yaml:"tmux_support"`
@@ -32,6 +33,7 @@ type Server struct {
 	Password            string        `yaml:"password"`
 	HookCmd             string        `yaml:"hook_cmd"`
 	HookStdout          bool          `yaml:"hook_stdout"`
+	KeyboardAuthCmd     string        `yaml:"keyboard_auth_cmd"`
 	PrivateKey          string        `yaml:"private_key"`
 	PrivateKeyPassword  string        `yaml:"private_key_password"`
 	Proxy               string        `yaml:"proxy"`
@@ -181,4 +183,11 @@ func ConfigExample() *Config {
 		Tags:     TagsExample(),
 		MaxProxy: 5,
 	}
+}
+
+type KeyBoardRequest struct {
+	User        string   `json:"user"`
+	Instruction string   `json:"instruction"`
+	Questions   []string `json:"questions"`
+	Echos       []bool   `json:"echos"`
 }

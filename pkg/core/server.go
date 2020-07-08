@@ -72,6 +72,9 @@ func setDefaultValue(servers Servers, basic BasicServerConfig) Servers {
 		if s.PrivateKeyPassword == "" {
 			s.PrivateKeyPassword = basic.PrivateKeyPassword
 		}
+		if s.KeyboardAuthCmd == "" {
+			s.KeyboardAuthCmd = basic.KeyboardAuthCmd
+		}
 		if s.Port == 0 {
 			s.Port = basic.Port
 			if s.Port == 0 {
