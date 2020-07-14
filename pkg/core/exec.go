@@ -21,7 +21,7 @@ import (
 )
 
 // Exec batch execution of commands
-func Exec(cmd, tagOrName string, single, ping bool) {
+func Exec(cmd, tagOrName string, execGroup, ping bool) {
 	// use context to manage goroutine
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -38,10 +38,10 @@ func Exec(cmd, tagOrName string, single, ping bool) {
 	}()
 
 	// single server exec
-	if single {
+	if !execGroup {
 		server, err := findServerByName(tagOrName)
 		common.CheckAndExit(err)
-		err = exec(ctx, cmd, server, single, ping)
+		err = exec(ctx, cmd, server, false, ping)
 		common.PrintErr(err)
 	} else {
 		// multiple servers
@@ -56,7 +56,7 @@ func Exec(cmd, tagOrName string, single, ping bool) {
 			// because it takes time for ssh to establish a connection
 			go func(s *Server) {
 				defer execWg.Done()
-				err = exec(ctx, cmd, s, single, false)
+				err = exec(ctx, cmd, s, true, false)
 				common.PrintErrWithPrefix(s.Name, err)
 			}(s)
 		}
@@ -66,7 +66,7 @@ func Exec(cmd, tagOrName string, single, ping bool) {
 
 // single server execution command
 // since multiple tasks are executed async, the error is returned using channel
-func exec(ctx context.Context, cmd string, s *Server, single, ping bool) error {
+func exec(ctx context.Context, cmd string, s *Server, colorPrint, ping bool) error {
 	// get ssh client
 	sshClient, err := s.sshClient(ping)
 	if err != nil {
@@ -97,7 +97,7 @@ func exec(ctx context.Context, cmd string, s *Server, single, ping bool) error {
 		<-sshSession.Ready()
 
 		// read from sshSession.Stdout and print to os.stdout
-		if single {
+		if !colorPrint {
 			_, _ = io.Copy(os.Stdout, sshSession.Stdout)
 		} else {
 			buf := bufio.NewReader(sshSession.Stdout)
