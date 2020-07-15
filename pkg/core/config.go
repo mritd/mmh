@@ -8,7 +8,6 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
-	"sync"
 
 	"github.com/mritd/promptx"
 
@@ -19,6 +18,7 @@ import (
 
 const (
 	configDirEnvName       = "MMH_CONFIG_DIR"
+	configChgSelectEnvName = "MMH_CONFIG_CHANGED_SELECT"
 	currentConfigStoreFile = ".current"
 	basicConfigName        = "basic.yaml"
 )
@@ -26,7 +26,6 @@ const (
 var (
 	Aliases []string
 
-	configOnce sync.Once
 	configDir  string
 	configList ConfigInfo
 
@@ -38,94 +37,104 @@ var (
 )
 
 func LoadConfig() {
-	configOnce.Do(func() {
-		// get user home dir
-		home, err := homedir.Dir()
+	// get user home dir
+	home, err := homedir.Dir()
+	common.CheckAndExit(err)
+	// load config dir from env
+	configDir = os.Getenv(configDirEnvName)
+	if configDir == "" {
+		// default to $HOME/.mmh
+		configDir = filepath.Join(home, ".mmh")
+		_, err = os.Stat(configDir)
+		if err != nil {
+			if os.IsNotExist(err) {
+				// create config dir
+				common.CheckAndExit(os.MkdirAll(configDir, 0755))
+				// create default config file
+				currentConfigName = "default.yaml"
+				currentConfigPath = filepath.Join(configDir, currentConfigName)
+				common.CheckAndExit(ConfigExample().WriteTo(currentConfigPath))
+				// create basic config file
+				basicConfigPath = filepath.Join(configDir, basicConfigName)
+				common.CheckAndExit(ConfigExample().WriteTo(basicConfigPath))
+				// set current config to default
+				currentCfgStoreFile := filepath.Join(configDir, currentConfigStoreFile)
+				common.CheckAndExit(ioutil.WriteFile(currentCfgStoreFile, []byte(currentConfigName), 0644))
+			} else if err != nil {
+				common.Exit(err.Error(), 1)
+			}
+		}
+	}
+
+	// config dir path only support absolute path or start with homedir(~)
+	if !filepath.IsAbs(configDir) && !strings.HasPrefix(configDir, "~") {
+		common.Exit("the config dir path must be a absolute path or start with homedir(~)", 1)
+	}
+	// convert config dir path with homedir(~) prefix to absolute path
+	if strings.HasPrefix(configDir, "~") {
+		configDir = strings.Replace(configDir, "~", home, 1)
+	}
+
+	// check config dir if it not exist
+	f, err := os.Lstat(configDir)
+	common.CheckAndExit(err)
+
+	// check config dir is symlink. filepath Walk does not follow symbolic links
+	if f.Mode()&os.ModeSymlink != 0 {
+		configDir, err = os.Readlink(configDir)
 		common.CheckAndExit(err)
-		// load config dir from env
-		configDir = os.Getenv(configDirEnvName)
-		if configDir == "" {
-			// default to $HOME/.mmh
-			configDir = filepath.Join(home, ".mmh")
-			_, err = os.Stat(configDir)
-			if err != nil {
-				if os.IsNotExist(err) {
-					// create config dir
-					common.CheckAndExit(os.MkdirAll(configDir, 0755))
-					// create default config file
-					currentConfigName = "default.yaml"
-					currentConfigPath = filepath.Join(configDir, currentConfigName)
-					common.CheckAndExit(ConfigExample().WriteTo(currentConfigPath))
-					// create basic config file
-					basicConfigPath = filepath.Join(configDir, basicConfigName)
-					common.CheckAndExit(ConfigExample().WriteTo(basicConfigPath))
-					// set current config to default
-					currentCfgStoreFile := filepath.Join(configDir, currentConfigStoreFile)
-					common.CheckAndExit(ioutil.WriteFile(currentCfgStoreFile, []byte(currentConfigName), 0644))
-				} else if err != nil {
-					common.Exit(err.Error(), 1)
-				}
-			}
-		}
+	}
 
-		// config dir path only support absolute path or start with homedir(~)
-		if !filepath.IsAbs(configDir) && !strings.HasPrefix(configDir, "~") {
-			common.Exit("the config dir path must be a absolute path or start with homedir(~)", 1)
-		}
-		// convert config dir path with homedir(~) prefix to absolute path
-		if strings.HasPrefix(configDir, "~") {
-			configDir = strings.Replace(configDir, "~", home, 1)
-		}
+	// get current config
+	currentCfgStoreFile := filepath.Join(configDir, currentConfigStoreFile)
+	bs, err := ioutil.ReadFile(currentCfgStoreFile)
+	if err != nil || len(bs) < 1 {
+		fmt.Println("failed to get current config, use default config")
+		currentConfigName = "default.yaml"
+	} else {
+		currentConfigName = string(bs)
+	}
+	// load current config
+	currentConfigPath = filepath.Join(configDir, currentConfigName)
+	common.CheckErr(currentConfig.LoadFrom(currentConfigPath))
+	// load basic config if it exist
+	basicConfigPath = filepath.Join(configDir, basicConfigName)
+	if _, err = os.Stat(basicConfigPath); err == nil {
+		common.CheckErr(basicConfig.LoadFrom(basicConfigPath))
+	}
 
-		// check config dir if it not exist
-		f, err := os.Lstat(configDir)
-		common.CheckAndExit(err)
-
-		// check config dir is symlink. filepath Walk does not follow symbolic links
-		if f.Mode()&os.ModeSymlink != 0 {
-			configDir, err = os.Readlink(configDir)
-			common.CheckAndExit(err)
+	// load all config info
+	_ = filepath.Walk(configDir, func(path string, f os.FileInfo, err error) error {
+		if !common.CheckErr(err) {
+			return err
 		}
-
-		// get current config
-		currentCfgStoreFile := filepath.Join(configDir, currentConfigStoreFile)
-		bs, err := ioutil.ReadFile(currentCfgStoreFile)
-		if err != nil || len(bs) < 1 {
-			fmt.Println("failed to get current config, use default config")
-			currentConfigName = "default.yaml"
-		} else {
-			currentConfigName = string(bs)
-		}
-		// load current config
-		currentConfigPath = filepath.Join(configDir, currentConfigName)
-		common.CheckErr(currentConfig.LoadFrom(currentConfigPath))
-		// load basic config if it exist
-		basicConfigPath = filepath.Join(configDir, basicConfigName)
-		if _, err = os.Stat(basicConfigPath); err == nil {
-			common.CheckErr(basicConfig.LoadFrom(basicConfigPath))
-		}
-
-		// load all config info
-		_ = filepath.Walk(configDir, func(path string, f os.FileInfo, err error) error {
-			if !common.CheckErr(err) {
-				return err
-			}
-			if f.IsDir() || !strings.HasSuffix(f.Name(), ".yaml") {
-				return nil
-			}
-			configList = append(configList, struct {
-				Name      string
-				Path      string
-				IsCurrent bool
-			}{
-				Name:      strings.TrimSuffix(f.Name(), ".yaml"),
-				Path:      path,
-				IsCurrent: path == currentConfigPath,
-			})
+		if f.IsDir() || !strings.HasSuffix(f.Name(), ".yaml") {
 			return nil
+		}
+		configList = append(configList, struct {
+			Name      string
+			Path      string
+			IsCurrent bool
+		}{
+			Name:      strings.TrimSuffix(f.Name(), ".yaml"),
+			Path:      path,
+			IsCurrent: path == currentConfigPath,
 		})
-		sort.Sort(configList)
+		return nil
 	})
+	sort.Sort(configList)
+}
+
+func ReloadConfig() {
+	configDir = ""
+	configList = ConfigInfo{}
+
+	basicConfig = Config{}
+	currentConfig = Config{}
+	currentConfigName = ""
+	currentConfigPath = ""
+	basicConfigPath = ""
+	LoadConfig()
 }
 
 func ListConfig() {
@@ -165,4 +174,9 @@ func InteractiveSetConfig() {
 
 	idx := (&promptx.Select{Items: configList, Config: cfg}).Run()
 	SetConfig(strings.TrimSuffix(configList[idx].Name, ".yaml"))
+
+	if os.Getenv(configChgSelectEnvName) == "true" {
+		ReloadConfig()
+		SingleInteractiveLogin()
+	}
 }
