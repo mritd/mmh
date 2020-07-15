@@ -138,11 +138,12 @@ func SingleInteractiveLogin() {
 		DisPlaySize:  9,
 	}
 
+	ss := getServers()
 	s := &promptx.Select{
-		Items:  getServers(),
+		Items:  ss,
 		Config: cfg,
 	}
-	SingleLogin(currentConfig.Servers[s.Run()].Name)
+	SingleLogin(ss[s.Run()].Name)
 }
 
 func setTmuxWindowName(name string, autoRename bool) {
