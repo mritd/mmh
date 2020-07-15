@@ -1,8 +1,8 @@
 package core
 
 const (
-	listConfigTpl = `  Name          Path
----------------------------------
+	listConfigTpl = `  Name           Path
+-----------------------------------------------------------------
 {{ range . }}{{ if .IsCurrent }}{{ "» " | cyan }}{{ maxLen 15 .Name | cyan }}{{ else }}  {{ maxLen 15 .Name }}{{ end }}{{ if .IsCurrent }}{{ .Path | cyan }}{{ else }}{{ .Path }}{{ end }}
 {{ end }}`
 
