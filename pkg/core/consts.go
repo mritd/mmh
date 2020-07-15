@@ -17,7 +17,7 @@ Address: {{ .Address }}:{{ .Port }}
 Tags: {{ .Tags | mergeTags }}
 Proxy: {{ .Proxy }}`
 
-	interactiveLoginSelectedTpl = `{{ "» " | green }}{{ maxLen 10 .Name | green }}>>  {{ .User | green }}{{ "@" | green }}{{ .Address | green }}`
+	interactiveLoginSelectedTpl = `{{ "» " | green }}{{ .User | green }}{{ "@" | green }}{{ .Address | green }}`
 	interactiveLoginActiveTpl   = `»  {{ maxLen 10 .Name | cyan }}>> {{ .User | cyan }}{{ "@" | cyan }}{{ .Address | cyan }}`
 	interactiveLoginInactiveTpl = `  {{ maxLen 10 .Name | white }}>>  {{ .User | white }}{{ "@" | white }}{{ .Address | white }}`
 	interactiveLoginDetailsTpl  = `
