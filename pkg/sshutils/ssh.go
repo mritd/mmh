@@ -93,19 +93,11 @@ func (s *SSHSession) ShellDone() <-chan int {
 
 // open a interactive shell
 func (s *SSHSession) Terminal() error {
-	return s.TerminalWithKeepAlive(0)
+	return s.TerminalWithKeepAlive(10 * time.Second)
 }
 
 // open a interactive shell with keepalive
-func (s *SSHSession) TerminalWithKeepAlive(serverAliveInterval time.Duration) error {
-	defer func() {
-		if s.exitMsg == "" {
-			_, _ = fmt.Fprintln(os.Stdout, "the connection was closed on the remote side on ", time.Now().Format(time.RFC822))
-		} else {
-			_, _ = fmt.Fprintln(os.Stdout, s.exitMsg)
-		}
-	}()
-
+func (s *SSHSession) TerminalWithKeepAlive(interval time.Duration) error {
 	fd := int(os.Stdin.Fd())
 	state, err := terminal.MakeRaw(fd)
 	if err != nil {
@@ -159,33 +151,16 @@ func (s *SSHSession) TerminalWithKeepAlive(serverAliveInterval time.Duration) er
 		_, _ = io.Copy(os.Stdout, s.Stdout)
 	}()
 	go func() {
-		buf := make([]byte, 128)
-		for {
-			n, err := os.Stdin.Read(buf)
-			if err != nil {
-				fmt.Println(err)
-				return
-			}
-			if n > 0 {
-				_, err = s.Stdin.Write(buf[:n])
-				if err != nil {
-					fmt.Println(err)
-					s.exitMsg = err.Error()
-					return
-				}
-			}
-		}
+		_, _ = io.Copy(s.Stdin, os.Stdin)
 	}()
 
 	// keepalive
-	if serverAliveInterval > 0 {
+	if interval > 0 {
 		go func() {
-			tick := time.Tick(serverAliveInterval)
+			tick := time.Tick(interval)
 			for range tick {
 				_, err := s.session.SendRequest("keepalive@linux.com", true, nil)
-				if err != nil {
-					fmt.Println(err)
-				}
+				common.PrintErr(err)
 			}
 		}()
 	}

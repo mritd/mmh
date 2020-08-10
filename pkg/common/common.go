@@ -97,34 +97,57 @@ func Tmux() bool {
 	return os.Getenv("TMUX") != ""
 }
 
-func TmuxSetWindowName(name string) {
-	cmd := osexec.Command("tmux", "rename-window", name)
-	CheckErr(cmd.Run())
+func TmuxSetWindowName(index, name string) {
+	fmt.Println("tmux", "rename-window", name)
+	cmd := osexec.Command("tmux", "rename-window", "-t", index, name)
+	PrintErr(cmd.Run())
 }
 
-func TmuxWindowName() string {
-	cmd := osexec.Command("tmux", "display-message", "-p", "#W")
+func TmuxWindowInfo() (index, name string) {
+	cmd := osexec.Command("tmux", "display-message", "-p", "#I #W")
 	bs, err := cmd.CombinedOutput()
-	if CheckErr(err) {
-		return ""
+	if !CheckErr(err) {
+		return "", ""
 	}
-	return strings.TrimSpace(string(bs))
+	sp := strings.Fields(string(bs))
+	if len(sp) != 2 {
+		PrintErr(fmt.Errorf("failed to get tmux window info: %s", string(bs)))
+		return "", ""
+	}
+	return sp[0], sp[1]
 }
 
-func TmuxSetAutomaticRename(autoRename bool) {
+func TmuxSetAutomaticRename(index string, autoRename bool) {
 	status := "on"
 	if !autoRename {
 		status = "off"
 	}
-	cmd := osexec.Command("tmux", "set-window", "automatic-rename", status)
-	CheckErr(cmd.Run())
+	fmt.Println("tmux", "set-window", "-t", index, "automatic-rename", status)
+	cmd := osexec.Command("tmux", "set-window", "-t", index, "automatic-rename", status)
+	PrintErr(cmd.Run())
 }
 
 func TmuxAutomaticRename() bool {
-	cmd := osexec.Command("tmux", "show-options", "-gw")
+	cmd := osexec.Command("tmux", "show-options", "-w")
 	bs, err := cmd.CombinedOutput()
-	if CheckErr(err) {
+	if !CheckErr(err) {
 		return false
 	}
-	return strings.Contains(string(bs), "automatic-rename on")
+	if strings.Contains(string(bs), "automatic-rename on") {
+		return true
+	}
+	if strings.Contains(string(bs), "automatic-rename off") {
+		return false
+	}
+
+	cmd = osexec.Command("tmux", "show-options", "-gw")
+	bs, err = cmd.CombinedOutput()
+	if !CheckErr(err) {
+		return false
+	}
+	if strings.Contains(string(bs), "automatic-rename on") {
+		return true
+	}
+
+	return false
 }

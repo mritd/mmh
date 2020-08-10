@@ -96,11 +96,11 @@ func LoadConfig() {
 	}
 	// load current config
 	currentConfigPath = filepath.Join(configDir, currentConfigName)
-	common.CheckErr(currentConfig.LoadFrom(currentConfigPath))
+	common.PrintErr(currentConfig.LoadFrom(currentConfigPath))
 	// load basic config if it exist
 	basicConfigPath = filepath.Join(configDir, basicConfigName)
 	if _, err = os.Stat(basicConfigPath); err == nil {
-		common.CheckErr(basicConfig.LoadFrom(basicConfigPath))
+		common.PrintErr(basicConfig.LoadFrom(basicConfigPath))
 	}
 
 	// load all config info

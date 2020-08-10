@@ -114,17 +114,20 @@ func ServerDetail(serverName string) {
 func SingleLogin(name string) {
 	s, err := findServerByName(name)
 	common.CheckAndExit(err)
+	var tmuxWinIndex, tmuxWinName string
+	var tmuxAutoRename bool
 	if s.TmuxSupport && common.Tmux() {
-		winName := common.TmuxWindowName()
-		autoRename := common.TmuxAutomaticRename()
-		defer func(winName string, autoRename bool) {
-			common.TmuxSetWindowName(winName)
-			common.TmuxSetAutomaticRename(autoRename)
-		}(winName, autoRename)
-		common.TmuxSetWindowName(s.Name)
-		common.TmuxSetAutomaticRename(false)
+		tmuxWinIndex, tmuxWinName = common.TmuxWindowInfo()
+		tmuxAutoRename = common.TmuxAutomaticRename()
+		common.TmuxSetWindowName(tmuxWinIndex, s.Name)
+		common.TmuxSetAutomaticRename(tmuxWinIndex, false)
 	}
+
 	common.PrintErr(s.Terminal())
+	if s.TmuxSupport && common.Tmux() {
+		common.TmuxSetWindowName(tmuxWinIndex, tmuxWinName)
+		common.TmuxSetAutomaticRename(tmuxWinIndex, tmuxAutoRename)
+	}
 }
 
 func SingleInteractiveLogin() {
