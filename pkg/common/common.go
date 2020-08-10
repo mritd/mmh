@@ -98,7 +98,6 @@ func Tmux() bool {
 }
 
 func TmuxSetWindowName(index, name string) {
-	fmt.Println("tmux", "rename-window", name)
 	cmd := osexec.Command("tmux", "rename-window", "-t", index, name)
 	PrintErr(cmd.Run())
 }
@@ -122,7 +121,6 @@ func TmuxSetAutomaticRename(index string, autoRename bool) {
 	if !autoRename {
 		status = "off"
 	}
-	fmt.Println("tmux", "set-window", "-t", index, "automatic-rename", status)
 	cmd := osexec.Command("tmux", "set-window", "-t", index, "automatic-rename", status)
 	PrintErr(cmd.Run())
 }
