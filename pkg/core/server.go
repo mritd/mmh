@@ -4,9 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	osexec "os/exec"
 	"sort"
-	"strings"
 	"time"
 
 	"github.com/mritd/mmh/pkg/common"
@@ -90,9 +88,6 @@ func setDefaultValue(servers Servers, basic BasicServerConfig) Servers {
 		if !s.TmuxSupport && basic.TmuxSupport {
 			s.TmuxSupport = basic.TmuxSupport
 		}
-		if !s.TmuxAutoRename && basic.TmuxAutoRename {
-			s.TmuxAutoRename = basic.TmuxAutoRename
-		}
 		ss = append(ss, s)
 	}
 	return ss
@@ -119,11 +114,15 @@ func ServerDetail(serverName string) {
 func SingleLogin(name string) {
 	s, err := findServerByName(name)
 	common.CheckAndExit(err)
-	var winName string
-	if s.TmuxSupport {
-		winName = getTmuxWindowName()
-		setTmuxWindowName(s.Name, false)
-		defer setTmuxWindowName(winName, s.TmuxAutoRename)
+	if s.TmuxSupport && common.Tmux() {
+		winName := common.TmuxWindowName()
+		autoRename := common.TmuxAutomaticRename()
+		defer func(winName string, autoRename bool) {
+			common.TmuxSetWindowName(winName)
+			common.TmuxSetAutomaticRename(autoRename)
+		}(winName, autoRename)
+		common.TmuxSetWindowName(s.Name)
+		common.TmuxSetAutomaticRename(false)
 	}
 	common.PrintErr(s.Terminal())
 }
@@ -144,20 +143,4 @@ func SingleInteractiveLogin() {
 		Config: cfg,
 	}
 	SingleLogin(ss[s.Run()].Name)
-}
-
-func setTmuxWindowName(name string, autoRename bool) {
-	cmd := osexec.Command("tmux", "rename-window", name)
-	common.CheckAndExit(cmd.Run())
-	if autoRename {
-		cmd = osexec.Command("tmux", "set-window", "automatic-rename", "on")
-		common.CheckAndExit(cmd.Run())
-	}
-}
-
-func getTmuxWindowName() string {
-	cmd := osexec.Command("tmux", "display-message", "-p", "#W")
-	bs, err := cmd.CombinedOutput()
-	common.CheckAndExit(err)
-	return strings.TrimSpace(string(bs))
 }

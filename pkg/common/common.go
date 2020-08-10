@@ -2,6 +2,7 @@ package common
 
 import (
 	"os"
+	osexec "os/exec"
 	"os/user"
 	"strings"
 	"text/template"
@@ -90,4 +91,40 @@ func CMD(cmd string) (string, []string) {
 	} else {
 		return cmds[0], nil
 	}
+}
+
+func Tmux() bool {
+	return os.Getenv("TMUX") != ""
+}
+
+func TmuxSetWindowName(name string) {
+	cmd := osexec.Command("tmux", "rename-window", name)
+	CheckErr(cmd.Run())
+}
+
+func TmuxWindowName() string {
+	cmd := osexec.Command("tmux", "display-message", "-p", "#W")
+	bs, err := cmd.CombinedOutput()
+	if CheckErr(err) {
+		return ""
+	}
+	return strings.TrimSpace(string(bs))
+}
+
+func TmuxSetAutomaticRename(autoRename bool) {
+	status := "on"
+	if !autoRename {
+		status = "off"
+	}
+	cmd := osexec.Command("tmux", "set-window", "automatic-rename", status)
+	CheckErr(cmd.Run())
+}
+
+func TmuxAutomaticRename() bool {
+	cmd := osexec.Command("tmux", "show-options", "-gw")
+	bs, err := cmd.CombinedOutput()
+	if CheckErr(err) {
+		return false
+	}
+	return strings.Contains(string(bs), "automatic-rename on")
 }

@@ -21,7 +21,6 @@ type BasicServerConfig struct {
 	Port                int           `yaml:"port"`
 	ServerAliveInterval time.Duration `yaml:"server_alive_interval"`
 	TmuxSupport         bool          `yaml:"tmux_support"`
-	TmuxAutoRename      bool          `yaml:"tmux_auto_rename"`
 }
 
 // server config
@@ -39,7 +38,6 @@ type Server struct {
 	Proxy               string        `yaml:"proxy"`
 	ServerAliveInterval time.Duration `yaml:"server_alive_interval"`
 	TmuxSupport         bool          `yaml:"tmux_support"`
-	TmuxAutoRename      bool          `yaml:"tmux_auto_rename"`
 	Tags                []string      `yaml:"tags"`
 }
 
