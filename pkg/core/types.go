@@ -20,7 +20,6 @@ type BasicServerConfig struct {
 	KeyboardAuthCmd     string        `yaml:"keyboard_auth_cmd"`
 	Port                int           `yaml:"port"`
 	ServerAliveInterval time.Duration `yaml:"server_alive_interval"`
-	TmuxSupport         bool          `yaml:"tmux_support"`
 }
 
 // server config
@@ -37,7 +36,6 @@ type Server struct {
 	PrivateKeyPassword  string        `yaml:"private_key_password"`
 	Proxy               string        `yaml:"proxy"`
 	ServerAliveInterval time.Duration `yaml:"server_alive_interval"`
-	TmuxSupport         bool          `yaml:"tmux_support"`
 	Tags                []string      `yaml:"tags"`
 }
 

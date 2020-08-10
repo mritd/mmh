@@ -12,8 +12,8 @@ import (
 
 var rootCmd = &cobra.Command{
 	Use:              "mmh",
-	Short:            "a simple multi-server sshutils tool",
-	Long:             "a simple multi-server sshutils tool.",
+	Short:            "a simple ssh tool",
+	Long:             "a simple ssh tool.",
 	TraverseChildren: true,
 	Run:              func(cmd *cobra.Command, args []string) { core.SingleInteractiveLogin() },
 }

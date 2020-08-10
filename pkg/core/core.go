@@ -2,7 +2,6 @@ package core
 
 import (
 	"bytes"
-	"errors"
 	"io/ioutil"
 	"strings"
 	"time"
@@ -23,6 +22,9 @@ import (
 )
 
 func (s *Server) sshClient(secondLast bool) (*ssh.Client, error) {
+	if currentConfig.MaxProxy == 0 {
+		currentConfig.MaxProxy = 5
+	}
 	return s.ssh(secondLast, 0)
 }
 
@@ -38,7 +40,7 @@ func (s *Server) ssh(secondLast bool, proxyCount int) (*ssh.Client, error) {
 
 	if s.Proxy != "" {
 		if proxyCount > currentConfig.MaxProxy {
-			return nil, errors.New(fmt.Sprintf("too many proxy server, proxy server must be <= %d", currentConfig.MaxProxy))
+			return nil, fmt.Errorf("too many proxy server, proxy server must be <= %d", currentConfig.MaxProxy)
 		} else {
 			proxyCount++
 		}
@@ -174,7 +176,7 @@ func (s *Server) Terminal() error {
 	// keep alive
 	if s.ServerAliveInterval > 0 {
 		if s.ServerAliveInterval < 10*time.Second {
-			fmt.Println("WARN: ServerAliveInterval set too small heartbeat time, use the default value of 10s(please set a larger value, such as \"30s\", \"5m\")")
+			fmt.Println("⚠️ WARN: ServerAliveInterval set too small heartbeat time, use the default value of 10s(please set a larger value, such as \"30s\", \"5m\")")
 			s.ServerAliveInterval = 10 * time.Second
 		}
 		return sshSession.TerminalWithKeepAlive(s.ServerAliveInterval)

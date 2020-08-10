@@ -85,9 +85,6 @@ func setDefaultValue(servers Servers, basic BasicServerConfig) Servers {
 				s.ServerAliveInterval = 10 * time.Second
 			}
 		}
-		if !s.TmuxSupport && basic.TmuxSupport {
-			s.TmuxSupport = basic.TmuxSupport
-		}
 		ss = append(ss, s)
 	}
 	return ss
@@ -116,7 +113,7 @@ func SingleLogin(name string) {
 	common.CheckAndExit(err)
 	var tmuxWinIndex, tmuxWinName string
 	var tmuxAutoRename bool
-	if s.TmuxSupport && common.Tmux() {
+	if common.Tmux() {
 		tmuxWinIndex, tmuxWinName = common.TmuxWindowInfo()
 		tmuxAutoRename = common.TmuxAutomaticRename()
 		common.TmuxSetWindowName(tmuxWinIndex, s.Name)
@@ -124,7 +121,7 @@ func SingleLogin(name string) {
 	}
 
 	common.PrintErrWithPrefix("\n😱", s.Terminal())
-	if s.TmuxSupport && common.Tmux() {
+	if common.Tmux() {
 		common.TmuxSetWindowName(tmuxWinIndex, tmuxWinName)
 		common.TmuxSetAutomaticRename(tmuxWinIndex, tmuxAutoRename)
 	}
