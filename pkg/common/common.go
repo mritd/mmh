@@ -31,7 +31,7 @@ func CheckErr(err error) bool {
 
 func PrintErrWithPrefix(prefix string, err error) {
 	if err != nil {
-		fmt.Println(prefix + ": 😱 " + err.Error())
+		fmt.Println(prefix, err.Error())
 	}
 }
 

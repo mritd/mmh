@@ -123,7 +123,7 @@ func SingleLogin(name string) {
 		common.TmuxSetAutomaticRename(tmuxWinIndex, false)
 	}
 
-	common.PrintErr(s.Terminal())
+	common.PrintErrWithPrefix("\n😱", s.Terminal())
 	if s.TmuxSupport && common.Tmux() {
 		common.TmuxSetWindowName(tmuxWinIndex, tmuxWinName)
 		common.TmuxSetAutomaticRename(tmuxWinIndex, tmuxAutoRename)

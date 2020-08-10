@@ -57,7 +57,7 @@ func Exec(cmd, tagOrName string, execGroup, ping bool) {
 			go func(s *Server) {
 				defer execWg.Done()
 				err = exec(ctx, cmd, s, true, false)
-				common.PrintErrWithPrefix(s.Name, err)
+				common.PrintErrWithPrefix(s.Name+": 😱 ", err)
 			}(s)
 		}
 		execWg.Wait()
