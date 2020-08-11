@@ -21,6 +21,9 @@ import (
 )
 
 // Exec batch execution of commands
+// If execGroup is true, execute the command on a group of servers
+// If ping is true and a proxy is set on the server, execute the
+// command on the second-to-last server
 func Exec(cmd, tagOrName string, execGroup, ping bool) {
 	// use context to manage goroutine
 	ctx, cancel := context.WithCancel(context.Background())

@@ -111,19 +111,21 @@ func (cfg *Config) LoadFrom(filePath string) error {
 	return cfg.Load()
 }
 
-type ConfigInfo []struct {
+type ConfigInfo struct {
 	Name      string
 	Path      string
 	IsCurrent bool
 }
 
-func (info ConfigInfo) Len() int {
+type ConfigList []ConfigInfo
+
+func (info ConfigList) Len() int {
 	return len(info)
 }
-func (info ConfigInfo) Less(i, j int) bool {
+func (info ConfigList) Less(i, j int) bool {
 	return info[i].Name < info[j].Name
 }
-func (info ConfigInfo) Swap(i, j int) {
+func (info ConfigList) Swap(i, j int) {
 	info[i], info[j] = info[j], info[i]
 }
 

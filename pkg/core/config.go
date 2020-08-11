@@ -17,8 +17,12 @@ import (
 )
 
 const (
-	configDirEnvName       = "MMH_CONFIG_DIR"
-	configChgSelectEnvName = "MMH_CONFIG_CHANGED_SELECT"
+	// The MMH_CONFIG_DIR env specifies the dir where the mmh config file is stored
+	EnvConfigDirName = "MMH_CONFIG_DIR"
+	// When the MMH_CONFIG_CHANGED_SELECT env is set to true, enter the interactive
+	// server list after the config file is changed(mmh cf)
+	EnvConfigChgSelectName = "MMH_CONFIG_CHANGED_SELECT"
+
 	currentConfigStoreFile = ".current"
 	basicConfigName        = "basic.yaml"
 )
@@ -27,7 +31,7 @@ var (
 	Aliases []string
 
 	configDir  string
-	configList ConfigInfo
+	configList ConfigList
 
 	basicConfig       Config
 	currentConfig     Config
@@ -36,17 +40,19 @@ var (
 	basicConfigPath   string
 )
 
+// LoadConfig is responsible for loading config files and serializing them to memory objects
 func LoadConfig() {
 	// get user home dir
 	home, err := homedir.Dir()
 	common.CheckAndExit(err)
 	// load config dir from env
-	configDir = os.Getenv(configDirEnvName)
+	configDir = os.Getenv(EnvConfigDirName)
 	if configDir == "" {
 		// default to $HOME/.mmh
 		configDir = filepath.Join(home, ".mmh")
 		_, err = os.Stat(configDir)
 		if err != nil {
+			// run mmh for the first time
 			if os.IsNotExist(err) {
 				// create config dir
 				common.CheckAndExit(os.MkdirAll(configDir, 0755))
@@ -111,11 +117,7 @@ func LoadConfig() {
 		if f.IsDir() || !strings.HasSuffix(f.Name(), ".yaml") {
 			return nil
 		}
-		configList = append(configList, struct {
-			Name      string
-			Path      string
-			IsCurrent bool
-		}{
+		configList = append(configList, ConfigInfo{
 			Name:      strings.TrimSuffix(f.Name(), ".yaml"),
 			Path:      path,
 			IsCurrent: path == currentConfigPath,
@@ -125,9 +127,10 @@ func LoadConfig() {
 	sort.Sort(configList)
 }
 
+// ReloadConfig first clears the memory config objects, and then reloads them
 func ReloadConfig() {
 	configDir = ""
-	configList = ConfigInfo{}
+	configList = ConfigList{}
 
 	basicConfig = Config{}
 	currentConfig = Config{}
@@ -137,6 +140,7 @@ func ReloadConfig() {
 	LoadConfig()
 }
 
+// ListConfig print a list of config files
 func ListConfig() {
 	t, _ := common.Template(listConfigTpl)
 	var buf bytes.Buffer
@@ -144,6 +148,8 @@ func ListConfig() {
 	fmt.Println(buf.String())
 }
 
+// SetConfig set which config file to use, and writes the config file name into
+// the file storage; the config file must exist or the operation fails
 func SetConfig(name string) {
 	// check config name exist
 	var exist bool
@@ -155,10 +161,11 @@ func SetConfig(name string) {
 	if !exist {
 		common.Exit(fmt.Sprintf("config [%s] not exist", name), 1)
 	}
-	// write
+	// write to file
 	common.CheckAndExit(ioutil.WriteFile(filepath.Join(configDir, currentConfigStoreFile), []byte(name+".yaml"), 0644))
 }
 
+// InteractiveSetConfig provides interactive selection list based on SetConfig
 func InteractiveSetConfig() {
 	cfg := &promptx.SelectConfig{
 		ActiveTpl:    `»  {{ .Name | cyan }}`,
@@ -174,8 +181,9 @@ func InteractiveSetConfig() {
 
 	idx := (&promptx.Select{Items: configList, Config: cfg}).Run()
 	SetConfig(strings.TrimSuffix(configList[idx].Name, ".yaml"))
-
-	if os.Getenv(configChgSelectEnvName) == "true" {
+	// If this variable is true, the interactive server list will be
+	// displayed after the configuration file is changed
+	if os.Getenv(EnvConfigChgSelectName) == "true" {
 		ReloadConfig()
 		SingleInteractiveLogin()
 	}

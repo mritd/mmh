@@ -21,14 +21,16 @@ import (
 	"fmt"
 )
 
+// sshClient returns the standard ssh client, if there is an error, the ssh client is nil
 func (s *Server) sshClient(secondLast bool) (*ssh.Client, error) {
+	// TODO: Move "Set MaxProxy Default Value" to other func
 	if currentConfig.MaxProxy == 0 {
 		currentConfig.MaxProxy = 5
 	}
 	return s.ssh(secondLast, 0)
 }
 
-// return a ssh client intense point
+// ssh return a ssh client
 // if secondLast is true, return the second last server
 func (s *Server) ssh(secondLast bool, proxyCount int) (*ssh.Client, error) {
 	sshConfig := &ssh.ClientConfig{
@@ -79,7 +81,7 @@ func (s *Server) ssh(secondLast bool, proxyCount int) (*ssh.Client, error) {
 	}
 }
 
-// authMethod return ssh auth method
+// authMethod return ssh auth method slice
 func (s *Server) authMethod() []ssh.AuthMethod {
 	var ams []ssh.AuthMethod
 
@@ -103,7 +105,7 @@ func (s *Server) authMethod() []ssh.AuthMethod {
 	return ams
 }
 
-// privateKeyFile return private key auth method
+// privateKeyFileAuth return private key auth method
 func privateKeyFileAuth(file, password string) (ssh.AuthMethod, error) {
 	if strings.HasPrefix(file, "~") {
 		home, err := homedir.Dir()
@@ -130,11 +132,12 @@ func privateKeyFileAuth(file, password string) (ssh.AuthMethod, error) {
 	return ssh.PublicKeys(signer), nil
 }
 
-// password return password auth method
+// passwordAuth return password auth method
 func passwordAuth(password string) ssh.AuthMethod {
 	return ssh.Password(password)
 }
 
+// keyboardAuth return keyboard auth method
 func keyboardAuth(authCmd string) ssh.AuthMethod {
 	return ssh.KeyboardInteractive(func(user, instruction string, questions []string, echos []bool) (answers []string, err error) {
 		cs, args := common.CMD(authCmd)
@@ -176,7 +179,7 @@ func (s *Server) Terminal() error {
 	// keep alive
 	if s.ServerAliveInterval > 0 {
 		if s.ServerAliveInterval < 10*time.Second {
-			fmt.Println("⚠️ WARN: ServerAliveInterval set too small heartbeat time, use the default value of 10s(please set a larger value, such as \"30s\", \"5m\")")
+			fmt.Println("WARN: ServerAliveInterval set too small heartbeat time, use the default value of 10s(please set a larger value, such as \"30s\", \"5m\")")
 			s.ServerAliveInterval = 10 * time.Second
 		}
 		return sshSession.TerminalWithKeepAlive(s.ServerAliveInterval)
