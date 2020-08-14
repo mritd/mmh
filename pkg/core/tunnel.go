@@ -17,7 +17,7 @@ func Tunnel(name, leftAddr, rightAddr string, reverse bool) {
 		defer func() { _ = listener.Close() }()
 		server, err := findServerByName(name)
 		common.CheckAndExit(err)
-		client, err := server.sshClient(false)
+		client, err := server.wrapperClient(false)
 		common.CheckAndExit(err)
 
 		for {
@@ -35,10 +35,10 @@ func Tunnel(name, leftAddr, rightAddr string, reverse bool) {
 			go connCopy(rightConn, leftConn)
 		}
 	} else {
-		fmt.Printf("mmh reverse tunnel at [%s] %s\n", name, rightAddr)
+		fmt.Printf("mmh reverse tunnel listen at [%s] %s\n", name, rightAddr)
 		server, err := findServerByName(name)
 		common.CheckAndExit(err)
-		client, err := server.sshClient(false)
+		client, err := server.wrapperClient(false)
 		common.CheckAndExit(err)
 		listener, err := client.Listen("tcp", rightAddr)
 		common.CheckAndExit(err)

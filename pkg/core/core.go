@@ -21,8 +21,9 @@ import (
 	"fmt"
 )
 
-// sshClient returns the standard ssh client, if there is an error, the ssh client is nil
-func (s *Server) sshClient(secondLast bool) (*ssh.Client, error) {
+// wrapperClient return a standard ssh client with specific parameters set
+// if there is an error, the ssh client is nil
+func (s *Server) wrapperClient(secondLast bool) (*ssh.Client, error) {
 	// TODO: Move "Set MaxProxy Default Value" to other func
 	if currentConfig.MaxProxy == 0 {
 		currentConfig.MaxProxy = 5
@@ -30,8 +31,23 @@ func (s *Server) sshClient(secondLast bool) (*ssh.Client, error) {
 	return s.ssh(secondLast, 0)
 }
 
-// ssh return a ssh client
-// if secondLast is true, return the second last server
+// wrapperSession returns a standard ssh session with specific parameters set
+// if there is an error, the ssh session is nil
+func (s *Server) wrapperSession(client *ssh.Client) (*ssh.Session, error) {
+	session, err := client.NewSession()
+	if err != nil {
+		return nil, err
+	}
+	if s.Environment != nil {
+		for k, v := range s.Environment {
+			_ = session.Setenv(k, v)
+		}
+	}
+	return session, nil
+}
+
+// ssh returns a standard ssh client, if proxy is configured, it will connect recursively
+// if secondLast is true, return the second last server client
 func (s *Server) ssh(secondLast bool, proxyCount int) (*ssh.Client, error) {
 	sshConfig := &ssh.ClientConfig{
 		User:            s.User,
@@ -162,13 +178,13 @@ func keyboardAuth(authCmd string) ssh.AuthMethod {
 
 // Terminal start a ssh terminal
 func (s *Server) Terminal() error {
-	sshClient, err := s.sshClient(false)
+	sshClient, err := s.wrapperClient(false)
 	if err != nil {
 		return err
 	}
 	defer func() { _ = sshClient.Close() }()
 
-	session, err := sshClient.NewSession()
+	session, err := s.wrapperSession(sshClient)
 	if err != nil {
 		return err
 	}

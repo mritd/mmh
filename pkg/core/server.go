@@ -52,6 +52,7 @@ func getServers() Servers {
 	return servers
 }
 
+// setDefaultValue set the default config value to the given servers
 func setDefaultValue(servers Servers, basic BasicServerConfig) Servers {
 	var ss Servers
 	for _, s := range servers {
@@ -72,6 +73,12 @@ func setDefaultValue(servers Servers, basic BasicServerConfig) Servers {
 		}
 		if s.KeyboardAuthCmd == "" {
 			s.KeyboardAuthCmd = basic.KeyboardAuthCmd
+		}
+		if s.Environment == nil {
+			s.Environment = basic.Environment
+			if s.Environment == nil {
+				s.Environment = map[string]string{"MMH": "true"}
+			}
 		}
 		if s.Port == 0 {
 			s.Port = basic.Port
@@ -108,6 +115,8 @@ func ServerDetail(serverName string) {
 	fmt.Println(buf.String())
 }
 
+// SingleLogin open a single server interactive terminal
+// If running in the tmux environment, mmh will automatically update the tmux window name
 func SingleLogin(name string) {
 	s, err := findServerByName(name)
 	common.CheckAndExit(err)
@@ -127,6 +136,7 @@ func SingleLogin(name string) {
 	}
 }
 
+// SingleInteractiveLogin display a list of interactive servers and then call SingleLogin
 func SingleInteractiveLogin() {
 	cfg := &promptx.SelectConfig{
 		SelectPrompt: "Login Server",

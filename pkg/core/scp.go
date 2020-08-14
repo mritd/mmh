@@ -30,7 +30,7 @@ func runCopy(args []string, multiServer bool) error {
 		s, err := findServerByName(serverName)
 		common.CheckAndExit(err)
 
-		client, err := s.sshClient(false)
+		client, err := s.wrapperClient(false)
 		if err != nil {
 			return err
 		}
@@ -61,7 +61,7 @@ func runCopy(args []string, multiServer bool) error {
 				go func(s *Server, args []string) {
 					defer wg.Done()
 
-					client, err := s.sshClient(false)
+					client, err := s.wrapperClient(false)
 					if err != nil {
 						_, _ = color.New(color.BgRed, color.FgHiWhite).Printf("%s:  %s", s.Name, err)
 						return
@@ -86,7 +86,7 @@ func runCopy(args []string, multiServer bool) error {
 		} else {
 			s, err := findServerByName(serverOrTag)
 			common.CheckAndExit(err)
-			client, err := s.sshClient(false)
+			client, err := s.wrapperClient(false)
 			if err != nil {
 				return err
 			}

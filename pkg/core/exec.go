@@ -71,14 +71,14 @@ func Exec(cmd, tagOrName string, execGroup, ping bool) {
 // since multiple tasks are executed async, the error is returned using channel
 func exec(ctx context.Context, cmd string, s *Server, colorPrint, ping bool) error {
 	// get ssh client
-	sshClient, err := s.sshClient(ping)
+	sshClient, err := s.wrapperClient(ping)
 	if err != nil {
 		return err
 	}
 	defer func() { _ = sshClient.Close() }()
 
 	// get ssh session
-	session, err := sshClient.NewSession()
+	session, err := s.wrapperSession(sshClient)
 	if err != nil {
 		return err
 	}
@@ -99,7 +99,7 @@ func exec(ctx context.Context, cmd string, s *Server, colorPrint, ping bool) err
 		// wait session ready
 		<-sshSession.Ready()
 
-		// read from sshSession.Stdout and print to os.stdout
+		// read from wrapperSession.Stdout and print to os.stdout
 		if !colorPrint {
 			_, _ = io.Copy(os.Stdout, sshSession.Stdout)
 		} else {

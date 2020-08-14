@@ -13,30 +13,32 @@ import (
 
 // server basic config
 type BasicServerConfig struct {
-	User                string        `yaml:"user"`
-	Password            string        `yaml:"password"`
-	PrivateKey          string        `yaml:"private_key"`
-	PrivateKeyPassword  string        `yaml:"private_key_password"`
-	KeyboardAuthCmd     string        `yaml:"keyboard_auth_cmd"`
-	Port                int           `yaml:"port"`
-	ServerAliveInterval time.Duration `yaml:"server_alive_interval"`
+	User                string            `yaml:"user"`
+	Password            string            `yaml:"password"`
+	PrivateKey          string            `yaml:"private_key"`
+	PrivateKeyPassword  string            `yaml:"private_key_password"`
+	KeyboardAuthCmd     string            `yaml:"keyboard_auth_cmd"`
+	Environment         map[string]string `yaml:"environment"`
+	Port                int               `yaml:"port"`
+	ServerAliveInterval time.Duration     `yaml:"server_alive_interval"`
 }
 
 // server config
 type Server struct {
-	Name                string        `yaml:"name"`
-	Address             string        `yaml:"address"`
-	Port                int           `yaml:"port"`
-	User                string        `yaml:"user"`
-	Password            string        `yaml:"password"`
-	HookCmd             string        `yaml:"hook_cmd"`
-	HookStdout          bool          `yaml:"hook_stdout"`
-	KeyboardAuthCmd     string        `yaml:"keyboard_auth_cmd"`
-	PrivateKey          string        `yaml:"private_key"`
-	PrivateKeyPassword  string        `yaml:"private_key_password"`
-	Proxy               string        `yaml:"proxy"`
-	ServerAliveInterval time.Duration `yaml:"server_alive_interval"`
-	Tags                []string      `yaml:"tags"`
+	Name                string            `yaml:"name"`
+	Address             string            `yaml:"address"`
+	Port                int               `yaml:"port"`
+	User                string            `yaml:"user"`
+	Password            string            `yaml:"password"`
+	HookCmd             string            `yaml:"hook_cmd"`
+	HookStdout          bool              `yaml:"hook_stdout"`
+	KeyboardAuthCmd     string            `yaml:"keyboard_auth_cmd"`
+	PrivateKey          string            `yaml:"private_key"`
+	PrivateKeyPassword  string            `yaml:"private_key_password"`
+	Environment         map[string]string `yaml:"environment"`
+	Proxy               string            `yaml:"proxy"`
+	ServerAliveInterval time.Duration     `yaml:"server_alive_interval"`
+	Tags                []string          `yaml:"tags"`
 }
 
 // server tags
