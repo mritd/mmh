@@ -3,8 +3,11 @@ package core
 import (
 	"bytes"
 	"io/ioutil"
+	"net/http"
 	"strings"
 	"time"
+
+	"github.com/gorilla/mux"
 
 	jsoniter "github.com/json-iterator/go"
 
@@ -19,6 +22,11 @@ import (
 	"github.com/mritd/mmh/pkg/common"
 
 	"fmt"
+)
+
+const (
+	envMMH           = "MMH"
+	envAPIAddressKey = "MMH_API_ADDRESS"
 )
 
 // wrapperClient return a standard ssh client with specific parameters set
@@ -42,6 +50,7 @@ func (s *Server) wrapperSession(client *ssh.Client) (*ssh.Session, error) {
 		for k, v := range s.Environment {
 			_ = session.Setenv(k, v)
 		}
+		_ = session.Setenv(envMMH, "true")
 	}
 	return session, nil
 }
@@ -189,6 +198,9 @@ func (s *Server) Terminal() error {
 		return err
 	}
 
+	// start mmh api server
+	_ = session.Setenv(envAPIAddressKey, s.listenAPI(sshClient))
+
 	sshSession := sshutils.NewSSHSession(session, s.HookCmd, s.HookStdout)
 	defer func() { _ = sshSession.Close() }()
 
@@ -202,4 +214,32 @@ func (s *Server) Terminal() error {
 	}
 
 	return sshSession.Terminal()
+}
+
+func (s *Server) listenAPI(client *ssh.Client) string {
+	if s.EnableAPI != "true" {
+		return "disabled"
+	}
+
+	remoteListener, err := client.Listen("tcp", "127.0.0.1:0")
+	if !common.CheckErr(err) {
+		return err.Error()
+	}
+
+	fmt.Printf("⚡ mmh api listen at [%s] http://%s\n", s.Name, remoteListener.Addr().String())
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				fmt.Printf("API Server Err: %v\n", r)
+			}
+			_ = remoteListener.Close()
+		}()
+
+		router := mux.NewRouter().StrictSlash(true)
+		registerAPI(router)
+
+		hs := http.Server{Handler: router}
+		_ = hs.Serve(remoteListener)
+	}()
+	return "http://" + remoteListener.Addr().String()
 }

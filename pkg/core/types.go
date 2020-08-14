@@ -19,6 +19,7 @@ type BasicServerConfig struct {
 	PrivateKeyPassword  string            `yaml:"private_key_password"`
 	KeyboardAuthCmd     string            `yaml:"keyboard_auth_cmd"`
 	Environment         map[string]string `yaml:"environment"`
+	EnableAPI           string            `yaml:"enable_api"`
 	Port                int               `yaml:"port"`
 	ServerAliveInterval time.Duration     `yaml:"server_alive_interval"`
 }
@@ -36,6 +37,7 @@ type Server struct {
 	PrivateKey          string            `yaml:"private_key"`
 	PrivateKeyPassword  string            `yaml:"private_key_password"`
 	Environment         map[string]string `yaml:"environment"`
+	EnableAPI           string            `yaml:"enable_api"`
 	Proxy               string            `yaml:"proxy"`
 	ServerAliveInterval time.Duration     `yaml:"server_alive_interval"`
 	Tags                []string          `yaml:"tags"`

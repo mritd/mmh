@@ -74,10 +74,13 @@ func setDefaultValue(servers Servers, basic BasicServerConfig) Servers {
 		if s.KeyboardAuthCmd == "" {
 			s.KeyboardAuthCmd = basic.KeyboardAuthCmd
 		}
+		if s.EnableAPI == "" {
+			s.EnableAPI = basic.EnableAPI
+		}
 		if s.Environment == nil {
 			s.Environment = basic.Environment
 			if s.Environment == nil {
-				s.Environment = map[string]string{"MMH": "true"}
+				s.Environment = make(map[string]string)
 			}
 		}
 		if s.Port == 0 {

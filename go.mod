@@ -3,7 +3,9 @@ module github.com/mritd/mmh
 go 1.14
 
 require (
+	github.com/atotto/clipboard v0.1.2
 	github.com/fatih/color v1.9.0
+	github.com/gorilla/mux v1.7.4
 	github.com/json-iterator/go v1.1.10
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
