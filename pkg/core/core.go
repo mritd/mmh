@@ -26,7 +26,7 @@ import (
 
 const (
 	envMMH           = "MMH"
-	envAPIAddressKey = "MMH_API_ADDRESS"
+	envAPIAddressKey = "MMH_API_ADDR"
 )
 
 // wrapperClient return a standard ssh client with specific parameters set

@@ -3,6 +3,7 @@ package core
 import (
 	"io/ioutil"
 	"net/http"
+	osexec "os/exec"
 
 	"github.com/xyproto/clip"
 
@@ -35,6 +36,29 @@ func registerAPI(router *mux.Router) {
 		}
 
 		err = clip.WriteAll(string(bs))
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			_, _ = w.Write([]byte(err.Error() + "\n"))
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte("ok\n"))
+	})
+
+	router.HandleFunc("/noti", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			w.WriteHeader(http.StatusBadRequest)
+			_, _ = w.Write([]byte("only support post method\n"))
+			return
+		}
+		bs, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			_, _ = w.Write([]byte(err.Error() + "\n"))
+			return
+		}
+		cmd := osexec.Command("noti", "-t", "mmh", "-m", string(bs))
+		err = cmd.Run()
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			_, _ = w.Write([]byte(err.Error() + "\n"))
