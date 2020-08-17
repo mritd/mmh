@@ -52,11 +52,11 @@ max_proxy: 10
 mec docker 'docker pull nginx:latest'
 ```
 
-`mec` 默认是针对 tag 组服务器操作的，如果期望对单一服务器可以使用 `-s` 选项:
+`mec` 默认是针对 tag 组服务器操作的，如果期望对单一服务器可以使用 `-g false` 选项:
 
 ``` sh
 # 在 prod11 服务器上执行 rm -rf /*
-mec prod11 'rm -rf /*' -s
+mec prod11 'rm -rf /*' -g false
 ```
 
 ## 批量复制
@@ -111,4 +111,4 @@ mtun -l 127.0.0.1:8080 -r baidu.com:80 prod11
 mtun -l baidu.com:80 -r 127.0.0.1:8080 --reverse prod11
 ```
 
-[首页](.) | [上一页](config) | [下一页](advanced)
+[首页](.) | [上一页](03-config) | [下一页](05-advanced)

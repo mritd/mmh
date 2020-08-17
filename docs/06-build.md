@@ -16,4 +16,4 @@ make
 make install
 ```
 
-[首页](.) | [上一页](usage) | [下一页](example)
+[首页](.) | [上一页](05-usage) | [下一页](07-example)

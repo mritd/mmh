@@ -91,23 +91,21 @@ servers:
   # 每隔 n 时间发送心跳包保证 ssh 不会自动断开
   server_alive_interval: 20s
 
-  # tmux 窗口标题配置(试验性功能)
+  ########### 以下部分为高级配置，具体请阅读后面的高级应用章节 ###########
 
-  # 是否开启 tmux 支持，开启后 mmh 连接服务器后将会自动设置当前窗口标题为服务器名称
-  tmux_support: true
-  # 是否开启 tmux 自动更新窗口标题，开启后 mmh 连接服务器退出后 tmux 窗口标题将会自动 rename
-  tmux_auto_rename: false
-  
-  # 自动切换 root 配置(试验性功能)
+  # hook_cmd 用于在登录后 hook 远端输入，以实现自动化
+  hook_cmd: /usr/local/bin/hook_jump_server_select.sh
+  # 配合 hook_cmd 可以读取远端输出
+  hook_stdout: true
+  # ssh 认证的键盘挑战 hook 脚本，用户可自行扩展实现键盘挑战登录
+  keyboard_auth_cmd: /usr/local/bin/keyboard_auth_otp.sh
+  # ssh 连接成功后注入 session 环境变量(需要 server sshd 调整配置)
+  environment:
+    ENABLE_VIM_CONFIG: "true"
+    Other_KEY: "Other_String_Value"
+  # 开启本地 API 支持，开启后可通过远端调用本地 api
+  enable_api: true
 
-  # 是否自动切换到 root
-  su_root: true
-  # 切换到 root 时使用 'sudo su - root' 来切换
-  use_sudo: true
-  # 使用 'sudo su - root' 切换时是否需要输入密码
-  no_password_sudo: false
-  # 如果 'sudo su - root' 需要密码则在此填写 root 密码
-  root_password: root
 ```
 
 ## tags 配置段
@@ -135,4 +133,4 @@ tags:
 以上配置中执行 `mec prod ls` 命令时，mmh 通过搜索配置文件得知 `prod11`、`prod12` 中存在 `prod` 这个 tag，
 然后 mmh 将会并发的在这两台服务器上执行 `ls` 命令。
 
-[首页](.) | [上一页](quick_start) | [下一页](usage)
+[首页](.) | [上一页](02-quick_start) | [下一页](04-usage)

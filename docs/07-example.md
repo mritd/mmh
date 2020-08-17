@@ -3,6 +3,7 @@
 - [持续监测日志](#持续监测日志)
 - [本地连接生产 mysql](#本地连接生产 mysql)
 - [生产使用本地网络](#生产使用本地网络)
+- [延迟通知](#延迟通知)
 
 # 持续监测日志
 
@@ -36,4 +37,15 @@ mtun -l 127.0.0.1:3306 -r 172.16.3.33:3306 prod11
 mtun -l 127.0.0.1:8123 -r 127.0.0.1:8234 prod11 --reverse
 ```
 
-[首页](.) | [上一页](build) | [下一页](q_a)
+# 延迟通知
+
+当在远端服务器执行一个耗时命令时，我们通常不想一直等待，只想在执行完成得道一个通知，此时可以借助
+noti api 完成(请确保本地已安装 [noti](https://github.com/variadico/noti)):
+
+``` sh
+docker pull debian:10 && curl -X POST ${MMH_API_ADDR}/noti --data-binary "pull debian:10 success!"
+```
+
+当 `docker pull debian:10` 执行完成后我们会在本地弹出一个 `pull debian:10 success!` 的通知。
+
+[首页](.) | [上一页](06-build) | [下一页](08-q_a)
