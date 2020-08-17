@@ -3,44 +3,41 @@ package core
 import (
 	"errors"
 	"io/ioutil"
-	"path/filepath"
 	"time"
-
-	"github.com/mitchellh/go-homedir"
 
 	"gopkg.in/yaml.v2"
 )
 
 // server basic config
 type BasicServerConfig struct {
-	User                string            `yaml:"user"`
-	Password            string            `yaml:"password"`
-	PrivateKey          string            `yaml:"private_key"`
-	PrivateKeyPassword  string            `yaml:"private_key_password"`
-	KeyboardAuthCmd     string            `yaml:"keyboard_auth_cmd"`
-	Environment         map[string]string `yaml:"environment"`
-	EnableAPI           string            `yaml:"enable_api"`
-	Port                int               `yaml:"port"`
-	ServerAliveInterval time.Duration     `yaml:"server_alive_interval"`
+	User                string            `yaml:"user,omitempty"`
+	Password            string            `yaml:"password,omitempty"`
+	PrivateKey          string            `yaml:"private_key,omitempty"`
+	PrivateKeyPassword  string            `yaml:"private_key_password,omitempty"`
+	KeyboardAuthCmd     string            `yaml:"keyboard_auth_cmd,omitempty"`
+	Environment         map[string]string `yaml:"environment,omitempty"`
+	EnableAPI           string            `yaml:"enable_api,omitempty"`
+	Port                int               `yaml:"port,omitempty"`
+	ServerAliveInterval time.Duration     `yaml:"server_alive_interval,omitempty"`
 }
 
 // server config
 type Server struct {
-	Name                string            `yaml:"name"`
+	Name                string            `yaml:"name,omitempty"`
 	Address             string            `yaml:"address"`
-	Port                int               `yaml:"port"`
-	User                string            `yaml:"user"`
-	Password            string            `yaml:"password"`
-	HookCmd             string            `yaml:"hook_cmd"`
-	HookStdout          bool              `yaml:"hook_stdout"`
-	KeyboardAuthCmd     string            `yaml:"keyboard_auth_cmd"`
-	PrivateKey          string            `yaml:"private_key"`
-	PrivateKeyPassword  string            `yaml:"private_key_password"`
-	Environment         map[string]string `yaml:"environment"`
-	EnableAPI           string            `yaml:"enable_api"`
-	Proxy               string            `yaml:"proxy"`
-	ServerAliveInterval time.Duration     `yaml:"server_alive_interval"`
-	Tags                []string          `yaml:"tags"`
+	Port                int               `yaml:"port,omitempty"`
+	User                string            `yaml:"user,omitempty"`
+	Password            string            `yaml:"password,omitempty"`
+	HookCmd             string            `yaml:"hook_cmd,omitempty"`
+	HookStdout          bool              `yaml:"hook_stdout,omitempty"`
+	KeyboardAuthCmd     string            `yaml:"keyboard_auth_cmd,omitempty"`
+	PrivateKey          string            `yaml:"private_key,omitempty"`
+	PrivateKeyPassword  string            `yaml:"private_key_password,omitempty"`
+	Environment         map[string]string `yaml:"environment,omitempty"`
+	EnableAPI           string            `yaml:"enable_api,omitempty"`
+	Proxy               string            `yaml:"proxy,omitempty"`
+	ServerAliveInterval time.Duration     `yaml:"server_alive_interval,omitempty"`
+	Tags                []string          `yaml:"tags,omitempty"`
 }
 
 // server tags
@@ -62,10 +59,10 @@ func (servers Servers) Swap(i, j int) {
 // context config(eg: default.yaml)
 type Config struct {
 	configPath string
-	Basic      BasicServerConfig `yaml:"basic"`
-	MaxProxy   int               `yaml:"max_proxy"`
+	Basic      BasicServerConfig `yaml:"basic,omitempty"`
+	MaxProxy   int               `yaml:"max_proxy,omitempty"`
 	Servers    Servers           `yaml:"servers"`
-	Tags       Tags              `yaml:"tags"`
+	Tags       Tags              `yaml:"tags,omitempty"`
 }
 
 // set config file path
@@ -135,45 +132,24 @@ func (info ConfigList) Swap(i, j int) {
 
 // basic config example
 func BasicServerExample() BasicServerConfig {
-	home, _ := homedir.Dir()
 	return BasicServerConfig{
-		User:       "root",
-		Port:       22,
-		PrivateKey: filepath.Join(home, ".ssh", "id_rsa"),
+		User:     "root",
+		Password: "password",
 	}
 }
 
 // server config example
 func ServersExample() Servers {
-	home, _ := homedir.Dir()
 	return Servers{
 		{
-			Name:                "prod11",
-			User:                "root",
-			Tags:                []string{"prod"},
-			Address:             "10.10.4.11",
-			Port:                22,
-			Password:            "password",
-			Proxy:               "prod12",
-			ServerAliveInterval: 20 * time.Second,
+			Name:    "prod11",
+			Address: "10.10.4.11",
+			Proxy:   "prod12",
 		},
 		{
-			Name:                "prod12",
-			User:                "root",
-			Tags:                []string{"prod"},
-			Address:             "10.10.4.12",
-			Port:                22,
-			PrivateKey:          filepath.Join(home, ".ssh", "id_rsa"),
-			PrivateKeyPassword:  "password",
-			ServerAliveInterval: 10 * time.Second,
+			Name:    "prod12",
+			Address: "10.10.4.12",
 		},
-	}
-}
-
-// tags config example
-func TagsExample() Tags {
-	return Tags{
-		"prod",
 	}
 }
 
@@ -182,7 +158,6 @@ func ConfigExample() *Config {
 	return &Config{
 		Basic:    BasicServerExample(),
 		Servers:  ServersExample(),
-		Tags:     TagsExample(),
 		MaxProxy: 5,
 	}
 }
