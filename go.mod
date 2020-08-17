@@ -17,4 +17,4 @@ require (
 	gopkg.in/yaml.v2 v2.3.0
 )
 
-replace github.com/xyproto/clip v0.3.1 => github.com/mritd/clip v0.3.1
+replace github.com/xyproto/clip v0.3.1 => github.com/mritd/clip v0.3.2-0.20200817040708-ed826a857db0
