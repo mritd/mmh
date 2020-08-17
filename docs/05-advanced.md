@@ -84,7 +84,7 @@ AcceptEnv LANG LC_* ENABLE_VIM_CONFIG MMH*
 - `${MMH_API_ADDR}/`: 单纯的返回一段字符串代表 mmh api server 已经运行
 - `${MMH_API_ADDR}/healthz`: mmh api server 健康检测接口
 - `${MMH_API_ADDR}/copy`: 通过 POST 请求，body 内的内容会自动复制到本地剪切板(只支持纯文本)
-- `${MMH_API_ADDR}/noti`: 通过 POST 请求，如果本地安装了 [noti](https://github.com/variadico/noti) 则 body 内容作为 message 在本地弹出
+- `${MMH_API_ADDR}/noti`: 通过 POST 请求，如果本地安装了 [noti](https://github.com/variadico/noti) 则 body 内容作为 message 在本地弹出(不支持 WSL)
 
 `copy` api 一般用于在无限远端想要复制一个大文本，拖屏幕很不方便的时候可以通过 api 完成，以下
 为一个小脚本用来模仿 mac 本地的 `pbcopy` 命令:
