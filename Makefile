@@ -8,6 +8,7 @@ all:
     	-ldflags   "-X 'github.com/mritd/mmh/cmd.Version=${BUILD_VERSION}' \
                     -X 'github.com/mritd/mmh/cmd.BuildDate=${BUILD_DATE}' \
                     -X 'github.com/mritd/mmh/cmd.CommitID=${COMMIT_SHA1}'"
+	tar -C docs -zcvf dist/addons.tar.gz addons
 
 release: all
 	ghr -u mritd -t $(GITHUB_TOKEN) -replace -recreate --debug ${BUILD_VERSION} dist
