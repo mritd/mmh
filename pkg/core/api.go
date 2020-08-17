@@ -4,7 +4,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/atotto/clipboard"
+	"github.com/xyproto/clip"
 
 	"github.com/gorilla/mux"
 )
@@ -34,7 +34,7 @@ func registerAPI(router *mux.Router) {
 			return
 		}
 
-		err = clipboard.WriteAll(string(bs))
+		err = clip.WriteAll(string(bs))
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			_, _ = w.Write([]byte(err.Error() + "\n"))
