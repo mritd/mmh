@@ -10,10 +10,10 @@ all:
                     -X 'github.com/mritd/mmh/cmd.CommitID=${COMMIT_SHA1}'"
 	tar -C docs -zcvf dist/addons.tar.gz addons
 
-release: all
+release: clean all
 	ghr -u mritd -t $(GITHUB_TOKEN) -replace -recreate --debug ${BUILD_VERSION} dist
 
-pre-release: all
+pre-release: clean all
 	ghr -u mritd -t $(GITHUB_TOKEN) -replace -recreate -prerelease --debug ${BUILD_VERSION} dist
 
 clean:
