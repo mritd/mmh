@@ -33,11 +33,9 @@ func Exec(cmd, tagOrName string, execGroup, ping bool) {
 	sigs := make(chan os.Signal)
 	signal.Notify(sigs, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	go func() {
-		switch <-sigs {
-		case syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT:
-			// exit all goroutine
-			cancel()
-		}
+		// exit all goroutine
+		<-sigs
+		cancel()
 	}()
 
 	// single server exec

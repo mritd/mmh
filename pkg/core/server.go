@@ -4,7 +4,10 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"os"
+	"os/signal"
 	"sort"
+	"syscall"
 	"time"
 
 	"github.com/mritd/mmh/pkg/common"
@@ -131,6 +134,17 @@ func SingleLogin(name string) {
 		common.TmuxSetWindowName(tmuxWinIndex, s.Name)
 		common.TmuxSetAutomaticRename(tmuxWinIndex, false)
 	}
+
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
+	go func() {
+		<-sig
+		if common.Tmux() {
+			common.TmuxSetWindowName(tmuxWinIndex, tmuxWinName)
+			common.TmuxSetAutomaticRename(tmuxWinIndex, tmuxAutoRename)
+		}
+		os.Exit(1)
+	}()
 
 	common.PrintErrWithPrefix("\n😱", s.Terminal())
 	if common.Tmux() {
