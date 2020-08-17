@@ -53,36 +53,33 @@ func LoadConfig() {
 		if !filepath.IsAbs(configDir) && !strings.HasPrefix(configDir, "~") {
 			common.Exit("the config dir path must be a absolute path or start with homedir(~)", 1)
 		}
-
 		// convert config dir path with homedir(~) prefix to absolute path
 		if strings.HasPrefix(configDir, "~") {
 			configDir = strings.Replace(configDir, "~", home, 1)
 		}
+	} else {
+		// default to $HOME/.mmh
+		configDir = filepath.Join(home, ".mmh")
+	}
 
-		// check config dir if it not exist
-		f, err := os.Lstat(configDir)
-		if err != nil {
+	// check config dir if it not exist
+	f, err := os.Lstat(configDir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			initConfig(configDir)
+		} else {
+			common.Exit(err.Error(), 1)
+		}
+	} else {
+		// check config dir is symlink. filepath Walk does not follow symbolic links
+		if f.Mode()&os.ModeSymlink != 0 {
+			configDir, err = os.Readlink(configDir)
 			if os.IsNotExist(err) {
 				initConfig(configDir)
 			} else {
 				common.Exit(err.Error(), 1)
 			}
-		} else {
-			// check config dir is symlink. filepath Walk does not follow symbolic links
-			if f.Mode()&os.ModeSymlink != 0 {
-				configDir, err = os.Readlink(configDir)
-				if os.IsNotExist(err) {
-					initConfig(configDir)
-				} else {
-					common.Exit(err.Error(), 1)
-				}
-			}
 		}
-
-	} else {
-		// default to $HOME/.mmh
-		configDir = filepath.Join(home, ".mmh")
-		initConfig(configDir)
 	}
 
 	// get current config
@@ -129,7 +126,7 @@ func initConfig(dir string) {
 	// create basic config file
 	common.CheckAndExit(ConfigExample().WriteTo(filepath.Join(dir, basicConfigName)))
 	// set current config to default
-	common.CheckAndExit(ioutil.WriteFile(filepath.Join(dir, currentConfigStoreFile), []byte(currentConfigName), 0644))
+	common.CheckAndExit(ioutil.WriteFile(filepath.Join(dir, currentConfigStoreFile), []byte("default.yaml"), 0644))
 }
 
 // ReloadConfig first clears the memory config objects, and then reloads them
