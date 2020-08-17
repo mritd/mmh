@@ -10,6 +10,8 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// registerAPI register routes to the local http address
+// Custom api endpoints are not currently supported
 func registerAPI(router *mux.Router) {
 	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)

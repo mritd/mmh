@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+if [ ! -n "${MMH_API_ADDR}" ]; then
+    echo "MMH API is not enabled, or sshd does not support injection of MMH_API_ADDR env."
+    exit 1
+fi
+
+curl -X POST ${MMH_API_ADDR}/copy --data-binary @-
