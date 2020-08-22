@@ -17,6 +17,7 @@ type BasicServerConfig struct {
 	KeyboardAuthCmd     string            `yaml:"keyboard_auth_cmd,omitempty"`
 	Environment         map[string]string `yaml:"environment,omitempty"`
 	EnableAPI           string            `yaml:"enable_api,omitempty"`
+	TouchID             string            `yaml:"touch_id"`
 	Port                int               `yaml:"port,omitempty"`
 	ServerAliveInterval time.Duration     `yaml:"server_alive_interval,omitempty"`
 }
@@ -27,15 +28,16 @@ type Server struct {
 	Address             string            `yaml:"address"`
 	Port                int               `yaml:"port,omitempty"`
 	User                string            `yaml:"user,omitempty"`
+	Proxy               string            `yaml:"proxy,omitempty"`
 	Password            string            `yaml:"password,omitempty"`
+	PrivateKey          string            `yaml:"private_key,omitempty"`
+	PrivateKeyPassword  string            `yaml:"private_key_password,omitempty"`
 	HookCmd             string            `yaml:"hook_cmd,omitempty"`
 	HookStdout          bool              `yaml:"hook_stdout,omitempty"`
 	KeyboardAuthCmd     string            `yaml:"keyboard_auth_cmd,omitempty"`
-	PrivateKey          string            `yaml:"private_key,omitempty"`
-	PrivateKeyPassword  string            `yaml:"private_key_password,omitempty"`
 	Environment         map[string]string `yaml:"environment,omitempty"`
 	EnableAPI           string            `yaml:"enable_api,omitempty"`
-	Proxy               string            `yaml:"proxy,omitempty"`
+	TouchID             string            `yaml:"touch_id"`
 	ServerAliveInterval time.Duration     `yaml:"server_alive_interval,omitempty"`
 	Tags                []string          `yaml:"tags,omitempty"`
 }

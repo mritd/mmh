@@ -2,10 +2,13 @@ package core
 
 import (
 	"bytes"
+	"errors"
 	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/mritd/mmh/pkg/extauth"
 
 	"github.com/gorilla/mux"
 
@@ -35,6 +38,15 @@ func (s *Server) wrapperClient(secondLast bool) (*ssh.Client, error) {
 	// TODO: Move "Set MaxProxy Default Value" to other func
 	if currentConfig.MaxProxy == 0 {
 		currentConfig.MaxProxy = 5
+	}
+	if s.TouchID == "true" {
+		ok, err := extauth.TouchIDAuth("登录服务器 " + s.Name)
+		if err != nil {
+			return nil, err
+		}
+		if !ok {
+			return nil, errors.New("mmh cannot verify your identity, login denied")
+		}
 	}
 	return s.ssh(secondLast, 0)
 }
