@@ -40,7 +40,7 @@ func (s *Server) wrapperClient(secondLast bool) (*ssh.Client, error) {
 		currentConfig.MaxProxy = 5
 	}
 	if s.TouchID == "true" {
-		ok, err := extauth.TouchIDAuth("登录服务器 " + s.Name)
+		ok, err := extauth.TouchIDAuth(fmt.Sprintf(" login server => %s\n\nUser: %s\nAddr: %s:%d", s.Name, s.User, s.Address, s.Port))
 		if err != nil {
 			return nil, err
 		}
