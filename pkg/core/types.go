@@ -17,7 +17,7 @@ type BasicServerConfig struct {
 	KeyboardAuthCmd     string            `yaml:"keyboard_auth_cmd,omitempty"`
 	Environment         map[string]string `yaml:"environment,omitempty"`
 	EnableAPI           string            `yaml:"enable_api,omitempty"`
-	TouchID             string            `yaml:"touch_id,omitempty"`
+	ExtAuth             string            `yaml:"ext_auth,omitempty"`
 	Port                int               `yaml:"port,omitempty"`
 	ServerAliveInterval time.Duration     `yaml:"server_alive_interval,omitempty"`
 }
@@ -37,7 +37,7 @@ type Server struct {
 	KeyboardAuthCmd     string            `yaml:"keyboard_auth_cmd,omitempty"`
 	Environment         map[string]string `yaml:"environment,omitempty"`
 	EnableAPI           string            `yaml:"enable_api,omitempty"`
-	TouchID             string            `yaml:"touch_id,omitempty"`
+	ExtAuth             string            `yaml:"ext_auth,omitempty"`
 	ServerAliveInterval time.Duration     `yaml:"server_alive_interval,omitempty"`
 	Tags                []string          `yaml:"tags,omitempty"`
 }

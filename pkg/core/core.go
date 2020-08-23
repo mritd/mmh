@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mritd/mmh/pkg/extauth"
+	"github.com/mritd/touchid"
 
 	"github.com/gorilla/mux"
 
@@ -39,8 +39,12 @@ func (s *Server) wrapperClient(secondLast bool) (*ssh.Client, error) {
 	if currentConfig.MaxProxy == 0 {
 		currentConfig.MaxProxy = 5
 	}
-	if s.TouchID == "true" {
-		ok, err := extauth.TouchIDAuth(fmt.Sprintf(" login server => %s\n\nUser: %s\nAddr: %s:%d", s.Name, s.User, s.Address, s.Port))
+
+	if s.ExtAuth != "" {
+		if s.ExtAuth == "true" {
+			s.ExtAuth = "any"
+		}
+		ok, err := touchid.Auth(touchid.DeviceType(s.ExtAuth), fmt.Sprintf(" login server => %s\n\nUser: %s\nAddr: %s:%d", s.Name, s.User, s.Address, s.Port))
 		if err != nil {
 			return nil, err
 		}

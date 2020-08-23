@@ -80,8 +80,8 @@ func setDefaultValue(servers Servers, basic BasicServerConfig) Servers {
 		if s.EnableAPI == "" {
 			s.EnableAPI = basic.EnableAPI
 		}
-		if s.TouchID == "" {
-			s.TouchID = basic.TouchID
+		if s.ExtAuth == "" {
+			s.ExtAuth = basic.ExtAuth
 		}
 		if s.Environment == nil {
 			s.Environment = basic.Environment

@@ -91,6 +91,8 @@ github.com/mritd/promptx v0.0.0-20200515061936-66e281bd3c15 h1:WFAv83HnY9yHpQWeD
 github.com/mritd/promptx v0.0.0-20200515061936-66e281bd3c15/go.mod h1:3fywjHX11nsf0f4lrmJ5zuwdxTEn6qh5v3LV2Nt8nVc=
 github.com/mritd/readline v0.0.0-20190919142632-e26f42a56c34 h1:BPeB6AxncRXhTouiFcv++Gso1IOki6rCVhkEE36DI6I=
 github.com/mritd/readline v0.0.0-20190919142632-e26f42a56c34/go.mod h1:RCmOeHfgzDd3ofo+QDJZ4tjCOv3SWN8WPk3piOfjqiU=
+github.com/mritd/touchid v0.0.0-20200823141335-acd3a7afd9af h1:ypRFZOJmbYsG19TjRf/B+8FzlWHYKxxxWdhxMr6PFaI=
+github.com/mritd/touchid v0.0.0-20200823141335-acd3a7afd9af/go.mod h1:Y4q67wYoVNg3k3jXwY8lB4a7idPYhQcA23ZOBIE/TgY=
 github.com/mwitkow/go-conntrack v0.0.0-20161129095857-cc309e4a2223/go.mod h1:qRWi+5nqEBWmkhHvq77mSJWrCKwh8bxhgT7d/eI7P4U=
 github.com/nbutton23/zxcvbn-go v0.0.0-20180912185939-ae427f1e4c1d/go.mod h1:o96djdrsSGy3AWPyBgZMAGfxZNfgntdJG+11KU4QvbU=
 github.com/oklog/ulid v1.3.1/go.mod h1:CirwcVhetQ6Lv90oh/F+FBtV6XMibvdAFo93nm5qn4U=
