@@ -9,10 +9,9 @@ var tunLeftAddr, tunRightAddr string
 var tunReverse bool
 
 var tunCmd = &cobra.Command{
-	Use:     "tun SERVER_NAME",
+	Use:     "tun SERVER",
 	Aliases: []string{"mtun"},
-	Short:   "sshutils tunnel",
-	Long:    "sshutils tunnel.",
+	Short:   "ssh tunnel",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 1 {
 			core.Tunnel(args[0], tunLeftAddr, tunRightAddr, tunReverse)

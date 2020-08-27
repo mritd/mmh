@@ -132,6 +132,13 @@ func (info ConfigList) Swap(i, j int) {
 	info[i], info[j] = info[j], info[i]
 }
 
+type KeyBoardRequest struct {
+	User        string   `json:"user"`
+	Instruction string   `json:"instruction"`
+	Questions   []string `json:"questions"`
+	Echos       []bool   `json:"echos"`
+}
+
 // basic config example
 func BasicServerExample() BasicServerConfig {
 	return BasicServerConfig{
@@ -162,11 +169,4 @@ func ConfigExample() *Config {
 		Servers:  ServersExample(),
 		MaxProxy: 5,
 	}
-}
-
-type KeyBoardRequest struct {
-	User        string   `json:"user"`
-	Instruction string   `json:"instruction"`
-	Questions   []string `json:"questions"`
-	Echos       []bool   `json:"echos"`
 }

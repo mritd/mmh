@@ -6,7 +6,7 @@ import (
 )
 
 var pingCmd = &cobra.Command{
-	Use:     "ping SERVER_NAME",
+	Use:     "ping SERVER",
 	Aliases: []string{"mping"},
 	Short:   "ping server",
 	Run: func(cmd *cobra.Command, args []string) {

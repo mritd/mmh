@@ -10,7 +10,7 @@ import (
 var execGroup bool
 
 var execCmd = &cobra.Command{
-	Use:     "exec SERVER COMMAND",
+	Use:     "exec SERVER|TAG COMMAND",
 	Aliases: []string{"mec"},
 	Short:   "batch exec command",
 	Run: func(cmd *cobra.Command, args []string) {
