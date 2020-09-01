@@ -121,12 +121,10 @@ func LoadConfig() {
 func initConfig(dir string) {
 	// create config dir
 	common.CheckAndExit(os.MkdirAll(dir, 0755))
-	// create default config file
-	common.CheckAndExit(ConfigExample().WriteTo(filepath.Join(dir, "default.yaml")))
 	// create basic config file
 	common.CheckAndExit(ConfigExample().WriteTo(filepath.Join(dir, basicConfigName)))
 	// set current config to default
-	common.CheckAndExit(ioutil.WriteFile(filepath.Join(dir, currentConfigStoreFile), []byte("default.yaml"), 0644))
+	common.CheckAndExit(ioutil.WriteFile(filepath.Join(dir, currentConfigStoreFile), []byte("basic.yaml"), 0644))
 }
 
 // ReloadConfig first clears the memory config objects, and then reloads them
