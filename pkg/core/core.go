@@ -44,7 +44,10 @@ func (s *Server) wrapperClient(secondLast bool) (*ssh.Client, error) {
 		if s.ExtAuth == "true" {
 			s.ExtAuth = "any"
 		}
-		ok, err := touchid.Auth(touchid.DeviceType(s.ExtAuth), fmt.Sprintf(" login server => %s\n\nUser: %s\nAddr: %s:%d", s.Name, s.User, s.Address, s.Port))
+		ok, err := touchid.SerialAuth(
+			touchid.DeviceType(s.ExtAuth),
+			fmt.Sprintf(" login server => %s\n\nUser: %s\nAddr: %s:%d", s.Name, s.User, s.Address, s.Port),
+			5*time.Second)
 		if err != nil {
 			return nil, err
 		}
