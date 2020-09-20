@@ -10,7 +10,7 @@ import (
 	"github.com/mritd/mmh/pkg/common"
 )
 
-// Install Install mmh binary files into the specified dir and create alias soft links
+// Install install mmh binary files into the specified dir and create alias soft links
 func Install(dir string) {
 	var binPaths []string
 	for _, as := range Aliases {
@@ -47,7 +47,7 @@ func Install(dir string) {
 
 }
 
-// Uninstall deletes mmh binary files and related soft links from the specified dir
+// Uninstall delete mmh binary files and related soft links from the specified dir
 func Uninstall(dir string) {
 	var binPaths []string
 	for _, as := range Aliases {

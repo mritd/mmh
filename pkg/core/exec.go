@@ -1,9 +1,6 @@
 package core
 
 import (
-	"bufio"
-	"bytes"
-	"fmt"
 	"io"
 
 	"github.com/mritd/mmh/pkg/sshutils"
@@ -42,7 +39,7 @@ func Exec(cmd, tagOrName string, execGroup, ping bool) {
 	if !execGroup {
 		server, err := findServerByName(tagOrName)
 		common.CheckAndExit(err)
-		err = exec(ctx, cmd, server, false, ping)
+		err = exec(ctx, cmd, server, ping)
 		common.PrintErr(err)
 	} else {
 		// multiple servers
@@ -57,7 +54,7 @@ func Exec(cmd, tagOrName string, execGroup, ping bool) {
 			// because it takes time for ssh to establish a connection
 			go func(s *Server) {
 				defer execWg.Done()
-				err = exec(ctx, cmd, s, true, false)
+				err = exec(ctx, cmd, s, false)
 				common.PrintErrWithPrefix(s.Name+": 😱 ", err)
 			}(s)
 		}
@@ -65,9 +62,8 @@ func Exec(cmd, tagOrName string, execGroup, ping bool) {
 	}
 }
 
-// single server execution command
-// since multiple tasks are executed async, the error is returned using channel
-func exec(ctx context.Context, cmd string, s *Server, colorPrint, ping bool) error {
+// exec executes commands on a single server
+func exec(ctx context.Context, cmd string, s *Server, ping bool) error {
 	// get ssh client
 	sshClient, err := s.wrapperClient(ping)
 	if err != nil {
@@ -76,13 +72,13 @@ func exec(ctx context.Context, cmd string, s *Server, colorPrint, ping bool) err
 	defer func() { _ = sshClient.Close() }()
 
 	// get ssh session
-	session, err := s.wrapperSession(sshClient)
+	se, err := s.wrapperSession(sshClient)
 	if err != nil {
 		return err
 	}
 
 	// ssh utils session
-	sshSession := sshutils.NewSSHSession(session, "", false)
+	sshSession := sshutils.NewSSHSession(se, s.HookCmd, s.HookStdout)
 	defer func() { _ = sshSession.Close() }()
 	go func() {
 		select {
@@ -92,38 +88,7 @@ func exec(ctx context.Context, cmd string, s *Server, colorPrint, ping bool) err
 		}
 	}()
 
-	// print to stdout
-	go func() {
-		// wait session ready
-		<-sshSession.Ready()
-
-		// read from wrapperSession.Stdout and print to os.stdout
-		if !colorPrint {
-			_, _ = io.Copy(os.Stdout, sshSession.Stdout)
-		} else {
-			buf := bufio.NewReader(sshSession.Stdout)
-			var output bytes.Buffer
-			for {
-				line, err := buf.ReadString('\n')
-				if err != nil {
-					if err == io.EOF || err == io.ErrClosedPipe {
-						break
-					} else {
-						common.PrintErr(err)
-						break
-					}
-				}
-
-				err = common.ColorOutput(&output, common.ColorLine{Prefix: s.Name, Value: line})
-				if err != nil {
-					common.PrintErr(err)
-				} else {
-					fmt.Print(output.String())
-				}
-				output.Reset()
-			}
-		}
-	}()
-
-	return sshSession.PipeExec(cmd)
+	return sshSession.PipeExec(cmd, func(r io.Reader, w io.Writer) {
+		common.Converted2Rendered(r, w, s.Name+":")
+	})
 }

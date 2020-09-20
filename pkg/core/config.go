@@ -86,7 +86,7 @@ func LoadConfig() {
 	currentCfgStoreFile := filepath.Join(configDir, currentConfigStoreFile)
 	bs, err := ioutil.ReadFile(currentCfgStoreFile)
 	if err != nil || len(bs) < 1 {
-		fmt.Println("failed to get current config, use default config")
+		fmt.Println("failed to get current config, use default config(default.yaml)")
 		currentConfigName = "default.yaml"
 	} else {
 		currentConfigName = string(bs)
@@ -142,7 +142,7 @@ func ReloadConfig() {
 
 // ListConfig print a list of config files
 func ListConfig() {
-	t, _ := common.Template(listConfigTpl)
+	t, _ := common.ColorFuncTemplate(listConfigTpl)
 	var buf bytes.Buffer
 	common.CheckAndExit(t.Execute(&buf, configList))
 	fmt.Println(buf.String())

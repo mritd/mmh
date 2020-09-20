@@ -108,7 +108,7 @@ func setDefaultValue(servers Servers, basic BasicServerConfig) Servers {
 
 // ListServers print server list
 func ListServers() {
-	t, _ := common.Template(listServersTpl)
+	t, _ := common.ColorFuncTemplate(listServersTpl)
 	var buf bytes.Buffer
 	common.CheckAndExit(t.Execute(&buf, getServers()))
 	fmt.Println(buf.String())
@@ -118,7 +118,7 @@ func ListServers() {
 func ServerDetail(serverName string) {
 	s, err := findServerByName(serverName)
 	common.CheckAndExit(err)
-	t, _ := common.Template(serverDetailTpl)
+	t, _ := common.ColorFuncTemplate(serverDetailTpl)
 	var buf bytes.Buffer
 	common.CheckAndExit(t.Execute(&buf, s))
 	fmt.Println(buf.String())

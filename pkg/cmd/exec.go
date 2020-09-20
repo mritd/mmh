@@ -17,13 +17,13 @@ var execCmd = &cobra.Command{
 		if len(args) < 2 {
 			_ = cmd.Help()
 		} else {
-			cmd := strings.Join(args[1:], " ")
-			core.Exec(cmd, args[0], execGroup, false)
+			cs := strings.Join(args[1:], " ")
+			core.Exec(cs, args[0], execGroup, false)
 		}
 	},
 }
 
 func init() {
+	execCmd.PersistentFlags().BoolVarP(&execGroup, "group", "g", false, "multi-server exec")
 	rootCmd.AddCommand(execCmd)
-	execCmd.PersistentFlags().BoolVarP(&execGroup, "group", "g", true, "multi-server exec")
 }

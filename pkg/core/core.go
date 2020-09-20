@@ -33,7 +33,6 @@ const (
 )
 
 // wrapperClient return a standard ssh client with specific parameters set
-// if there is an error, the ssh client is nil
 func (s *Server) wrapperClient(secondLast bool) (*ssh.Client, error) {
 	// TODO: Move "Set MaxProxy Default Value" to other func
 	if currentConfig.MaxProxy == 0 {
@@ -46,7 +45,7 @@ func (s *Server) wrapperClient(secondLast bool) (*ssh.Client, error) {
 		}
 		ok, err := touchid.SerialAuth(
 			touchid.DeviceType(s.ExtAuth),
-			fmt.Sprintf(" login server => %s\n\nUser: %s\nAddr: %s:%d", s.Name, s.User, s.Address, s.Port),
+			fmt.Sprintf(" connect to server => %s\n\nUser: %s\nAddr: %s:%d", s.Name, s.User, s.Address, s.Port),
 			5*time.Second)
 		if err != nil {
 			return nil, err
@@ -65,11 +64,11 @@ func (s *Server) wrapperSession(client *ssh.Client) (*ssh.Session, error) {
 	if err != nil {
 		return nil, err
 	}
+	_ = session.Setenv(envMMH, "true")
 	if s.Environment != nil {
 		for k, v := range s.Environment {
 			_ = session.Setenv(k, v)
 		}
-		_ = session.Setenv(envMMH, "true")
 	}
 	return session, nil
 }
@@ -184,7 +183,7 @@ func passwordAuth(password string) ssh.AuthMethod {
 // keyboardAuth return keyboard auth method
 func keyboardAuth(authCmd string) ssh.AuthMethod {
 	return ssh.KeyboardInteractive(func(user, instruction string, questions []string, echos []bool) (answers []string, err error) {
-		cs, args := common.CMD(authCmd)
+		cs, args := common.ParseCommand(authCmd)
 		cmd := osexec.Command(cs, args...)
 		reqBs, err := jsoniter.Marshal(KeyBoardRequest{
 			User:        user,
@@ -212,15 +211,14 @@ func (s *Server) Terminal() error {
 	}
 	defer func() { _ = sshClient.Close() }()
 
-	session, err := s.wrapperSession(sshClient)
+	se, err := s.wrapperSession(sshClient)
 	if err != nil {
 		return err
 	}
+	// Inject mmh api address
+	_ = se.Setenv(envAPIAddressKey, s.listenAPI(sshClient))
 
-	// start mmh api server
-	_ = session.Setenv(envAPIAddressKey, s.listenAPI(sshClient))
-
-	sshSession := sshutils.NewSSHSession(session, s.HookCmd, s.HookStdout)
+	sshSession := sshutils.NewSSHSession(se, s.HookCmd, s.HookStdout)
 	defer func() { _ = sshSession.Close() }()
 
 	// keep alive
