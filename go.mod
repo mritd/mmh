@@ -13,7 +13,7 @@ require (
 	github.com/spf13/cobra v1.0.0
 	github.com/xyproto/clip v0.3.1
 	golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a
-	gopkg.in/yaml.v2 v2.3.0
+	gopkg.in/yaml.v2 v2.4.0
 )
 
 replace github.com/xyproto/clip v0.3.1 => github.com/mritd/clip v0.3.2-0.20200817040708-ed826a857db0
