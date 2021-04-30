@@ -5,7 +5,7 @@ go 1.15
 require (
 	github.com/fatih/color v1.10.0
 	github.com/gorilla/mux v1.8.0
-	github.com/json-iterator/go v1.1.10
+	github.com/json-iterator/go v1.1.11
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mritd/promptx v0.0.0-20200515061936-66e281bd3c15
 	github.com/mritd/touchid v0.0.0-20200914041600-145dfa05fb2b
