@@ -10,7 +10,7 @@ require (
 	github.com/mritd/promptx v0.0.0-20200515061936-66e281bd3c15
 	github.com/mritd/touchid v0.0.0-20200914041600-145dfa05fb2b
 	github.com/pkg/sftp v1.13.0
-	github.com/spf13/cobra v1.0.0
+	github.com/spf13/cobra v1.1.2
 	github.com/xyproto/clip v0.3.1
 	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
 	gopkg.in/yaml.v2 v2.4.0
