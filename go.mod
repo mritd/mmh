@@ -3,7 +3,7 @@ module github.com/mritd/mmh
 go 1.15
 
 require (
-	github.com/fatih/color v1.10.0
+	github.com/fatih/color v1.12.0
 	github.com/gorilla/mux v1.8.0
 	github.com/json-iterator/go v1.1.11
 	github.com/mitchellh/go-homedir v1.1.0
