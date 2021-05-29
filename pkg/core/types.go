@@ -8,7 +8,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-// server basic config
+// BasicServerConfig server basic config
 type BasicServerConfig struct {
 	User                string            `yaml:"user,omitempty"`
 	Password            string            `yaml:"password,omitempty"`
@@ -22,9 +22,9 @@ type BasicServerConfig struct {
 	ServerAliveInterval time.Duration     `yaml:"server_alive_interval,omitempty"`
 }
 
-// server config
+// Server server config
 type Server struct {
-	Name                string            `yaml:"name,omitempty"`
+	Name                string            `yaml:"name"`
 	Address             string            `yaml:"address"`
 	Port                int               `yaml:"port,omitempty"`
 	User                string            `yaml:"user,omitempty"`
@@ -42,10 +42,10 @@ type Server struct {
 	Tags                []string          `yaml:"tags,omitempty"`
 }
 
-// server tags
+// Tags server tags
 type Tags []string
 
-// mmh servers
+// Servers mmh servers
 type Servers []*Server
 
 func (servers Servers) Len() int {
@@ -58,7 +58,7 @@ func (servers Servers) Swap(i, j int) {
 	servers[i], servers[j] = servers[j], servers[i]
 }
 
-// context config(eg: default.yaml)
+// Config context config(eg: default.yaml)
 type Config struct {
 	configPath string
 	Basic      BasicServerConfig `yaml:"basic,omitempty"`
@@ -67,12 +67,12 @@ type Config struct {
 	Tags       Tags              `yaml:"tags,omitempty"`
 }
 
-// set config file path
+// SetConfigPath set config file path
 func (cfg *Config) SetConfigPath(configPath string) {
 	cfg.configPath = configPath
 }
 
-// write config
+// Write write config
 func (cfg *Config) Write() error {
 	if cfg.configPath == "" {
 		return errors.New("config path not set")
@@ -84,7 +84,7 @@ func (cfg *Config) Write() error {
 	return ioutil.WriteFile(cfg.configPath, out, 0644)
 }
 
-// write config to yaml file
+// WriteTo write config to yaml file
 func (cfg *Config) WriteTo(filePath string) error {
 	if filePath == "" {
 		return errors.New("file path is empty")
@@ -93,7 +93,7 @@ func (cfg *Config) WriteTo(filePath string) error {
 	return cfg.Write()
 }
 
-// load config
+// Load load config
 func (cfg *Config) Load() error {
 	if cfg.configPath == "" {
 		return errors.New("config path not set")
@@ -105,7 +105,7 @@ func (cfg *Config) Load() error {
 	return yaml.Unmarshal(buf, cfg)
 }
 
-// load config from yaml file
+// LoadFrom load config from yaml file
 func (cfg *Config) LoadFrom(filePath string) error {
 	if filePath == "" {
 		return errors.New("file path is empty")
@@ -139,34 +139,25 @@ type KeyBoardRequest struct {
 	Echos       []bool   `json:"echos"`
 }
 
-// basic config example
-func BasicServerExample() BasicServerConfig {
-	return BasicServerConfig{
-		User:     "root",
-		Password: "password",
-	}
-}
 
-// server config example
-func ServersExample() Servers {
-	return Servers{
-		{
-			Name:    "prod11",
-			Address: "10.10.4.11",
-			Proxy:   "prod12",
-		},
-		{
-			Name:    "prod12",
-			Address: "10.10.4.12",
-		},
-	}
-}
-
-// context config example
+// ConfigExample context config example
 func ConfigExample() *Config {
 	return &Config{
-		Basic:    BasicServerExample(),
-		Servers:  ServersExample(),
+		Basic: BasicServerConfig{
+			User:     "root",
+			Password: "password",
+		},
+		Servers: Servers{
+			{
+				Name:    "prod11",
+				Address: "10.10.4.11",
+				Proxy:   "prod12",
+			},
+			{
+				Name:    "prod12",
+				Address: "10.10.4.12",
+			},
+		},
 		MaxProxy: 5,
 	}
 }

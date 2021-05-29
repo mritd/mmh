@@ -6,37 +6,25 @@ import (
 )
 
 var cfCmd = &cobra.Command{
-	Use:     "cf",
-	Aliases: []string{"mcf", "mcx"},
+	Use:     "context",
+	Aliases: []string{"mcx"},
 	Short:   "change current context",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
 			core.InteractiveSetConfig()
 		} else {
-			_ = cmd.Help()
+			core.SetConfig(args[0])
 		}
 	},
-}
-
-var cfListCmd = &cobra.Command{
-	Use:   "ls",
-	Short: "list context",
-	Run:   func(cmd *cobra.Command, args []string) { core.ListConfig() },
-}
-
-var cfSetCmd = &cobra.Command{
-	Use:   "set",
-	Short: "set context",
-	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 1 {
-			core.SetConfig(args[0])
-		} else {
-			_ = cmd.Help()
+	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		var res []string
+		for _, info := range core.Configs {
+			res = append(res, info.Name)
 		}
+		return res, cobra.ShellCompDirectiveNoFileComp
 	},
 }
 
 func init() {
-	cfCmd.AddCommand(cfListCmd, cfSetCmd)
 	rootCmd.AddCommand(cfCmd)
 }
