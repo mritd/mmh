@@ -9,10 +9,10 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mritd/promptx v0.0.0-20200515061936-66e281bd3c15
 	github.com/mritd/touchid v0.0.1
-	github.com/pkg/sftp v1.13.0
+	github.com/pkg/sftp v1.13.1
 	github.com/spf13/cobra v1.1.3
 	github.com/xyproto/clip v0.3.1
-	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
+	golang.org/x/crypto v0.0.0-20210421170649-83a5a9bb288b
 	gopkg.in/yaml.v2 v2.4.0
 )
 
