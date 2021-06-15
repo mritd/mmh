@@ -8,8 +8,6 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/mritd/promptx"
-
 	"github.com/mritd/mmh/pkg/common"
 
 	"github.com/mitchellh/go-homedir"
@@ -19,8 +17,8 @@ const (
 	// EnvConfigDirName The MMH_CONFIG_DIR env specifies the dir where the mmh config file is stored
 	EnvConfigDirName = "MMH_CONFIG_DIR"
 
-	currentConfigStoreFile = ".current"
-	basicConfigName        = "basic.yaml"
+	ConfigNameFile  = ".current"
+	BasicConfigName = "basic.yaml"
 )
 
 var (
@@ -79,8 +77,7 @@ func LoadConfig() {
 	}
 
 	// get current config
-	currentCfgStoreFile := filepath.Join(configDir, currentConfigStoreFile)
-	bs, err := ioutil.ReadFile(currentCfgStoreFile)
+	bs, err := ioutil.ReadFile(filepath.Join(configDir, ConfigNameFile))
 	if err != nil || len(bs) < 1 {
 		fmt.Println("failed to get current config, use default config(default.yaml)")
 		currentConfigName = "default.yaml"
@@ -91,7 +88,7 @@ func LoadConfig() {
 	currentConfigPath = filepath.Join(configDir, currentConfigName)
 	common.PrintErr(currentConfig.LoadFrom(currentConfigPath))
 	// load basic config if it exist
-	basicConfigPath = filepath.Join(configDir, basicConfigName)
+	basicConfigPath = filepath.Join(configDir, BasicConfigName)
 	if _, err = os.Stat(basicConfigPath); err == nil {
 		common.PrintErr(basicConfig.LoadFrom(basicConfigPath))
 	}
@@ -118,22 +115,9 @@ func initConfig(dir string) {
 	// create config dir
 	common.CheckAndExit(os.MkdirAll(dir, 0755))
 	// create basic config file
-	common.CheckAndExit(ConfigExample().WriteTo(filepath.Join(dir, basicConfigName)))
+	common.CheckAndExit(ConfigExample().WriteTo(filepath.Join(dir, BasicConfigName)))
 	// set current config to default
-	common.CheckAndExit(ioutil.WriteFile(filepath.Join(dir, currentConfigStoreFile), []byte("basic.yaml"), 0644))
-}
-
-// ReloadConfig first clears the memory config objects, and then reloads them
-func ReloadConfig() {
-	configDir = ""
-	Configs = ConfigList{}
-
-	basicConfig = Config{}
-	currentConfig = Config{}
-	currentConfigName = ""
-	currentConfigPath = ""
-	basicConfigPath = ""
-	LoadConfig()
+	common.CheckAndExit(ioutil.WriteFile(filepath.Join(dir, ConfigNameFile), []byte(BasicConfigName), 0644))
 }
 
 // SetConfig set which config file to use, and writes the config file name into
@@ -150,23 +134,5 @@ func SetConfig(name string) {
 		common.Exit(fmt.Sprintf("config [%s] not exist", name), 1)
 	}
 	// write to file
-	common.CheckAndExit(ioutil.WriteFile(filepath.Join(configDir, currentConfigStoreFile), []byte(name+".yaml"), 0644))
-}
-
-// InteractiveSetConfig provides interactive selection list based on SetConfig
-func InteractiveSetConfig() {
-	cfg := &promptx.SelectConfig{
-		ActiveTpl:    `»  {{ .Name | cyan }}`,
-		InactiveTpl:  `  {{ .Name | white }}`,
-		SelectPrompt: "Config",
-		SelectedTpl:  `{{ "» " | green }}{{ .Name | green }}`,
-		DisPlaySize:  9,
-		DetailsTpl: `
---------- Context ----------
-{{ "Name:" | faint }} {{ .Name | faint }}
-{{ "Path:" | faint }} {{ .Path | faint }}`,
-	}
-
-	idx := (&promptx.Select{Items: Configs, Config: cfg}).Run()
-	SetConfig(strings.TrimSuffix(Configs[idx].Name, ".yaml"))
+	common.CheckAndExit(ioutil.WriteFile(filepath.Join(configDir, ConfigNameFile), []byte(name+".yaml"), 0644))
 }

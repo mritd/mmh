@@ -30,7 +30,7 @@ type SSHSession struct {
 	Stderr io.Reader
 }
 
-// close the session
+// Close close the session
 func (s *SSHSession) Close() error {
 	pw, ok := s.se.Stdout.(*io.PipeWriter)
 	if ok {
