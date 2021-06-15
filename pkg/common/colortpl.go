@@ -9,8 +9,6 @@ import (
 	"sync"
 	"text/template"
 
-	"github.com/mritd/promptx"
-
 	"github.com/fatih/color"
 )
 
@@ -30,6 +28,11 @@ var colorOnce sync.Once
 var tplCh = make(chan *template.Template, 1)
 var tplCacheMux sync.RWMutex
 var tplCacheMap = make(map[string]*template.Template, 7)
+
+var funcMap = template.FuncMap{
+	"maxLen":    maxLen,
+	"mergeTags": mergeTags,
+}
 
 var colorFuncMap = template.FuncMap{
 	ColorRed:     color.New(color.FgRed).SprintfFunc(),
@@ -72,7 +75,7 @@ func RenderedOutput(wr io.Writer, line ColorLine) error {
 }
 
 func ColorFuncTemplate(tpl string) (*template.Template, error) {
-	return template.New("").Funcs(promptx.FuncMap).Parse(tpl)
+	return template.New("").Funcs(funcMap).Parse(tpl)
 }
 
 func Converted2Rendered(r io.Reader, w io.Writer, prefix string) {

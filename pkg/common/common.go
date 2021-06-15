@@ -1,19 +1,11 @@
 package common
 
 import (
+	"fmt"
 	"os"
 	"os/user"
 	"strings"
-
-	"github.com/mritd/promptx"
-
-	"fmt"
 )
-
-func init() {
-	promptx.FuncMap["maxLen"] = maxLen
-	promptx.FuncMap["mergeTags"] = mergeTags
-}
 
 func CheckAndExit(err error) {
 	PrintErr(err)

@@ -15,7 +15,6 @@ var rootCmd = &cobra.Command{
 	Short:            "a simple ssh tool",
 	Long:             "a simple ssh tool.",
 	TraverseChildren: true,
-	Run:              func(cmd *cobra.Command, args []string) { core.SingleInteractiveLogin() },
 }
 
 func Execute() {

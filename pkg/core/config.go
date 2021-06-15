@@ -96,7 +96,7 @@ func LoadConfig() {
 	// load all config info
 	_ = filepath.Walk(configDir, func(path string, f os.FileInfo, err error) error {
 		if !common.CheckErr(err) {
-			return err
+			return nil
 		}
 		if f.IsDir() || !strings.HasSuffix(f.Name(), ".yaml") {
 			return nil
@@ -109,15 +109,6 @@ func LoadConfig() {
 		return nil
 	})
 	sort.Sort(Configs)
-}
-
-func initConfig(dir string) {
-	// create config dir
-	common.CheckAndExit(os.MkdirAll(dir, 0755))
-	// create basic config file
-	common.CheckAndExit(ConfigExample().WriteTo(filepath.Join(dir, BasicConfigName)))
-	// set current config to default
-	common.CheckAndExit(ioutil.WriteFile(filepath.Join(dir, ConfigNameFile), []byte(BasicConfigName), 0644))
 }
 
 // SetConfig set which config file to use, and writes the config file name into
@@ -135,4 +126,14 @@ func SetConfig(name string) {
 	}
 	// write to file
 	common.CheckAndExit(ioutil.WriteFile(filepath.Join(configDir, ConfigNameFile), []byte(name+".yaml"), 0644))
+}
+
+// initConfig init the example config
+func initConfig(dir string) {
+	// create config dir
+	common.CheckAndExit(os.MkdirAll(dir, 0755))
+	// create basic config file
+	common.CheckAndExit(ConfigExample().WriteTo(filepath.Join(dir, BasicConfigName)))
+	// set current config to default
+	common.CheckAndExit(ioutil.WriteFile(filepath.Join(dir, ConfigNameFile), []byte(BasicConfigName), 0644))
 }

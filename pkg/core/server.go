@@ -11,12 +11,25 @@ import (
 	"time"
 
 	"github.com/mritd/mmh/pkg/common"
-	"github.com/mritd/promptx"
 )
+
+// ListServers merge basic context servers and current context servers
+func ListServers() Servers {
+	var servers Servers
+	bss := setDefaultValue(basicConfig.Servers, basicConfig.Basic)
+	sort.Sort(bss)
+	servers = append(servers, bss...)
+	if currentConfig.configPath != basicConfig.configPath {
+		css := setDefaultValue(currentConfig.Servers, currentConfig.Basic)
+		sort.Sort(css)
+		servers = append(servers, css...)
+	}
+	return servers
+}
 
 // findServerByName find server from config by server name
 func findServerByName(name string) (*Server, error) {
-	for _, s := range getServers() {
+	for _, s := range ListServers() {
 		if s.Name == name {
 			return s, nil
 		}
@@ -27,7 +40,7 @@ func findServerByName(name string) (*Server, error) {
 // findServersByTag find servers from config by server tag
 func findServersByTag(tag string) (Servers, error) {
 	var servers Servers
-	for _, s := range getServers() {
+	for _, s := range ListServers() {
 		tmpServer := s
 		for _, t := range tmpServer.Tags {
 			if tag == t {
@@ -39,20 +52,6 @@ func findServersByTag(tag string) (Servers, error) {
 		return nil, errors.New("server not found")
 	}
 	return servers, nil
-}
-
-// getServers merge basic context servers and current context servers
-func getServers() Servers {
-	var servers Servers
-	bss := setDefaultValue(basicConfig.Servers, basicConfig.Basic)
-	sort.Sort(bss)
-	servers = append(servers, bss...)
-	if currentConfig.configPath != basicConfig.configPath {
-		css := setDefaultValue(currentConfig.Servers, currentConfig.Basic)
-		sort.Sort(css)
-		servers = append(servers, css...)
-	}
-	return servers
 }
 
 // setDefaultValue set the default config value to the given servers
@@ -106,16 +105,16 @@ func setDefaultValue(servers Servers, basic BasicServerConfig) Servers {
 	return ss
 }
 
-// ListServers print server list
-func ListServers() {
+// PrintServers print server list
+func PrintServers() {
 	t, _ := common.ColorFuncTemplate(listServersTpl)
 	var buf bytes.Buffer
-	common.CheckAndExit(t.Execute(&buf, getServers()))
+	common.CheckAndExit(t.Execute(&buf, ListServers()))
 	fmt.Println(buf.String())
 }
 
-// ServerDetail print single server detail
-func ServerDetail(serverName string) {
+// PrintServerDetail print single server detail
+func PrintServerDetail(serverName string) {
 	s, err := findServerByName(serverName)
 	common.CheckAndExit(err)
 	t, _ := common.ColorFuncTemplate(serverDetailTpl)
@@ -154,23 +153,4 @@ func SingleLogin(name string) {
 		common.TmuxSetWindowName(tmuxWinIndex, tmuxWinName)
 		common.TmuxSetAutomaticRename(tmuxWinIndex, tmuxAutoRename)
 	}
-}
-
-// SingleInteractiveLogin display a list of interactive servers and then call SingleLogin
-func SingleInteractiveLogin() {
-	cfg := &promptx.SelectConfig{
-		SelectPrompt: "Login Server",
-		SelectedTpl:  interactiveLoginSelectedTpl,
-		ActiveTpl:    interactiveLoginActiveTpl,
-		InactiveTpl:  interactiveLoginInactiveTpl,
-		DetailsTpl:   interactiveLoginDetailsTpl,
-		DisPlaySize:  9,
-	}
-
-	ss := getServers()
-	s := &promptx.Select{
-		Items:  ss,
-		Config: cfg,
-	}
-	SingleLogin(ss[s.Run()].Name)
 }

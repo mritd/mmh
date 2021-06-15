@@ -7,7 +7,6 @@ require (
 	github.com/gorilla/mux v1.8.0
 	github.com/json-iterator/go v1.1.11
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/mritd/promptx v0.0.0-20200515061936-66e281bd3c15
 	github.com/mritd/touchid v0.0.1
 	github.com/pkg/sftp v1.13.1
 	github.com/spf13/cobra v1.1.3

@@ -11,9 +11,9 @@ var serverCmd = &cobra.Command{
 	Aliases: []string{"mcs"},
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 1 {
-			core.ServerDetail(args[0])
+			core.PrintServerDetail(args[0])
 		} else {
-			core.ListServers()
+			core.PrintServers()
 		}
 	},
 }
