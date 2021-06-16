@@ -1,20 +1,15 @@
 package core
 
 import (
-	"io"
-
-	"github.com/mritd/mmh/pkg/sshutils"
-
-	"sync"
-
-	"github.com/mritd/mmh/pkg/common"
-
-	"os"
-
 	"context"
-
+	"io"
+	"os"
 	"os/signal"
+	"sync"
 	"syscall"
+
+	"github.com/mritd/mmh/common"
+	"github.com/mritd/mmh/sshutils"
 )
 
 // Exec batch execution of commands

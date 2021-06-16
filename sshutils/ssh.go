@@ -10,7 +10,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/mritd/mmh/pkg/common"
+	"github.com/mritd/mmh/common"
 
 	"golang.org/x/crypto/ssh/terminal"
 

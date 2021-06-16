@@ -6,9 +6,8 @@ import (
 	"sync"
 
 	"github.com/fatih/color"
-
-	"github.com/mritd/mmh/pkg/common"
-	"github.com/mritd/mmh/pkg/sshutils"
+	"github.com/mritd/mmh/common"
+	"github.com/mritd/mmh/sshutils"
 )
 
 func Copy(args []string, multiServer bool) {

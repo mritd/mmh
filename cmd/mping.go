@@ -1,16 +1,16 @@
 package cmd
 
 import (
-	"github.com/mritd/mmh/pkg/core"
+	"github.com/mritd/mmh/core"
 	"github.com/spf13/cobra"
 )
 
-var mgo = &cobra.Command{
-	Use:   "mgo SERVER_NAME",
-	Short: "login server",
+var mping = &cobra.Command{
+	Use:   "mping SERVER",
+	Short: "ping server",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 1 {
-			core.SingleLogin(args[0])
+			core.Ping(args[0])
 		} else {
 			_ = cmd.Help()
 		}
@@ -18,5 +18,5 @@ var mgo = &cobra.Command{
 }
 
 func init() {
-	cmds["mgo"] = mgo
+	cmds["mping"] = mping
 }

@@ -2,6 +2,7 @@ package sshutils
 
 import (
 	"errors"
+	"github.com/mitchellh/go-homedir"
 	"io"
 	"os"
 	"path"
@@ -10,7 +11,6 @@ import (
 
 	"golang.org/x/crypto/ssh"
 
-	"github.com/mitchellh/go-homedir"
 	"github.com/pkg/sftp"
 )
 

@@ -3,28 +3,20 @@ package core
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
+	osexec "os/exec"
 	"strings"
 	"time"
 
-	"github.com/mritd/touchid"
-
 	"github.com/gorilla/mux"
-
 	jsoniter "github.com/json-iterator/go"
-
-	osexec "os/exec"
-
-	"github.com/mritd/mmh/pkg/sshutils"
-
-	"golang.org/x/crypto/ssh"
-
 	"github.com/mitchellh/go-homedir"
-
-	"github.com/mritd/mmh/pkg/common"
-
-	"fmt"
+	"github.com/mritd/mmh/common"
+	"github.com/mritd/mmh/sshutils"
+	"github.com/mritd/touchid"
+	"golang.org/x/crypto/ssh"
 )
 
 const (

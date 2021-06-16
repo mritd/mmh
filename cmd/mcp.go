@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/mritd/mmh/pkg/core"
+	"github.com/mritd/mmh/core"
 	"github.com/spf13/cobra"
 )
 

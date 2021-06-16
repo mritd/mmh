@@ -4,7 +4,7 @@ import (
 	"os"
 	osexec "os/exec"
 
-	"github.com/mritd/mmh/pkg/common"
+	"github.com/mritd/mmh/common"
 )
 
 // Ping execute the ping target server

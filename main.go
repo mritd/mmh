@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/mritd/mmh/pkg/cmd"
+	"github.com/mritd/mmh/cmd"
 )
 
 func main() {

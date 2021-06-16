@@ -13,10 +13,10 @@ for cmd in ${COMMANDS}; do
     if [ "$1" == "install" ]; then
         echo "install => ${GOPATH}/bin/${cmd}"
         go build -o ${GOPATH}/bin/${cmd} -ldflags \
-            "-X 'github.com/mritd/mmh/pkg/cmd.Version=${BUILD_VERSION}' \
-            -X 'github.com/mritd/mmh/pkg/cmd.BuildDate=${BUILD_DATE}' \
-            -X 'github.com/mritd/mmh/pkg/cmd.CommitID=${COMMIT_SHA1}' \
-            -X 'github.com/mritd/mmh/pkg/cmd.BuildCmd=${cmd}'"
+            "-X 'github.com/mritd/mmh/cmd.Version=${BUILD_VERSION}' \
+            -X 'github.com/mritd/mmh/cmd.BuildDate=${BUILD_DATE}' \
+            -X 'github.com/mritd/mmh/cmd.CommitID=${COMMIT_SHA1}' \
+            -X 'github.com/mritd/mmh/cmd.BuildCmd=${cmd}'"
     else
         for pl in ${PLATFORMS}; do
             export GOOS=$(echo ${pl} | cut -d'/' -f1)
@@ -30,10 +30,10 @@ for cmd in ${COMMANDS}; do
 
             echo "build => ${TARGET}"
             go build -trimpath -o ${TARGET} \
-                    -ldflags    "-X 'github.com/mritd/mmh/pkg/cmd.Version=${BUILD_VERSION}' \
-                                -X 'github.com/mritd/mmh/pkg/cmd.BuildDate=${BUILD_DATE}' \
-                                -X 'github.com/mritd/mmh/pkg/cmd.CommitID=${COMMIT_SHA1}' \
-                                -X 'github.com/mritd/mmh/pkg/cmd.BuildCmd=${cmd}' \
+                    -ldflags    "-X 'github.com/mritd/mmh/cmd.Version=${BUILD_VERSION}' \
+                                -X 'github.com/mritd/mmh/cmd.BuildDate=${BUILD_DATE}' \
+                                -X 'github.com/mritd/mmh/cmd.CommitID=${COMMIT_SHA1}' \
+                                -X 'github.com/mritd/mmh/cmd.BuildCmd=${cmd}' \
                                 -w -s"
         done
     fi

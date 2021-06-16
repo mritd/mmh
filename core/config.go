@@ -8,9 +8,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/mritd/mmh/pkg/common"
-
 	"github.com/mitchellh/go-homedir"
+	"github.com/mritd/mmh/common"
 )
 
 const (

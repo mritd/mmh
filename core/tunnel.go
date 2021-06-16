@@ -5,7 +5,7 @@ import (
 	"io"
 	"net"
 
-	"github.com/mritd/mmh/pkg/common"
+	"github.com/mritd/mmh/common"
 )
 
 // Tunnel will open an ssh tcp tunnel between the left address and the right address

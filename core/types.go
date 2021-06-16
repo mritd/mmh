@@ -139,7 +139,6 @@ type KeyBoardRequest struct {
 	Echos       []bool   `json:"echos"`
 }
 
-
 // ConfigExample context config example
 func ConfigExample() *Config {
 	return &Config{
