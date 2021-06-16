@@ -17,7 +17,9 @@ import (
 func ListServers(serverSort bool) Servers {
 	var servers Servers
 	bss := setDefaultValue(basicConfig.Servers, basicConfig.Basic)
-	sort.Sort(bss)
+	if serverSort {
+		sort.Sort(bss)
+	}
 	servers = append(servers, bss...)
 	if currentConfig.configPath != basicConfig.configPath {
 		css := setDefaultValue(currentConfig.Servers, currentConfig.Basic)
