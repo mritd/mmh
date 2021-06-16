@@ -22,7 +22,6 @@ const (
 )
 
 var (
-	Aliases []string
 	Configs ConfigList
 
 	configDir string
