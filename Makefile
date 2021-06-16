@@ -16,8 +16,6 @@ clean:
 	rm -rf dist
 
 install:
-	go install -ldflags "-X 'github.com/mritd/mmh/pkg/cmd.Version=${BUILD_VERSION}' \
-                         -X 'github.com/mritd/mmh/pkg/cmd.BuildDate=${BUILD_DATE}' \
-                         -X 'github.com/mritd/mmh/pkg/cmd.CommitID=${COMMIT_SHA1}'"
+	bash .cross_compile.sh install
 
 .PHONY: all release pre-release clean install

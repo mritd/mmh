@@ -8,9 +8,8 @@ import (
 var copy2Group bool
 var copyDir bool
 
-var cpCmd = &cobra.Command{
-	Use:     "cp [-g] [-r] FILE/DIR|SERVER:PATH SERVER:PATH|FILE/DIR",
-	Aliases: []string{"mcp"},
+var mcp = &cobra.Command{
+	Use:     "mcp [-g] [-r] FILE/DIR|SERVER:PATH SERVER:PATH|FILE/DIR",
 	Short:   "copies files between hosts on a network",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) < 2 {
@@ -22,7 +21,7 @@ var cpCmd = &cobra.Command{
 }
 
 func init() {
-	cpCmd.PersistentFlags().BoolVarP(&copy2Group, "group", "g", false, "multi-server copy")
-	cpCmd.PersistentFlags().BoolVarP(&copyDir, "dir", "r", false, "useless flag")
-	rootCmd.AddCommand(cpCmd)
+	cmds["mcp"] = mcp
+	mcp.PersistentFlags().BoolVarP(&copy2Group, "group", "g", false, "multi-server copy")
+	mcp.PersistentFlags().BoolVarP(&copyDir, "dir", "r", false, "useless flag")
 }

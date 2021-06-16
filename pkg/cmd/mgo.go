@@ -5,10 +5,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var goCmd = &cobra.Command{
-	Use:     "go SERVER",
-	Aliases: []string{"mgo"},
-	Short:   "login server",
+var mgo = &cobra.Command{
+	Use:   "mgo SERVER_NAME",
+	Short: "login server",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 1 {
 			core.SingleLogin(args[0])
@@ -19,5 +18,5 @@ var goCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(goCmd)
+	cmds["mgo"] = mgo
 }

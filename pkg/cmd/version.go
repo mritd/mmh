@@ -33,7 +33,3 @@ var versionCmd = &cobra.Command{
 		fmt.Printf(versionTpl, banner, Version, runtime.GOOS+"/"+runtime.GOARCH, BuildDate, CommitID)
 	},
 }
-
-func init() {
-	rootCmd.AddCommand(versionCmd)
-}

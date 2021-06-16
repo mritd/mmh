@@ -9,9 +9,8 @@ import (
 
 var execGroup bool
 
-var execCmd = &cobra.Command{
+var mec = &cobra.Command{
 	Use:     "exec [OPTIONS] SERVER|TAG COMMAND",
-	Aliases: []string{"mec"},
 	Short:   "batch exec command",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) < 2 {
@@ -28,6 +27,6 @@ var execCmd = &cobra.Command{
 }
 
 func init() {
-	execCmd.PersistentFlags().BoolVarP(&execGroup, "tag", "t", false, "server tag")
-	rootCmd.AddCommand(execCmd)
+	cmds["mec"] = mec
+	mec.PersistentFlags().BoolVarP(&execGroup, "tag", "t", false, "server tag")
 }
