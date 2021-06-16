@@ -10,11 +10,6 @@ import (
 )
 
 var completionShell string
-var rootCmd = &cobra.Command{
-	Use:              "mmh",
-	Short:            "a simple ssh tool",
-	Long:             "a simple ssh tool.",
-}
 
 var BuildCmd string
 var cmds = make(map[string]*cobra.Command, 10)
@@ -31,7 +26,6 @@ func Execute() {
 		common.Exit(err.Error(), -1)
 	}
 }
-
 
 func GenCompletion(cmd *cobra.Command, shell string) {
 	switch shell {

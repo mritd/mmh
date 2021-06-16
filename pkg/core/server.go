@@ -14,14 +14,16 @@ import (
 )
 
 // ListServers merge basic context servers and current context servers
-func ListServers() Servers {
+func ListServers(serverSort bool) Servers {
 	var servers Servers
 	bss := setDefaultValue(basicConfig.Servers, basicConfig.Basic)
 	sort.Sort(bss)
 	servers = append(servers, bss...)
 	if currentConfig.configPath != basicConfig.configPath {
 		css := setDefaultValue(currentConfig.Servers, currentConfig.Basic)
-		sort.Sort(css)
+		if serverSort {
+			sort.Sort(css)
+		}
 		servers = append(servers, css...)
 	}
 	return servers
@@ -29,7 +31,7 @@ func ListServers() Servers {
 
 // findServerByName find server from config by server name
 func findServerByName(name string) (*Server, error) {
-	for _, s := range ListServers() {
+	for _, s := range ListServers(false) {
 		if s.Name == name {
 			return s, nil
 		}
@@ -40,7 +42,7 @@ func findServerByName(name string) (*Server, error) {
 // findServersByTag find servers from config by server tag
 func findServersByTag(tag string) (Servers, error) {
 	var servers Servers
-	for _, s := range ListServers() {
+	for _, s := range ListServers(false) {
 		tmpServer := s
 		for _, t := range tmpServer.Tags {
 			if tag == t {
@@ -106,10 +108,10 @@ func setDefaultValue(servers Servers, basic BasicServerConfig) Servers {
 }
 
 // PrintServers print server list
-func PrintServers() {
+func PrintServers(serverSort bool) {
 	t, _ := common.ColorFuncTemplate(listServersTpl)
 	var buf bytes.Buffer
-	common.CheckAndExit(t.Execute(&buf, ListServers()))
+	common.CheckAndExit(t.Execute(&buf, ListServers(serverSort)))
 	fmt.Println(buf.String())
 }
 

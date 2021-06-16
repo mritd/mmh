@@ -3,7 +3,6 @@ package common
 import (
 	"fmt"
 	"os"
-	"os/user"
 	"strings"
 )
 
@@ -29,12 +28,6 @@ func PrintErr(err error) {
 	if err != nil {
 		fmt.Println("😱 " + err.Error())
 	}
-}
-
-func IsRoot() bool {
-	u, err := user.Current()
-	CheckAndExit(err)
-	return u.Uid == "0" || u.Gid == "0"
 }
 
 func Exit(message string, code int) {
