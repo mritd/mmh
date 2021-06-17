@@ -18,4 +18,7 @@ clean:
 install:
 	bash .cross_compile.sh install
 
+completion:
+	bash .completion.sh
+
 .PHONY: all release pre-release clean install
