@@ -2,7 +2,6 @@ package core
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -15,7 +14,6 @@ import (
 	"github.com/mitchellh/go-homedir"
 	"github.com/mritd/mmh/common"
 	"github.com/mritd/mmh/sshutils"
-	"github.com/mritd/touchid"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -31,21 +29,6 @@ func (s *Server) wrapperClient(secondLast bool) (*ssh.Client, error) {
 		currentConfig.MaxProxy = 5
 	}
 
-	if s.ExtAuth != "" {
-		if s.ExtAuth == "true" {
-			s.ExtAuth = "any"
-		}
-		ok, err := touchid.SerialAuth(
-			touchid.DeviceType(s.ExtAuth),
-			fmt.Sprintf(" connect to server => %s\n\nUser: %s\nAddr: %s:%d", s.Name, s.User, s.Address, s.Port),
-			5*time.Second)
-		if err != nil {
-			return nil, err
-		}
-		if !ok {
-			return nil, errors.New("mmh cannot verify your identity, login denied")
-		}
-	}
 	return s.ssh(secondLast, 0)
 }
 

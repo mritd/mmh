@@ -37,7 +37,6 @@ type Server struct {
 	KeyboardAuthCmd     string            `yaml:"keyboard_auth_cmd,omitempty"`
 	Environment         map[string]string `yaml:"environment,omitempty"`
 	EnableAPI           string            `yaml:"enable_api,omitempty"`
-	ExtAuth             string            `yaml:"ext_auth,omitempty"`
 	ServerAliveInterval time.Duration     `yaml:"server_alive_interval,omitempty"`
 	Tags                []string          `yaml:"tags,omitempty"`
 
@@ -145,9 +144,6 @@ func (cfg *Config) mergeBasic() {
 		}
 		if s.EnableAPI == "" {
 			s.EnableAPI = cfg.Basic.EnableAPI
-		}
-		if s.ExtAuth == "" {
-			s.ExtAuth = cfg.Basic.ExtAuth
 		}
 		if s.Environment == nil {
 			s.Environment = cfg.Basic.Environment

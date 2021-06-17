@@ -21,7 +21,7 @@ for cmd in ${COMMANDS}; do
         for pl in ${PLATFORMS}; do
             export GOOS=$(echo ${pl} | cut -d'/' -f1)
             export GOARCH=$(echo ${pl} | cut -d'/' -f2)
-            export CGO_ENABLED=1
+            export CGO_ENABLED=0
 
             export TARGET=${TARGET_DIR}/${cmd}_${GOOS}_${GOARCH}
             if [ "${GOOS}" == "windows" ]; then
