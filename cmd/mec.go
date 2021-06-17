@@ -12,7 +12,7 @@ import (
 var execGroup bool
 
 var mec = &cobra.Command{
-	Use:   "exec [OPTIONS] SERVER|TAG COMMAND",
+	Use:   "mec [OPTIONS] SERVER|TAG COMMAND",
 	Short: "batch exec command",
 	Run: func(cmd *cobra.Command, args []string) {
 		if completionShell != "" {

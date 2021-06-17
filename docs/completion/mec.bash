@@ -1,6 +1,6 @@
-# bash completion for exec                                 -*- shell-script -*-
+# bash completion for mec                                  -*- shell-script -*-
 
-__exec_debug()
+__mec_debug()
 {
     if [[ -n ${BASH_COMP_DEBUG_FILE} ]]; then
         echo "$*" >> "${BASH_COMP_DEBUG_FILE}"
@@ -9,13 +9,13 @@ __exec_debug()
 
 # Homebrew on Macs have version 1.3 of bash-completion which doesn't include
 # _init_completion. This is a very minimal version of that function.
-__exec_init_completion()
+__mec_init_completion()
 {
     COMPREPLY=()
     _get_comp_words_by_ref "$@" cur prev words cword
 }
 
-__exec_index_of_word()
+__mec_index_of_word()
 {
     local w word=$1
     shift
@@ -27,7 +27,7 @@ __exec_index_of_word()
     index=-1
 }
 
-__exec_contains_word()
+__mec_contains_word()
 {
     local w word=$1; shift
     for w in "$@"; do
@@ -36,9 +36,9 @@ __exec_contains_word()
     return 1
 }
 
-__exec_handle_go_custom_completion()
+__mec_handle_go_custom_completion()
 {
-    __exec_debug "${FUNCNAME[0]}: cur is ${cur}, words[*] is ${words[*]}, #words[@] is ${#words[@]}"
+    __mec_debug "${FUNCNAME[0]}: cur is ${cur}, words[*] is ${words[*]}, #words[@] is ${#words[@]}"
 
     local shellCompDirectiveError=1
     local shellCompDirectiveNoSpace=2
@@ -49,22 +49,22 @@ __exec_handle_go_custom_completion()
     local out requestComp lastParam lastChar comp directive args
 
     # Prepare the command to request completions for the program.
-    # Calling ${words[0]} instead of directly exec allows to handle aliases
+    # Calling ${words[0]} instead of directly mec allows to handle aliases
     args=("${words[@]:1}")
     requestComp="${words[0]} __completeNoDesc ${args[*]}"
 
     lastParam=${words[$((${#words[@]}-1))]}
     lastChar=${lastParam:$((${#lastParam}-1)):1}
-    __exec_debug "${FUNCNAME[0]}: lastParam ${lastParam}, lastChar ${lastChar}"
+    __mec_debug "${FUNCNAME[0]}: lastParam ${lastParam}, lastChar ${lastChar}"
 
     if [ -z "${cur}" ] && [ "${lastChar}" != "=" ]; then
         # If the last parameter is complete (there is a space following it)
         # We add an extra empty parameter so we can indicate this to the go method.
-        __exec_debug "${FUNCNAME[0]}: Adding extra empty parameter"
+        __mec_debug "${FUNCNAME[0]}: Adding extra empty parameter"
         requestComp="${requestComp} \"\""
     fi
 
-    __exec_debug "${FUNCNAME[0]}: calling ${requestComp}"
+    __mec_debug "${FUNCNAME[0]}: calling ${requestComp}"
     # Use eval to handle any environment variables and such
     out=$(eval "${requestComp}" 2>/dev/null)
 
@@ -76,23 +76,23 @@ __exec_handle_go_custom_completion()
         # There is not directive specified
         directive=0
     fi
-    __exec_debug "${FUNCNAME[0]}: the completion directive is: ${directive}"
-    __exec_debug "${FUNCNAME[0]}: the completions are: ${out[*]}"
+    __mec_debug "${FUNCNAME[0]}: the completion directive is: ${directive}"
+    __mec_debug "${FUNCNAME[0]}: the completions are: ${out[*]}"
 
     if [ $((directive & shellCompDirectiveError)) -ne 0 ]; then
         # Error code.  No completion.
-        __exec_debug "${FUNCNAME[0]}: received error from custom completion go code"
+        __mec_debug "${FUNCNAME[0]}: received error from custom completion go code"
         return
     else
         if [ $((directive & shellCompDirectiveNoSpace)) -ne 0 ]; then
             if [[ $(type -t compopt) = "builtin" ]]; then
-                __exec_debug "${FUNCNAME[0]}: activating no space"
+                __mec_debug "${FUNCNAME[0]}: activating no space"
                 compopt -o nospace
             fi
         fi
         if [ $((directive & shellCompDirectiveNoFileComp)) -ne 0 ]; then
             if [[ $(type -t compopt) = "builtin" ]]; then
-                __exec_debug "${FUNCNAME[0]}: activating no file completion"
+                __mec_debug "${FUNCNAME[0]}: activating no file completion"
                 compopt +o default
             fi
         fi
@@ -108,7 +108,7 @@ __exec_handle_go_custom_completion()
         done
 
         filteringCmd="_filedir $fullFilter"
-        __exec_debug "File filtering command: $filteringCmd"
+        __mec_debug "File filtering command: $filteringCmd"
         $filteringCmd
     elif [ $((directive & shellCompDirectiveFilterDirs)) -ne 0 ]; then
         # File completion for directories only
@@ -116,10 +116,10 @@ __exec_handle_go_custom_completion()
         # Use printf to strip any trailing newline
         subdir=$(printf "%s" "${out[0]}")
         if [ -n "$subdir" ]; then
-            __exec_debug "Listing directories in $subdir"
-            __exec_handle_subdirs_in_dir_flag "$subdir"
+            __mec_debug "Listing directories in $subdir"
+            __mec_handle_subdirs_in_dir_flag "$subdir"
         else
-            __exec_debug "Listing directories in ."
+            __mec_debug "Listing directories in ."
             _filedir -d
         fi
     else
@@ -129,9 +129,9 @@ __exec_handle_go_custom_completion()
     fi
 }
 
-__exec_handle_reply()
+__mec_handle_reply()
 {
-    __exec_debug "${FUNCNAME[0]}"
+    __mec_debug "${FUNCNAME[0]}"
     local comp
     case $cur in
         -*)
@@ -159,7 +159,7 @@ __exec_handle_reply()
 
                 local index flag
                 flag="${cur%=*}"
-                __exec_index_of_word "${flag}" "${flags_with_completion[@]}"
+                __mec_index_of_word "${flag}" "${flags_with_completion[@]}"
                 COMPREPLY=()
                 if [[ ${index} -ge 0 ]]; then
                     PREFIX=""
@@ -177,7 +177,7 @@ __exec_handle_reply()
 
     # check if we are handling a flag with special work handling
     local index
-    __exec_index_of_word "${prev}" "${flags_with_completion[@]}"
+    __mec_index_of_word "${prev}" "${flags_with_completion[@]}"
     if [[ ${index} -ge 0 ]]; then
         ${flags_completion[${index}]}
         return
@@ -194,7 +194,7 @@ __exec_handle_reply()
         completions+=("${must_have_one_noun[@]}")
     elif [[ -n "${has_completion_function}" ]]; then
         # if a go completion function is provided, defer to that function
-        __exec_handle_go_custom_completion
+        __mec_handle_go_custom_completion
     fi
     if [[ ${#must_have_one_flag[@]} -ne 0 ]]; then
         completions+=("${must_have_one_flag[@]}")
@@ -210,9 +210,9 @@ __exec_handle_reply()
     fi
 
     if [[ ${#COMPREPLY[@]} -eq 0 ]]; then
-		if declare -F __exec_custom_func >/dev/null; then
+		if declare -F __mec_custom_func >/dev/null; then
 			# try command name qualified custom func
-			__exec_custom_func
+			__mec_custom_func
 		else
 			# otherwise fall back to unqualified for compatibility
 			declare -F __custom_func >/dev/null && __custom_func
@@ -232,21 +232,21 @@ __exec_handle_reply()
 }
 
 # The arguments should be in the form "ext1|ext2|extn"
-__exec_handle_filename_extension_flag()
+__mec_handle_filename_extension_flag()
 {
     local ext="$1"
     _filedir "@(${ext})"
 }
 
-__exec_handle_subdirs_in_dir_flag()
+__mec_handle_subdirs_in_dir_flag()
 {
     local dir="$1"
     pushd "${dir}" >/dev/null 2>&1 && _filedir -d && popd >/dev/null 2>&1 || return
 }
 
-__exec_handle_flag()
+__mec_handle_flag()
 {
-    __exec_debug "${FUNCNAME[0]}: c is $c words[c] is ${words[c]}"
+    __mec_debug "${FUNCNAME[0]}: c is $c words[c] is ${words[c]}"
 
     # if a command required a flag, and we found it, unset must_have_one_flag()
     local flagname=${words[c]}
@@ -257,13 +257,13 @@ __exec_handle_flag()
         flagname=${flagname%=*} # strip everything after the =
         flagname="${flagname}=" # but put the = back
     fi
-    __exec_debug "${FUNCNAME[0]}: looking for ${flagname}"
-    if __exec_contains_word "${flagname}" "${must_have_one_flag[@]}"; then
+    __mec_debug "${FUNCNAME[0]}: looking for ${flagname}"
+    if __mec_contains_word "${flagname}" "${must_have_one_flag[@]}"; then
         must_have_one_flag=()
     fi
 
     # if you set a flag which only applies to this command, don't show subcommands
-    if __exec_contains_word "${flagname}" "${local_nonpersistent_flags[@]}"; then
+    if __mec_contains_word "${flagname}" "${local_nonpersistent_flags[@]}"; then
       commands=()
     fi
 
@@ -280,8 +280,8 @@ __exec_handle_flag()
     fi
 
     # skip the argument to a two word flag
-    if [[ ${words[c]} != *"="* ]] && __exec_contains_word "${words[c]}" "${two_word_flags[@]}"; then
-			  __exec_debug "${FUNCNAME[0]}: found a flag ${words[c]}, skip the next argument"
+    if [[ ${words[c]} != *"="* ]] && __mec_contains_word "${words[c]}" "${two_word_flags[@]}"; then
+			  __mec_debug "${FUNCNAME[0]}: found a flag ${words[c]}, skip the next argument"
         c=$((c+1))
         # if we are looking for a flags value, don't show commands
         if [[ $c -eq $cword ]]; then
@@ -293,13 +293,13 @@ __exec_handle_flag()
 
 }
 
-__exec_handle_noun()
+__mec_handle_noun()
 {
-    __exec_debug "${FUNCNAME[0]}: c is $c words[c] is ${words[c]}"
+    __mec_debug "${FUNCNAME[0]}: c is $c words[c] is ${words[c]}"
 
-    if __exec_contains_word "${words[c]}" "${must_have_one_noun[@]}"; then
+    if __mec_contains_word "${words[c]}" "${must_have_one_noun[@]}"; then
         must_have_one_noun=()
-    elif __exec_contains_word "${words[c]}" "${noun_aliases[@]}"; then
+    elif __mec_contains_word "${words[c]}" "${noun_aliases[@]}"; then
         must_have_one_noun=()
     fi
 
@@ -307,55 +307,55 @@ __exec_handle_noun()
     c=$((c+1))
 }
 
-__exec_handle_command()
+__mec_handle_command()
 {
-    __exec_debug "${FUNCNAME[0]}: c is $c words[c] is ${words[c]}"
+    __mec_debug "${FUNCNAME[0]}: c is $c words[c] is ${words[c]}"
 
     local next_command
     if [[ -n ${last_command} ]]; then
         next_command="_${last_command}_${words[c]//:/__}"
     else
         if [[ $c -eq 0 ]]; then
-            next_command="_exec_root_command"
+            next_command="_mec_root_command"
         else
             next_command="_${words[c]//:/__}"
         fi
     fi
     c=$((c+1))
-    __exec_debug "${FUNCNAME[0]}: looking for ${next_command}"
+    __mec_debug "${FUNCNAME[0]}: looking for ${next_command}"
     declare -F "$next_command" >/dev/null && $next_command
 }
 
-__exec_handle_word()
+__mec_handle_word()
 {
     if [[ $c -ge $cword ]]; then
-        __exec_handle_reply
+        __mec_handle_reply
         return
     fi
-    __exec_debug "${FUNCNAME[0]}: c is $c words[c] is ${words[c]}"
+    __mec_debug "${FUNCNAME[0]}: c is $c words[c] is ${words[c]}"
     if [[ "${words[c]}" == -* ]]; then
-        __exec_handle_flag
-    elif __exec_contains_word "${words[c]}" "${commands[@]}"; then
-        __exec_handle_command
+        __mec_handle_flag
+    elif __mec_contains_word "${words[c]}" "${commands[@]}"; then
+        __mec_handle_command
     elif [[ $c -eq 0 ]]; then
-        __exec_handle_command
-    elif __exec_contains_word "${words[c]}" "${command_aliases[@]}"; then
+        __mec_handle_command
+    elif __mec_contains_word "${words[c]}" "${command_aliases[@]}"; then
         # aliashash variable is an associative array which is only supported in bash > 3.
         if [[ -z "${BASH_VERSION}" || "${BASH_VERSINFO[0]}" -gt 3 ]]; then
             words[c]=${aliashash[${words[c]}]}
-            __exec_handle_command
+            __mec_handle_command
         else
-            __exec_handle_noun
+            __mec_handle_noun
         fi
     else
-        __exec_handle_noun
+        __mec_handle_noun
     fi
-    __exec_handle_word
+    __mec_handle_word
 }
 
-_exec_root_command()
+_mec_root_command()
 {
-    last_command="exec"
+    last_command="mec"
 
     command_aliases=()
 
@@ -382,7 +382,7 @@ _exec_root_command()
     noun_aliases=()
 }
 
-__start_exec()
+__start_mec()
 {
     local cur prev words cword
     declare -A flaghash 2>/dev/null || :
@@ -390,7 +390,7 @@ __start_exec()
     if declare -F _init_completion >/dev/null 2>&1; then
         _init_completion -s || return
     else
-        __exec_init_completion -n "=" || return
+        __mec_init_completion -n "=" || return
     fi
 
     local c=0
@@ -399,20 +399,20 @@ __start_exec()
     local local_nonpersistent_flags=()
     local flags_with_completion=()
     local flags_completion=()
-    local commands=("exec")
+    local commands=("mec")
     local must_have_one_flag=()
     local must_have_one_noun=()
     local has_completion_function
     local last_command
     local nouns=()
 
-    __exec_handle_word
+    __mec_handle_word
 }
 
 if [[ $(type -t compopt) = "builtin" ]]; then
-    complete -o default -F __start_exec exec
+    complete -o default -F __start_mec mec
 else
-    complete -o default -o nospace -F __start_exec exec
+    complete -o default -o nospace -F __start_mec mec
 fi
 
 # ex: ts=4 sw=4 et filetype=sh

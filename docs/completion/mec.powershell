@@ -1,16 +1,16 @@
-# powershell completion for exec                                 -*- shell-script -*-
+# powershell completion for mec                                  -*- shell-script -*-
 
-function __exec_debug {
+function __mec_debug {
     if ($env:BASH_COMP_DEBUG_FILE) {
         "$args" | Out-File -Append -FilePath "$env:BASH_COMP_DEBUG_FILE"
     }
 }
 
-filter __exec_escapeStringWithSpecialChars {
+filter __mec_escapeStringWithSpecialChars {
     $_ -replace '\s|#|@|\$|;|,|''|\{|\}|\(|\)|"|`|\||<|>|&','`$&'
 }
 
-Register-ArgumentCompleter -CommandName 'exec' -ScriptBlock {
+Register-ArgumentCompleter -CommandName 'mec' -ScriptBlock {
     param(
             $WordToComplete,
             $CommandAst,
@@ -21,9 +21,9 @@ Register-ArgumentCompleter -CommandName 'exec' -ScriptBlock {
     $Command = $CommandAst.CommandElements
     $Command = "$Command"
 
-    __exec_debug ""
-    __exec_debug "========= starting completion logic =========="
-    __exec_debug "WordToComplete: $WordToComplete Command: $Command CursorPosition: $CursorPosition"
+    __mec_debug ""
+    __mec_debug "========= starting completion logic =========="
+    __mec_debug "WordToComplete: $WordToComplete Command: $Command CursorPosition: $CursorPosition"
 
     # The user could have moved the cursor backwards on the command-line.
     # We need to trigger completion from the $CursorPosition location, so we need
@@ -33,7 +33,7 @@ Register-ArgumentCompleter -CommandName 'exec' -ScriptBlock {
     if ($Command.Length -gt $CursorPosition) {
         $Command=$Command.Substring(0,$CursorPosition)
     }
-	__exec_debug "Truncated command: $Command"
+	__mec_debug "Truncated command: $Command"
 
     $ShellCompDirectiveError=1
     $ShellCompDirectiveNoSpace=2
@@ -45,7 +45,7 @@ Register-ArgumentCompleter -CommandName 'exec' -ScriptBlock {
     # Split the command at the first space to separate the program and arguments.
     $Program,$Arguments = $Command.Split(" ",2)
     $RequestComp="$Program __complete $Arguments"
-    __exec_debug "RequestComp: $RequestComp"
+    __mec_debug "RequestComp: $RequestComp"
 
     # we cannot use $WordToComplete because it
     # has the wrong values if the cursor was moved
@@ -53,13 +53,13 @@ Register-ArgumentCompleter -CommandName 'exec' -ScriptBlock {
     if ($WordToComplete -ne "" ) {
         $WordToComplete = $Arguments.Split(" ")[-1]
     }
-    __exec_debug "New WordToComplete: $WordToComplete"
+    __mec_debug "New WordToComplete: $WordToComplete"
 
 
     # Check for flag with equal sign
     $IsEqualFlag = ($WordToComplete -Like "--*=*" )
     if ( $IsEqualFlag ) {
-        __exec_debug "Completing equal sign flag"
+        __mec_debug "Completing equal sign flag"
         # Remove the flag part
         $Flag,$WordToComplete = $WordToComplete.Split("=",2)
     }
@@ -67,12 +67,12 @@ Register-ArgumentCompleter -CommandName 'exec' -ScriptBlock {
     if ( $WordToComplete -eq "" -And ( -Not $IsEqualFlag )) {
         # If the last parameter is complete (there is a space following it)
         # We add an extra empty parameter so we can indicate this to the go method.
-        __exec_debug "Adding extra empty parameter"
+        __mec_debug "Adding extra empty parameter"
         # We need to use `"`" to pass an empty argument a "" or '' does not work!!!
         $RequestComp="$RequestComp" + ' `"`"' 
     }
 
-    __exec_debug "Calling $RequestComp"
+    __mec_debug "Calling $RequestComp"
     #call the command store the output in $out and redirect stderr and stdout to null
     # $Out is an array contains each line per element
     Invoke-Expression -OutVariable out "$RequestComp" 2>&1 | Out-Null
@@ -84,15 +84,15 @@ Register-ArgumentCompleter -CommandName 'exec' -ScriptBlock {
         # There is no directive specified
         $Directive = 0
     }
-    __exec_debug "The completion directive is: $Directive"
+    __mec_debug "The completion directive is: $Directive"
 
     # remove directive (last element) from out
     $Out = $Out | Where-Object { $_ -ne $Out[-1] }
-    __exec_debug "The completions are: $Out"
+    __mec_debug "The completions are: $Out"
 
     if (($Directive -band $ShellCompDirectiveError) -ne 0 ) {
         # Error code.  No completion.
-        __exec_debug "Received error from custom completion go code"
+        __mec_debug "Received error from custom completion go code"
         return
     }
 
@@ -100,7 +100,7 @@ Register-ArgumentCompleter -CommandName 'exec' -ScriptBlock {
     $Values = $Out | ForEach-Object {
         #Split the output in name and description
         $Name, $Description = $_.Split("`t",2)
-        __exec_debug "Name: $Name Description: $Description"
+        __mec_debug "Name: $Name Description: $Description"
 
         # Look for the longest completion so that we can format things nicely
         if ($Longest -lt $Name.Length) {
@@ -119,12 +119,12 @@ Register-ArgumentCompleter -CommandName 'exec' -ScriptBlock {
     $Space = " "
     if (($Directive -band $ShellCompDirectiveNoSpace) -ne 0 ) {
         # remove the space here
-        __exec_debug "ShellCompDirectiveNoSpace is called"
+        __mec_debug "ShellCompDirectiveNoSpace is called"
         $Space = ""
     }
 
     if (($Directive -band $ShellCompDirectiveNoFileComp) -ne 0 ) {
-        __exec_debug "ShellCompDirectiveNoFileComp is called"
+        __mec_debug "ShellCompDirectiveNoFileComp is called"
 
         if ($Values.Length -eq 0) {
             # Just print an empty string here so the
@@ -138,7 +138,7 @@ Register-ArgumentCompleter -CommandName 'exec' -ScriptBlock {
 
     if ((($Directive -band $ShellCompDirectiveFilterFileExt) -ne 0 ) -or
        (($Directive -band $ShellCompDirectiveFilterDirs) -ne 0 ))  {
-        __exec_debug "ShellCompDirectiveFilterFileExt ShellCompDirectiveFilterDirs are not supported"
+        __mec_debug "ShellCompDirectiveFilterFileExt ShellCompDirectiveFilterDirs are not supported"
 
         # return here to prevent the completion of the extensions
         return
@@ -150,14 +150,14 @@ Register-ArgumentCompleter -CommandName 'exec' -ScriptBlock {
 
         # Join the flag back if we have a equal sign flag
         if ( $IsEqualFlag ) {
-            __exec_debug "Join the equal sign flag back to the completion value"
+            __mec_debug "Join the equal sign flag back to the completion value"
             $_.Name = $Flag + "=" + $_.Name
         }
     }
 
     # Get the current mode
     $Mode = (Get-PSReadLineKeyHandler | Where-Object {$_.Key -eq "Tab" }).Function
-    __exec_debug "Mode: $Mode"
+    __mec_debug "Mode: $Mode"
 
     $Values | ForEach-Object {
 
@@ -182,10 +182,10 @@ Register-ArgumentCompleter -CommandName 'exec' -ScriptBlock {
             "Complete" {
 
                 if ($Values.Length -eq 1) {
-                    __exec_debug "Only one completion left"
+                    __mec_debug "Only one completion left"
 
                     # insert space after value
-                    [System.Management.Automation.CompletionResult]::new($($comp.Name | __exec_escapeStringWithSpecialChars) + $Space, "$($comp.Name)", 'ParameterValue', "$($comp.Description)")
+                    [System.Management.Automation.CompletionResult]::new($($comp.Name | __mec_escapeStringWithSpecialChars) + $Space, "$($comp.Name)", 'ParameterValue', "$($comp.Description)")
 
                 } else {
                     # Add the proper number of spaces to align the descriptions
@@ -209,7 +209,7 @@ Register-ArgumentCompleter -CommandName 'exec' -ScriptBlock {
                 # insert space after value
                 # MenuComplete will automatically show the ToolTip of
                 # the highlighted value at the bottom of the suggestions.
-                [System.Management.Automation.CompletionResult]::new($($comp.Name | __exec_escapeStringWithSpecialChars) + $Space, "$($comp.Name)", 'ParameterValue', "$($comp.Description)")
+                [System.Management.Automation.CompletionResult]::new($($comp.Name | __mec_escapeStringWithSpecialChars) + $Space, "$($comp.Name)", 'ParameterValue', "$($comp.Description)")
             }
 
             # TabCompleteNext and in case we get something unknown
@@ -217,7 +217,7 @@ Register-ArgumentCompleter -CommandName 'exec' -ScriptBlock {
                 # Like MenuComplete but we don't want to add a space here because
                 # the user need to press space anyway to get the completion.
                 # Description will not be shown because thats not possible with TabCompleteNext
-                [System.Management.Automation.CompletionResult]::new($($comp.Name | __exec_escapeStringWithSpecialChars), "$($comp.Name)", 'ParameterValue', "$($comp.Description)")
+                [System.Management.Automation.CompletionResult]::new($($comp.Name | __mec_escapeStringWithSpecialChars), "$($comp.Name)", 'ParameterValue', "$($comp.Description)")
             }
         }
 

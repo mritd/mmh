@@ -1,8 +1,8 @@
-#compdef _exec exec
+#compdef _mec mec
 
-# zsh completion for exec                                 -*- shell-script -*-
+# zsh completion for mec                                  -*- shell-script -*-
 
-__exec_debug()
+__mec_debug()
 {
     local file="$BASH_COMP_DEBUG_FILE"
     if [[ -n ${file} ]]; then
@@ -10,7 +10,7 @@ __exec_debug()
     fi
 }
 
-_exec()
+_mec()
 {
     local shellCompDirectiveError=1
     local shellCompDirectiveNoSpace=2
@@ -21,21 +21,21 @@ _exec()
     local lastParam lastChar flagPrefix requestComp out directive compCount comp lastComp
     local -a completions
 
-    __exec_debug "\n========= starting completion logic =========="
-    __exec_debug "CURRENT: ${CURRENT}, words[*]: ${words[*]}"
+    __mec_debug "\n========= starting completion logic =========="
+    __mec_debug "CURRENT: ${CURRENT}, words[*]: ${words[*]}"
 
     # The user could have moved the cursor backwards on the command-line.
     # We need to trigger completion from the $CURRENT location, so we need
     # to truncate the command-line ($words) up to the $CURRENT location.
     # (We cannot use $CURSOR as its value does not work when a command is an alias.)
     words=("${=words[1,CURRENT]}")
-    __exec_debug "Truncated words[*]: ${words[*]},"
+    __mec_debug "Truncated words[*]: ${words[*]},"
 
     lastParam=${words[-1]}
     lastChar=${lastParam[-1]}
-    __exec_debug "lastParam: ${lastParam}, lastChar: ${lastChar}"
+    __mec_debug "lastParam: ${lastParam}, lastChar: ${lastChar}"
 
-    # For zsh, when completing a flag with an = (e.g., exec -n=<TAB>)
+    # For zsh, when completing a flag with an = (e.g., mec -n=<TAB>)
     # completions must be prefixed with the flag
     setopt local_options BASH_REMATCH
     if [[ "${lastParam}" =~ '-.*=' ]]; then
@@ -48,22 +48,22 @@ _exec()
     if [ "${lastChar}" = "" ]; then
         # If the last parameter is complete (there is a space following it)
         # We add an extra empty parameter so we can indicate this to the go completion code.
-        __exec_debug "Adding extra empty parameter"
+        __mec_debug "Adding extra empty parameter"
         requestComp="${requestComp} \"\""
     fi
 
-    __exec_debug "About to call: eval ${requestComp}"
+    __mec_debug "About to call: eval ${requestComp}"
 
     # Use eval to handle any environment variables and such
     out=$(eval ${requestComp} 2>/dev/null)
-    __exec_debug "completion output: ${out}"
+    __mec_debug "completion output: ${out}"
 
     # Extract the directive integer following a : from the last line
     local lastLine
     while IFS='\n' read -r line; do
         lastLine=${line}
     done < <(printf "%s\n" "${out[@]}")
-    __exec_debug "last line: ${lastLine}"
+    __mec_debug "last line: ${lastLine}"
 
     if [ "${lastLine[1]}" = : ]; then
         directive=${lastLine[2,-1]}
@@ -73,16 +73,16 @@ _exec()
         out=${out[1,-$suffix]}
     else
         # There is no directive specified.  Leave $out as is.
-        __exec_debug "No directive found.  Setting do default"
+        __mec_debug "No directive found.  Setting do default"
         directive=0
     fi
 
-    __exec_debug "directive: ${directive}"
-    __exec_debug "completions: ${out}"
-    __exec_debug "flagPrefix: ${flagPrefix}"
+    __mec_debug "directive: ${directive}"
+    __mec_debug "completions: ${out}"
+    __mec_debug "flagPrefix: ${flagPrefix}"
 
     if [ $((directive & shellCompDirectiveError)) -ne 0 ]; then
-        __exec_debug "Completion received error. Ignoring completions."
+        __mec_debug "Completion received error. Ignoring completions."
         return
     fi
 
@@ -99,7 +99,7 @@ _exec()
             comp=${comp//$tab/:}
 
             ((compCount++))
-            __exec_debug "Adding completion: ${comp}"
+            __mec_debug "Adding completion: ${comp}"
             completions+=${comp}
             lastComp=$comp
         fi
@@ -118,17 +118,17 @@ _exec()
         done
         filteringCmd+=" ${flagPrefix}"
 
-        __exec_debug "File filtering command: $filteringCmd"
+        __mec_debug "File filtering command: $filteringCmd"
         _arguments '*:filename:'"$filteringCmd"
     elif [ $((directive & shellCompDirectiveFilterDirs)) -ne 0 ]; then
         # File completion for directories only
         local subDir
         subdir="${completions[1]}"
         if [ -n "$subdir" ]; then
-            __exec_debug "Listing directories in $subdir"
+            __mec_debug "Listing directories in $subdir"
             pushd "${subdir}" >/dev/null 2>&1
         else
-            __exec_debug "Listing directories in ."
+            __mec_debug "Listing directories in ."
         fi
 
         _arguments '*:dirname:_files -/'" ${flagPrefix}"
@@ -136,16 +136,16 @@ _exec()
             popd >/dev/null 2>&1
         fi
     elif [ $((directive & shellCompDirectiveNoSpace)) -ne 0 ] && [ ${compCount} -eq 1 ]; then
-        __exec_debug "Activating nospace."
+        __mec_debug "Activating nospace."
         # We can use compadd here as there is no description when
         # there is only one completion.
         compadd -S '' "${lastComp}"
     elif [ ${compCount} -eq 0 ]; then
         if [ $((directive & shellCompDirectiveNoFileComp)) -ne 0 ]; then
-            __exec_debug "deactivating file completion"
+            __mec_debug "deactivating file completion"
         else
             # Perform file completion
-            __exec_debug "activating file completion"
+            __mec_debug "activating file completion"
             _arguments '*:filename:_files'" ${flagPrefix}"
         fi
     else
@@ -154,6 +154,6 @@ _exec()
 }
 
 # don't run the completion function when being source-ed or eval-ed
-if [ "$funcstack[1]" = "_exec" ]; then
-	_exec
+if [ "$funcstack[1]" = "_mec" ]; then
+	_mec
 fi
