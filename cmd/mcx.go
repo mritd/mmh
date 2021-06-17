@@ -22,6 +22,7 @@ var mcx = &cobra.Command{
 		}
 
 		core.SetConfig(args[0])
+		fmt.Printf("👉 mmh changed config to [%s.yaml]...\n", args[0])
 	},
 	ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
 		var res []string

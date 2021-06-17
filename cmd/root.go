@@ -1,10 +1,11 @@
 package cmd
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/mritd/mmh/common"
 	"github.com/mritd/mmh/core"
-	"github.com/sirupsen/logrus"
-	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -19,7 +20,7 @@ func Execute() {
 
 	targetCmd, ok := cmds[BuildCmd]
 	if !ok {
-		logrus.Fatalf("target cmd [%s] not found", BuildCmd)
+		common.Exit(fmt.Sprintf("target cmd [%s] not found\n", BuildCmd), 1)
 	}
 
 	if err := targetCmd.Execute(); err != nil {
