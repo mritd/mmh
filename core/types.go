@@ -40,6 +40,8 @@ type Server struct {
 	ExtAuth             string            `yaml:"ext_auth,omitempty"`
 	ServerAliveInterval time.Duration     `yaml:"server_alive_interval,omitempty"`
 	Tags                []string          `yaml:"tags,omitempty"`
+
+	ConfigPath string `yaml:"config_path,omitempty"`
 }
 
 // Tags server tags
@@ -102,7 +104,13 @@ func (cfg *Config) Load() error {
 	if err != nil {
 		return err
 	}
-	return yaml.Unmarshal(buf, cfg)
+
+	err = yaml.Unmarshal(buf, cfg)
+	if err != nil {
+		return err
+	}
+	cfg.mergeBasic()
+	return nil
 }
 
 // LoadFrom load config from yaml file
@@ -112,6 +120,54 @@ func (cfg *Config) LoadFrom(filePath string) error {
 	}
 	cfg.configPath = filePath
 	return cfg.Load()
+}
+
+func (cfg *Config) mergeBasic() {
+	for _, s := range cfg.Servers {
+		s.ConfigPath = cfg.configPath
+		if s.User == "" {
+			s.User = cfg.Basic.User
+			if s.User == "" {
+				s.User = "root"
+			}
+		}
+		if s.Password == "" {
+			s.Password = cfg.Basic.Password
+		}
+		if s.PrivateKey == "" {
+			s.PrivateKey = cfg.Basic.PrivateKey
+		}
+		if s.PrivateKeyPassword == "" {
+			s.PrivateKeyPassword = cfg.Basic.PrivateKeyPassword
+		}
+		if s.KeyboardAuthCmd == "" {
+			s.KeyboardAuthCmd = cfg.Basic.KeyboardAuthCmd
+		}
+		if s.EnableAPI == "" {
+			s.EnableAPI = cfg.Basic.EnableAPI
+		}
+		if s.ExtAuth == "" {
+			s.ExtAuth = cfg.Basic.ExtAuth
+		}
+		if s.Environment == nil {
+			s.Environment = cfg.Basic.Environment
+			if s.Environment == nil {
+				s.Environment = make(map[string]string)
+			}
+		}
+		if s.Port == 0 {
+			s.Port = cfg.Basic.Port
+			if s.Port == 0 {
+				s.Port = 22
+			}
+		}
+		if s.ServerAliveInterval == 0 {
+			s.ServerAliveInterval = cfg.Basic.ServerAliveInterval
+			if s.ServerAliveInterval == 0 {
+				s.ServerAliveInterval = 10 * time.Second
+			}
+		}
+	}
 }
 
 type ConfigInfo struct {

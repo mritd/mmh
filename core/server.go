@@ -8,7 +8,6 @@ import (
 	"os/signal"
 	"sort"
 	"syscall"
-	"time"
 
 	"github.com/mritd/mmh/common"
 )
@@ -16,17 +15,15 @@ import (
 // ListServers merge basic context servers and current context servers
 func ListServers(serverSort bool) Servers {
 	var servers Servers
-	bss := setDefaultValue(basicConfig.Servers, basicConfig.Basic)
 	if serverSort {
-		sort.Sort(bss)
+		sort.Sort(basicConfig.Servers)
 	}
-	servers = append(servers, bss...)
+	servers = append(servers, basicConfig.Servers...)
 	if currentConfig.configPath != basicConfig.configPath {
-		css := setDefaultValue(currentConfig.Servers, currentConfig.Basic)
 		if serverSort {
-			sort.Sort(css)
+			sort.Sort(currentConfig.Servers)
 		}
-		servers = append(servers, css...)
+		servers = append(servers, currentConfig.Servers...)
 	}
 	return servers
 }
@@ -56,57 +53,6 @@ func findServersByTag(tag string) (Servers, error) {
 		return nil, errors.New("server not found")
 	}
 	return servers, nil
-}
-
-// setDefaultValue set the default config value to the given servers
-func setDefaultValue(servers Servers, basic BasicServerConfig) Servers {
-	var ss Servers
-	for _, s := range servers {
-		if s.User == "" {
-			s.User = basic.User
-			if s.User == "" {
-				s.User = "root"
-			}
-		}
-		if s.Password == "" {
-			s.Password = basic.Password
-		}
-		if s.PrivateKey == "" {
-			s.PrivateKey = basic.PrivateKey
-		}
-		if s.PrivateKeyPassword == "" {
-			s.PrivateKeyPassword = basic.PrivateKeyPassword
-		}
-		if s.KeyboardAuthCmd == "" {
-			s.KeyboardAuthCmd = basic.KeyboardAuthCmd
-		}
-		if s.EnableAPI == "" {
-			s.EnableAPI = basic.EnableAPI
-		}
-		if s.ExtAuth == "" {
-			s.ExtAuth = basic.ExtAuth
-		}
-		if s.Environment == nil {
-			s.Environment = basic.Environment
-			if s.Environment == nil {
-				s.Environment = make(map[string]string)
-			}
-		}
-		if s.Port == 0 {
-			s.Port = basic.Port
-			if s.Port == 0 {
-				s.Port = 22
-			}
-		}
-		if s.ServerAliveInterval == 0 {
-			s.ServerAliveInterval = basic.ServerAliveInterval
-			if s.ServerAliveInterval == 0 {
-				s.ServerAliveInterval = 10 * time.Second
-			}
-		}
-		ss = append(ss, s)
-	}
-	return ss
 }
 
 // PrintServers print server list

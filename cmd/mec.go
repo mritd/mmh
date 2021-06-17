@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"fmt"
+	"path/filepath"
 	"strings"
 
 	"github.com/mritd/mmh/core"
@@ -10,9 +12,14 @@ import (
 var execGroup bool
 
 var mec = &cobra.Command{
-	Use:     "exec [OPTIONS] SERVER|TAG COMMAND",
-	Short:   "batch exec command",
+	Use:   "exec [OPTIONS] SERVER|TAG COMMAND",
+	Short: "batch exec command",
 	Run: func(cmd *cobra.Command, args []string) {
+		if completionShell != "" {
+			GenCompletion(cmd, completionShell)
+			return
+		}
+
 		if len(args) < 2 {
 			_ = cmd.Help()
 		} else {
@@ -22,6 +29,9 @@ var mec = &cobra.Command{
 	},
 	ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
 		var res []string
+		for _, s := range core.ListServers(true) {
+			res = append(res, fmt.Sprintf("%s\tfrom %s(%s)", s.Name, filepath.Base(s.ConfigPath), s.Name))
+		}
 		return res, cobra.ShellCompDirectiveNoFileComp
 	},
 }
@@ -29,4 +39,5 @@ var mec = &cobra.Command{
 func init() {
 	cmds["mec"] = mec
 	mec.PersistentFlags().BoolVarP(&execGroup, "tag", "t", false, "server tag")
+	mec.PersistentFlags().StringVar(&completionShell, "completion", "", "generate shell completion")
 }

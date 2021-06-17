@@ -10,5 +10,6 @@ const (
 User: {{ .User }}
 Address: {{ .Address }}:{{ .Port }}
 Tags: {{ .Tags | mergeTags }}
-Proxy: {{ .Proxy }}`
+Proxy: {{ .Proxy }}
+Config: {{ .ConfigPath }}`
 )
