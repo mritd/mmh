@@ -11,13 +11,8 @@ import (
 var serverSort bool
 var mcs = &cobra.Command{
 	Use:   "mcs [SERVER_NAME]",
-	Short: "print server list",
+	Short: "Print server list",
 	Run: func(cmd *cobra.Command, args []string) {
-		if completionShell != "" {
-			GenCompletion(cmd, completionShell)
-			return
-		}
-
 		if len(args) == 1 {
 			core.PrintServerDetail(args[0])
 		} else {
@@ -34,7 +29,7 @@ var mcs = &cobra.Command{
 }
 
 func init() {
-	cmds["mcs"] = mcs
 	mcs.PersistentFlags().BoolVarP(&serverSort, "sort", "s", false, "sort server list")
 	mcs.PersistentFlags().StringVar(&completionShell, "completion", "", "generate shell completion")
+	rootCmd.AddCommand(mcs)
 }

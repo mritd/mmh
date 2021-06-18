@@ -27,9 +27,14 @@ var (
 
 var versionCmd = &cobra.Command{
 	Use:   "version",
-	Short: "show version",
+	Short: "Show version",
 	Run: func(cmd *cobra.Command, args []string) {
 		banner, _ := base64.StdEncoding.DecodeString(bannerBase64)
 		fmt.Printf(versionTpl, banner, Version, runtime.GOOS+"/"+runtime.GOARCH, BuildDate, CommitID)
 	},
+}
+
+func init() {
+	rootCmd.PersistentFlags().BoolVarP(&showVersion, "version", "v", false, "show version")
+	rootCmd.AddCommand(versionCmd)
 }

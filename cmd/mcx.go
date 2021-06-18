@@ -9,13 +9,8 @@ import (
 
 var mcx = &cobra.Command{
 	Use:   "mcx",
-	Short: "change config file",
+	Short: "Change config file",
 	Run: func(cmd *cobra.Command, args []string) {
-		if completionShell != "" {
-			GenCompletion(cmd, completionShell)
-			return
-		}
-
 		if len(args) < 1 {
 			_ = cmd.Help()
 			return
@@ -34,6 +29,6 @@ var mcx = &cobra.Command{
 }
 
 func init() {
-	cmds["mcx"] = mcx
 	mcx.PersistentFlags().StringVar(&completionShell, "completion", "", "generate shell completion")
+	rootCmd.AddCommand(mcx)
 }

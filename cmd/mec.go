@@ -13,13 +13,8 @@ var execGroup bool
 
 var mec = &cobra.Command{
 	Use:   "mec [OPTIONS] SERVER|TAG COMMAND",
-	Short: "batch exec command",
+	Short: "Batch exec command",
 	Run: func(cmd *cobra.Command, args []string) {
-		if completionShell != "" {
-			GenCompletion(cmd, completionShell)
-			return
-		}
-
 		if len(args) < 2 {
 			_ = cmd.Help()
 		} else {
@@ -37,7 +32,7 @@ var mec = &cobra.Command{
 }
 
 func init() {
-	cmds["mec"] = mec
 	mec.PersistentFlags().BoolVarP(&execGroup, "tag", "t", false, "server tag")
 	mec.PersistentFlags().StringVar(&completionShell, "completion", "", "generate shell completion")
+	rootCmd.AddCommand(mec)
 }

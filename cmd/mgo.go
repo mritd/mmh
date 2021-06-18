@@ -10,13 +10,8 @@ import (
 
 var mgo = &cobra.Command{
 	Use:   "mgo SERVER_NAME",
-	Short: "login server",
+	Short: "Login server",
 	Run: func(cmd *cobra.Command, args []string) {
-		if completionShell != "" {
-			GenCompletion(cmd, completionShell)
-			return
-		}
-
 		if len(args) == 1 {
 			core.SingleLogin(args[0])
 		} else {
@@ -33,6 +28,6 @@ var mgo = &cobra.Command{
 }
 
 func init() {
-	cmds["mgo"] = mgo
 	mgo.PersistentFlags().StringVar(&completionShell, "completion", "", "generate shell completion")
+	rootCmd.AddCommand(mgo)
 }

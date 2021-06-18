@@ -13,13 +13,8 @@ var tunReverse bool
 
 var mtun = &cobra.Command{
 	Use:   "mtun SERVER -l LEFT_ADDR -r RIGHT_ADDR [OPTIONS]",
-	Short: "ssh tunnel",
+	Short: "Open a ssh tunnel",
 	Run: func(cmd *cobra.Command, args []string) {
-		if completionShell != "" {
-			GenCompletion(cmd, completionShell)
-			return
-		}
-
 		if len(args) == 1 && tunLeftAddr != "" && tunRightAddr != "" {
 			core.Tunnel(args[0], tunLeftAddr, tunRightAddr, tunReverse)
 		} else {
@@ -36,7 +31,6 @@ var mtun = &cobra.Command{
 }
 
 func init() {
-	cmds["mtun"] = mtun
 	mtun.PersistentFlags().StringVarP(&tunLeftAddr, "left", "l", "", "left address")
 	mtun.PersistentFlags().StringVarP(&tunRightAddr, "right", "r", "", "right address")
 	mtun.PersistentFlags().BoolVar(&tunReverse, "reverse", false, "reverse tcp tunnel(right to left)")
@@ -46,5 +40,5 @@ func init() {
 	_ = mtun.RegisterFlagCompletionFunc("right", func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
 		return []string{"127.0.0.1"}, cobra.ShellCompDirectiveNoFileComp | cobra.ShellCompDirectiveNoSpace
 	})
-	mtun.PersistentFlags().StringVar(&completionShell, "completion", "", "generate shell completion")
+	rootCmd.AddCommand(mtun)
 }

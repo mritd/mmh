@@ -1,31 +1,60 @@
 package cmd
 
 import (
+	"encoding/base64"
 	"fmt"
 	"os"
+	"path/filepath"
+	"runtime"
 
 	"github.com/mritd/mmh/common"
+
 	"github.com/mritd/mmh/core"
 
 	"github.com/spf13/cobra"
 )
 
 var completionShell string
+var showVersion bool
 
-var BuildCmd string
-var cmds = make(map[string]*cobra.Command, 10)
+var rootCmd = &cobra.Command{
+	Use:   "mmh",
+	Short: "Modular ssh toolkit",
+	Run: func(cmd *cobra.Command, args []string) {
+		if completionShell != "" {
+			GenCompletion(cmd, completionShell)
+			return
+		}
+		if showVersion {
+			banner, _ := base64.StdEncoding.DecodeString(bannerBase64)
+			fmt.Printf(versionTpl, banner, Version, runtime.GOOS+"/"+runtime.GOARCH, BuildDate, CommitID)
+			return
+		}
+		_ = cmd.Help()
+	},
+}
 
 func Execute() {
 	core.LoadConfig()
 
-	targetCmd, ok := cmds[BuildCmd]
-	if !ok {
-		common.Exit(fmt.Sprintf("target cmd [%s] not found\n", BuildCmd), 1)
+	// check bin name
+	if os.Args[0] != rootCmd.Name() {
+		// try to find the subcommand with the same name as bin and execute it
+		subCmd, _, err := rootCmd.Find([]string{filepath.Base(os.Args[0])})
+		if err == nil && subCmd.Name() != rootCmd.Name() {
+			// if find a subcommand, we need to remove the subcommand from the parent command
+			// to ensure that the '__complete' command takes effect
+			rootCmd.RemoveCommand(subCmd)
+			// re set args for the subcommand
+			if len(os.Args) > 1 {
+				subCmd.SetArgs(os.Args[1:])
+			}
+			// execute subcommand
+			common.CheckAndExit(subCmd.Execute())
+			return
+		}
 	}
-
-	if err := targetCmd.Execute(); err != nil {
-		common.Exit(err.Error(), -1)
-	}
+	common.CheckAndExit(rootCmd.Execute())
 }
 
 func GenCompletion(cmd *cobra.Command, shell string) {
@@ -39,4 +68,8 @@ func GenCompletion(cmd *cobra.Command, shell string) {
 	case "powershell":
 		_ = cmd.GenPowerShellCompletionWithDesc(os.Stdout)
 	}
+}
+
+func init() {
+	rootCmd.PersistentFlags().StringVar(&completionShell, "completion", "", "generate shell completion")
 }

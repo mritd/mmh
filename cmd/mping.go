@@ -10,13 +10,8 @@ import (
 
 var mping = &cobra.Command{
 	Use:   "mping SERVER",
-	Short: "ping server",
+	Short: "Ping server",
 	Run: func(cmd *cobra.Command, args []string) {
-		if completionShell != "" {
-			GenCompletion(cmd, completionShell)
-			return
-		}
-
 		if len(args) == 1 {
 			core.Ping(args[0])
 		} else {
@@ -33,6 +28,5 @@ var mping = &cobra.Command{
 }
 
 func init() {
-	cmds["mping"] = mping
-	mping.PersistentFlags().StringVar(&completionShell, "completion", "", "generate shell completion")
+	rootCmd.AddCommand(mping)
 }
