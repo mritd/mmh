@@ -2,7 +2,12 @@
 
 set -e
 
+BUILD_VERSION=$(cat version)
+BUILD_DATE=$(date "+%F %T")
+COMMIT_SHA1=$(git rev-parse HEAD)
+
 TARGET_DIR="dist"
+TARGET_NAME="mmh"
 PLATFORMS="darwin/amd64 darwin/arm64 linux/386 linux/amd64 linux/arm linux/arm64"
 COMMANDS="mcp mcs mcx mec mgo mping mtun"
 
@@ -28,24 +33,20 @@ elif [ "$1" == "uninstall" ]; then
     done
 elif [ "$1" == "completion" ]; then
     for s in bash zsh fish powershell; do
-        mmh --completion ${s} > docs/completion/mmh.${s}
+        mmh --completion ${s} > docs/completions/mmh.${s}
     done
-    cat docs/completion/mmh.zsh > docs/completion/mmh.ohmyzsh
-    echo 'compdef _mmh mmh' >> docs/completion/mmh.ohmyzsh
-    echo 'compdef _mmh mcs' >> docs/completion/mmh.ohmyzsh
-    echo 'compdef _mmh mcx' >> docs/completion/mmh.ohmyzsh
-    echo 'compdef _mmh mcp' >> docs/completion/mmh.ohmyzsh
-    echo 'compdef _mmh mec' >> docs/completion/mmh.ohmyzsh
-    echo 'compdef _mmh mgo' >> docs/completion/mmh.ohmyzsh
-    echo 'compdef _mmh mping' >> docs/completion/mmh.ohmyzsh
-    echo 'compdef _mmh mtun' >> docs/completion/mmh.ohmyzsh
+    cat docs/completions/mmh.zsh > docs/completions/mmh.ohmyzsh
+    echo 'compdef _mmh mmh' >> docs/completions/mmh.ohmyzsh
+    for cmd in ${COMMANDS}; do
+        echo "compdef _mmh ${cmd}" >> docs/completions/mmh.ohmyzsh
+    done
 else
     for pl in ${PLATFORMS}; do
         export GOOS=$(echo ${pl} | cut -d'/' -f1)
         export GOARCH=$(echo ${pl} | cut -d'/' -f2)
         export CGO_ENABLED=0
 
-        export TARGET=${TARGET_DIR}/${cmd}_${GOOS}_${GOARCH}
+        export TARGET=${TARGET_DIR}/${TARGET_NAME}_${GOOS}_${GOARCH}
         if [ "${GOOS}" == "windows" ]; then
             export TARGET=${TARGET_DIR}/${cmd}_${GOOS}_${GOARCH}.exe
         fi
@@ -55,7 +56,6 @@ else
                 -ldflags    "-X 'github.com/mritd/mmh/cmd.Version=${BUILD_VERSION}' \
                             -X 'github.com/mritd/mmh/cmd.BuildDate=${BUILD_DATE}' \
                             -X 'github.com/mritd/mmh/cmd.CommitID=${COMMIT_SHA1}' \
-                            -X 'github.com/mritd/mmh/cmd.BuildCmd=${cmd}' \
                             -w -s"
     done
 fi

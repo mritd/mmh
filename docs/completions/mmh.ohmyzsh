@@ -158,9 +158,9 @@ if [ "$funcstack[1]" = "_mmh" ]; then
 	_mmh
 fi
 compdef _mmh mmh
+compdef _mmh mcp
 compdef _mmh mcs
 compdef _mmh mcx
-compdef _mmh mcp
 compdef _mmh mec
 compdef _mmh mgo
 compdef _mmh mping

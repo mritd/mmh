@@ -5,6 +5,7 @@ COMMIT_SHA1     := $(shell git rev-parse HEAD)
 all: clean
 	bash .cross_compile.sh
 	tar -C docs -zcvf dist/addons.tar.gz addons
+	tar -C docs -zcvf dist/completions.tar.gz completions
 
 release: clean all
 	ghr -u mritd -t $(GITHUB_TOKEN) -replace -recreate --debug ${BUILD_VERSION} dist
