@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"strings"
 	"sync"
 	"text/template"
 
@@ -28,11 +27,6 @@ var colorOnce sync.Once
 var tplCh = make(chan *template.Template, 1)
 var tplCacheMux sync.RWMutex
 var tplCacheMap = make(map[string]*template.Template, 7)
-
-var funcMap = template.FuncMap{
-	"maxLen":    maxLen,
-	"mergeTags": mergeTags,
-}
 
 var colorFuncMap = template.FuncMap{
 	ColorRed:     color.New(color.FgRed).SprintfFunc(),
@@ -74,10 +68,6 @@ func RenderedOutput(wr io.Writer, line ColorLine) error {
 	return colorTpl.Execute(wr, line)
 }
 
-func ColorFuncTemplate(tpl string) (*template.Template, error) {
-	return template.New("").Funcs(funcMap).Parse(tpl)
-}
-
 func Converted2Rendered(r io.Reader, w io.Writer, prefix string) {
 	reader := bufio.NewReader(r)
 	// use buf to ensure atomic output of each line
@@ -91,29 +81,4 @@ func Converted2Rendered(r io.Reader, w io.Writer, prefix string) {
 		_, _ = io.Copy(w, &buf)
 		buf.Reset()
 	}
-}
-
-func maxLen(length int, name string) string {
-	if length == 0 {
-		length = 15
-	}
-	sTpl := fmt.Sprintf("%%-%ds", length)
-	if len(name) < length {
-		return fmt.Sprintf(sTpl, name)
-	} else {
-		return fmt.Sprintf(sTpl, shortenString(name, length))
-	}
-}
-
-func shortenString(str string, n int) string {
-	if len(str) <= n {
-		return str
-	} else {
-		return str[:n]
-	}
-}
-
-// merge tags
-func mergeTags(tags []string) string {
-	return strings.Join(tags, ",")
 }
