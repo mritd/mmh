@@ -18,8 +18,7 @@ var mping = &cobra.Command{
 			_ = cmd.Help()
 		}
 	},
-	ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
-		var res []string
+	ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) (res []string, _ cobra.ShellCompDirective) {
 		for _, s := range core.ListServers(true) {
 			res = append(res, fmt.Sprintf("%s\tfrom %s(%s)", s.Name, filepath.Base(s.ConfigPath), s.Name))
 		}

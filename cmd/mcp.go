@@ -17,8 +17,7 @@ var mcp = &cobra.Command{
 			core.Copy(args, copy2Group)
 		}
 	},
-	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		var res []string
+	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) (res []string, _ cobra.ShellCompDirective) {
 		for _, s := range core.ListServers(true) {
 			res = append(res, s.Name)
 		}
