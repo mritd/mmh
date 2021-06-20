@@ -8,6 +8,8 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/olekukonko/tablewriter"
+
 	"github.com/mitchellh/go-homedir"
 	"github.com/mritd/mmh/common"
 )
@@ -124,6 +126,15 @@ func SetConfig(name string) {
 	}
 	// write to file
 	common.CheckAndExit(ioutil.WriteFile(filepath.Join(configDir, ConfigNameFile), []byte(name+".yaml"), 0644))
+}
+
+func ListConfigs() {
+	table := tablewriter.NewWriter(os.Stdout)
+	table.SetHeader([]string{"Name", "Path"})
+	for _, c := range Configs {
+		table.Append([]string{c.Name, c.Path})
+	}
+	table.Render()
 }
 
 // initConfig init the example config
