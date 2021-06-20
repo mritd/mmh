@@ -29,6 +29,5 @@ var mcx = &cobra.Command{
 }
 
 func init() {
-	mcx.PersistentFlags().StringVar(&completionShell, "completion", "", "generate shell completion")
 	rootCmd.AddCommand(mcx)
 }

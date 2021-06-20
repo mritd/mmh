@@ -33,6 +33,5 @@ var mec = &cobra.Command{
 
 func init() {
 	mec.PersistentFlags().BoolVarP(&execGroup, "tag", "t", false, "server tag")
-	mec.PersistentFlags().StringVar(&completionShell, "completion", "", "generate shell completion")
 	rootCmd.AddCommand(mec)
 }

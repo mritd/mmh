@@ -8,7 +8,7 @@ import (
 var copy2Group bool
 
 var mcp = &cobra.Command{
-	Use:   "mcp [-g] [-r] FILE/DIR|SERVER:PATH SERVER:PATH|FILE/DIR",
+	Use:   "mcp [-t] FILE/DIR|SERVER:PATH SERVER:PATH|FILE/DIR",
 	Short: "Copies files between hosts on a network",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) < 2 {
@@ -27,7 +27,6 @@ var mcp = &cobra.Command{
 }
 
 func init() {
-	mcp.PersistentFlags().BoolVarP(&copy2Group, "group", "g", false, "multi-server copy")
-	mcp.PersistentFlags().StringVar(&completionShell, "completion", "", "generate shell completion")
+	mcp.PersistentFlags().BoolVarP(&copy2Group, "tag", "t", false, "server tag")
 	rootCmd.AddCommand(mcp)
 }

@@ -30,6 +30,5 @@ var mcs = &cobra.Command{
 
 func init() {
 	mcs.PersistentFlags().BoolVarP(&serverSort, "sort", "s", false, "sort server list")
-	mcs.PersistentFlags().StringVar(&completionShell, "completion", "", "generate shell completion")
 	rootCmd.AddCommand(mcs)
 }
