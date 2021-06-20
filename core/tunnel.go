@@ -45,6 +45,10 @@ func Tunnel(name, leftAddr, rightAddr string, reverse bool) {
 
 		for {
 			rightConn, err := listener.Accept()
+			if err == io.EOF {
+				fmt.Printf("Server [%s] ssh connection is closed, stop ssh tunnel.\n", server.Name)
+				return
+			}
 			if !common.CheckErr(err) {
 				continue
 			}
