@@ -13,12 +13,12 @@ import (
 // registerAPI register routes to the local http address
 // Custom api endpoints are not currently supported
 func registerAPI(router *mux.Router) {
-	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc("/", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte("mmh api server started.\n"))
 	})
 
-	router.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc("/healthz", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte("ok\n"))
 	})
