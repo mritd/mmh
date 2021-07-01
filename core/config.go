@@ -132,7 +132,11 @@ func ListConfigs() {
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader([]string{"Name", "Path"})
 	for _, c := range Configs {
-		table.Append([]string{c.Name, c.Path})
+		if c.Name+".yaml" == currentConfigName {
+			table.Append([]string{fmt.Sprintf("\033[1;32m%s\033[0m", c.Name), c.Path})
+		} else {
+			table.Append([]string{c.Name, c.Path})
+		}
 	}
 	table.Render()
 }
