@@ -10,7 +10,7 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/pkg/sftp v1.13.1
-	github.com/spf13/cobra v1.2.0
+	github.com/spf13/cobra v1.2.1
 	github.com/xyproto/clip v0.3.1
 	golang.org/x/crypto v0.0.0-20210421170649-83a5a9bb288b
 	gopkg.in/yaml.v2 v2.4.0
