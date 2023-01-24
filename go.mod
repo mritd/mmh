@@ -5,11 +5,10 @@ go 1.16
 require (
 	github.com/fatih/color v1.14.1
 	github.com/gorilla/mux v1.8.0
-	github.com/json-iterator/go v1.1.11
+	github.com/json-iterator/go v1.1.12
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
-	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/pkg/sftp v1.13.2
 	github.com/spf13/cobra v1.6.1
