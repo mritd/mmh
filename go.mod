@@ -10,10 +10,10 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/olekukonko/tablewriter v0.0.5
-	github.com/pkg/sftp v1.13.2
+	github.com/pkg/sftp v1.13.5
 	github.com/spf13/cobra v1.6.1
 	github.com/xyproto/clip v0.3.1
-	golang.org/x/crypto v0.0.0-20210421170649-83a5a9bb288b
+	golang.org/x/crypto v0.0.0-20211215153901-e495a2d5b3d3
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 	gopkg.in/yaml.v2 v2.4.0
 )
