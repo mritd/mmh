@@ -18,6 +18,8 @@ type BasicServerConfig struct {
 	Environment         map[string]string `yaml:"environment,omitempty"`
 	EnableAPI           string            `yaml:"enable_api,omitempty"`
 	ExtAuth             string            `yaml:"ext_auth,omitempty"`
+	Socks5              string            `yaml:"socks5,omitempty"`
+	HTTPProxy           string            `yaml:"http_proxy,omitempty"`
 	Port                int               `yaml:"port,omitempty"`
 	ServerAliveInterval time.Duration     `yaml:"server_alive_interval,omitempty"`
 }
@@ -29,6 +31,8 @@ type Server struct {
 	Port                int               `yaml:"port,omitempty"`
 	User                string            `yaml:"user,omitempty"`
 	Proxy               string            `yaml:"proxy,omitempty"`
+	Socks5              string            `yaml:"socks5,omitempty"`
+	HTTPProxy           string            `yaml:"http_proxy,omitempty"`
 	Password            string            `yaml:"password,omitempty"`
 	PrivateKey          string            `yaml:"private_key,omitempty"`
 	PrivateKeyPassword  string            `yaml:"private_key_password,omitempty"`
@@ -144,6 +148,12 @@ func (cfg *Config) mergeBasic() {
 		}
 		if s.EnableAPI == "" {
 			s.EnableAPI = cfg.Basic.EnableAPI
+		}
+		if s.Socks5 == "" {
+			s.Socks5 = cfg.Basic.Socks5
+		}
+		if s.HTTPProxy == "" {
+			s.HTTPProxy = cfg.Basic.HTTPProxy
 		}
 		if s.Environment == nil {
 			s.Environment = cfg.Basic.Environment

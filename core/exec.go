@@ -3,7 +3,6 @@ package core
 import (
 	"context"
 	"io"
-	"os"
 	"os/signal"
 	"sync"
 	"syscall"
@@ -17,18 +16,10 @@ import (
 // If ping is true and a proxy is set on the server, execute the
 // command on the second-to-last server
 func Exec(cmd, tagOrName string, execGroup, ping bool) {
-	// use context to manage goroutine
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	// monitor os signal
-	sigs := make(chan os.Signal)
-	signal.Notify(sigs, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
-	go func() {
-		// exit all goroutine
-		<-sigs
-		cancel()
-	}()
+	// cancel all goroutines on the first termination signal
+	ctx, stop := signal.NotifyContext(context.Background(),
+		syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+	defer stop()
 
 	// single server exec
 	if !execGroup {
@@ -49,8 +40,9 @@ func Exec(cmd, tagOrName string, execGroup, ping bool) {
 			// because it takes time for ssh to establish a connection
 			go func(s *Server) {
 				defer execWg.Done()
-				err = exec(ctx, cmd, s, false)
-				common.PrintErrWithPrefix(s.Name+": 😱 ", err)
+				if err := exec(ctx, cmd, s, false); err != nil {
+					common.PrintErrWithPrefix(s.Name+": 😱 ", err)
+				}
 			}(s)
 		}
 		execWg.Wait()

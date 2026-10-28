@@ -88,6 +88,10 @@ servers:
   private_key_password: ""
   # 连接此服务器需要预先连接的服务器(跳板机)
   proxy: prod12
+  # 连接此服务器时使用的 socks5 代理，支持 user:password@host:port
+  socks5: 127.0.0.1:17000
+  # 连接此服务器时使用的 http 代理(CONNECT 方式)，支持 http://user:password@host:port
+  http_proxy: http://127.0.0.1:7890
   # 每隔 n 时间发送心跳包保证 ssh 不会自动断开
   server_alive_interval: 20s
 
@@ -107,6 +111,12 @@ servers:
   enable_api: true
 
 ```
+
+**`socks5` 与 `http_proxy` 用于让 mmh 通过代理连接服务器，效果等价于 OpenSSH 的
+`ProxyCommand nc -X 5 -x 127.0.0.1:17000 %h %p`；两者同时配置时 `socks5` 优先。配置在 `basic` 段时对
+所有 server 生效，单个 server 配置了同名字段则以 server 的配置为准。需要注意这两个字段描述的是“如何到达
+ssh 服务器本身”：当 server 同时配置了 `proxy`(跳板机)时，mmh 使用跳板机自身的代理配置连接跳板机，
+目标服务器通过跳板机的 ssh 通道直达，此时目标 server 上的 `socks5`/`http_proxy` 不再生效。**
 
 ## tags 配置段
 

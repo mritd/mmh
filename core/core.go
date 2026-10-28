@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
+	"net"
 	"net/http"
 	osexec "os/exec"
 	"strings"
@@ -20,6 +21,9 @@ import (
 const (
 	envMMH           = "MMH"
 	envAPIAddressKey = "MMH_API_ADDR"
+
+	// sshConnectTimeout is the timeout for TCP dialing and the ssh handshake
+	sshConnectTimeout = 5 * time.Second
 )
 
 // wrapperClient return a standard ssh client with specific parameters set
@@ -51,11 +55,12 @@ func (s *Server) wrapperSession(client *ssh.Client) (*ssh.Session, error) {
 // ssh returns a standard ssh client, if proxy is configured, it will connect recursively
 // if secondLast is true, return the second last server client
 func (s *Server) ssh(secondLast bool, proxyCount int) (*ssh.Client, error) {
+	addr := net.JoinHostPort(s.Address, fmt.Sprint(s.Port))
 	sshConfig := &ssh.ClientConfig{
 		User:            s.User,
 		Auth:            s.authMethod(),
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
-		Timeout:         5 * time.Second,
+		Timeout:         sshConnectTimeout,
 	}
 
 	if s.Proxy != "" {
@@ -80,23 +85,52 @@ func (s *Server) ssh(secondLast bool, proxyCount int) (*ssh.Client, error) {
 			return proxyClient, nil
 		}
 
-		conn, err := proxyClient.Dial("tcp", fmt.Sprint(s.Address, ":", s.Port))
+		conn, err := proxyClient.Dial("tcp", addr)
 		if err != nil {
+			// 代理连接没有交给调用方，这里必须自行关闭，否则每次失败都会泄漏一条到跳板机的 ssh 连接
+			_ = proxyClient.Close()
 			return nil, err
 		}
-		ncc, channel, request, err := ssh.NewClientConn(conn, fmt.Sprint(s.Address, ":", s.Port), sshConfig)
+		client, err := newSSHClient(conn, addr, sshConfig)
 		if err != nil {
+			_ = proxyClient.Close()
 			return nil, err
 		}
-		return ssh.NewClient(ncc, channel, request), nil
+
+		// 目标 client 关闭后一并释放跳板机连接，避免代理链上的连接只增不减
+		go func() {
+			_ = client.Wait()
+			_ = proxyClient.Close()
+		}()
+		return client, nil
 
 	} else {
 		if secondLast {
 			return nil, nil
-		} else {
-			return ssh.Dial("tcp", fmt.Sprint(s.Address, ":", s.Port), sshConfig)
 		}
+
+		// dial directly or through the socks5/http proxy configured on the server
+		conn, err := s.dialSSH()
+		if err != nil {
+			return nil, err
+		}
+		return newSSHClient(conn, addr, sshConfig)
 	}
+}
+
+// newSSHClient completes the ssh handshake on conn, when the handshake fails the
+// connection is closed so callers don't leak it
+func newSSHClient(conn net.Conn, addr string, config *ssh.ClientConfig) (*ssh.Client, error) {
+	if config.Timeout > 0 {
+		_ = conn.SetDeadline(time.Now().Add(config.Timeout))
+	}
+	ncc, channel, request, err := ssh.NewClientConn(conn, addr, config)
+	if err != nil {
+		_ = conn.Close()
+		return nil, err
+	}
+	_ = conn.SetDeadline(time.Time{})
+	return ssh.NewClient(ncc, channel, request), nil
 }
 
 // authMethod return ssh auth method slice

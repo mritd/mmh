@@ -1,7 +1,9 @@
 # 功能详解
 
 - [命令列表](#命令列表)
+- [Shell 别名](#shell-别名)
 - [无限跳板](#无限跳板)
+- [代理连接](#代理连接)
 - [远程执行](#远程执行)
 - [批量复制](#批量复制)
 - [ping 检测](#ping 检测)
@@ -9,19 +11,55 @@
 
 ## 命令列表
 
-mmh 目前只支持 mac 和 linux 平台，对于 windows 用户在 WSL2 ubuntu 系统下已经测试通过。**mmh 在安装时
-仅会将原始二进制文件复制一份到安装目录(默认 `/usr/local/bin`)，然后会采用软链接的方式创建其他快捷命令。**
-目前 mmh 已包含命令列表以及软链接如下:
+mmh 目前只支持 mac 和 linux 平台，对于 windows 用户在 WSL2 ubuntu 系统下已经测试通过。**这些快捷
+命令既可以通过软链接的方式提供，也可以通过 `mmh alias` 以 shell 别名的方式注入到终端配置文件中。**
+目前 mmh 已包含的命令列表如下:
 
-- **`mmh cf -> mcf`: 用于切换 context，同时包含一个别名为 `mcx` 的命令**
-- **`mmh server -> mcs`: 列出当前 context 中的服务器**
-- **`mmh go -> mgo`: 登录某一台服务器(ssh)**
-- **`mmh exec -> mec`: 在远端服务器(或一组服务器)上执行命令**
-- **`mmh cp -> mcp`: 在本地与远端服务器(或一组服务器)之间复制文件**
-- **`mmh ping -> mping`: 针对远端服务器执行 ping 检测**
-- **`mmh tun -> mtun`: 在本地与远端服务器之间创建 tcp 隧道，支持反向创建**
+- **`mcx`: 用于切换 context(配置文件)**
+- **`mcs`: 列出当前 context 中的服务器**
+- **`mgo`: 登录某一台服务器(ssh)**
+- **`mec`: 在远端服务器(或一组服务器)上执行命令**
+- **`mcp`: 在本地与远端服务器(或一组服务器)之间复制文件**
+- **`mping`: 针对远端服务器执行 ping 检测**
+- **`mtun`: 在本地与远端服务器之间创建 tcp 隧道，支持反向创建**
 
-其他 install 等命令为辅助命令，暂不做详细说明。
+如果不想创建软链接，也可以通过 `mmh alias` 命令将这些命令以 shell 别名的方式注入到终端配置文件中，
+详见 [Shell 别名](#shell-别名)。
+
+## Shell 别名
+
+`mmh alias` 可以将 `mcp`、`mcs`、`mcx`、`mec`、`mgo`、`mping`、`mtun` 这些子命令以 shell
+别名的方式注入到终端配置文件中。默认会根据 `$SHELL` 自动识别当前 shell 并写入对应的配置文件:
+
+``` sh
+# 自动识别当前 shell 并注入
+mmh alias
+# 同时注入 zsh 和 bash 的配置文件
+mmh alias --shell zsh,bash
+# 写入指定的配置文件
+mmh alias --file ~/.zshrc
+# 删除已经注入的别名
+mmh alias --remove
+```
+
+支持的 shell 以及对应的配置文件如下:
+
+| shell | 配置文件 |
+| ----- | -------- |
+| zsh | `$ZDOTDIR/.zshrc` 或 `~/.zshrc` |
+| bash | macOS 优先 `~/.bash_profile`，其他平台优先 `~/.bashrc` |
+| fish | `$XDG_CONFIG_HOME/fish/config.fish` 或 `~/.config/fish/config.fish` |
+| sh | `~/.profile` |
+
+注入的内容被 `# >>> mmh aliases >>>` 和 `# <<< mmh aliases <<<` 两行标记包裹，
+**重复执行 `mmh alias` 只会替换标记块内的内容而不会重复追加**；如果希望自定义别名中使用的
+mmh 命令(比如使用绝对路径)，可以通过 `--bin` 指定:
+
+``` sh
+mmh alias --bin /usr/local/bin/mmh
+```
+
+命令执行完成后重新打开终端或执行 `source` 加载对应配置文件即可生效。
 
 ## 无限跳板
 
@@ -42,6 +80,48 @@ tags:
 ...
 max_proxy: 10
 ```
+
+## 代理连接
+
+除了跳板机，mmh 也支持通过 socks5 或 http 代理连接服务器，效果等价于 OpenSSH 的
+`ProxyCommand nc -X 5 -x 127.0.0.1:17000 %h %p`:
+
+``` yaml
+basic:
+  # 对所有 server 生效
+  socks5: 127.0.0.1:17000
+servers:
+- name: gpu08
+  address: 10.10.4.18
+- name: gpu09
+  address: 10.10.4.19
+  # 单个 server 也可以覆盖 basic 中的配置
+  http_proxy: http://127.0.0.1:7890
+```
+
+- `socks5` 支持 `host:port` 以及需要认证的 `user:password@host:port`
+- `http_proxy` 支持 `host:port` 以及 `http://user:password@host:port`
+- 两者同时配置时 `socks5` 优先
+- 配置完成后 `mgo`、`mec`、`mcp`、`mtun` 等所有功能都会通过代理建立连接
+- 当 server 同时配置了 `proxy`(跳板机)时，跳板机使用自身的代理配置连接，目标服务器通过跳板机的
+  ssh 通道直达，此时目标 server 上的 `socks5`/`http_proxy` 不再生效
+
+连接时会在 stderr 输出实际使用的代理(代理地址中的认证信息会被隐藏)，例如:
+
+``` sh
+🧦 using socks5 proxy [127.0.0.1:17000] => gpu08(10.10.4.18:22)
+```
+
+如果当前网络不需要代理(例如已经处于目标服务器所在内网)，可以通过全局 `--no-proxy` 选项临时忽略
+`socks5`/`http_proxy` 配置，直接连接目标服务器:
+
+``` sh
+mgo --no-proxy gpu08
+# 等价写法
+mmh --no-proxy mgo gpu08
+```
+
+`--no-proxy` 只影响 `socks5`/`http_proxy`，配置的跳板机(`proxy`)链路仍然生效。
 
 ## 远程执行
 

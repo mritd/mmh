@@ -14,6 +14,7 @@ require (
 	github.com/spf13/cobra v1.6.1
 	github.com/xyproto/clip v0.3.1
 	golang.org/x/crypto v0.0.0-20211215153901-e495a2d5b3d3
+	golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 	gopkg.in/yaml.v2 v2.4.0
 )

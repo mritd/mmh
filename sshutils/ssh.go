@@ -52,8 +52,11 @@ func (s *SSHSession) Close() error {
 func (s *SSHSession) updateTerminalSize() {
 	go func() {
 		// SIGWINCH is sent to the process when the window size of the terminal has changed.
-		sigs := make(chan os.Signal)
+		// the channel must be buffered, signal delivery is non-blocking and would be
+		// dropped when the receiver is not ready yet
+		sigs := make(chan os.Signal, 1)
 		signal.Notify(sigs, syscall.SIGWINCH)
+		defer signal.Stop(sigs)
 
 		fd := int(os.Stdin.Fd())
 		termWidth, termHeight, err := terminal.GetSize(fd)
